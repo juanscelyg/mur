@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>mur_description</name>
+  <version>0.0.0</version>
+  <description>The mur_description package</description>
+
+
+  <maintainer email="js.celyg@upm.es">Juan Cely</maintainer>
+  <author email="js.celyg@upm.es">Juan Cely</author>
+
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>gazebo_ros</exec_depend>
+  <exec_depend>gazebo_ros_control</exec_depend>
+  <exec_depend>message_to_tf</exec_depend>
+  <exec_depend>uuv_sensor_ros_plugins</exec_depend>
+  <exec_depend>uuv_gazebo_ros_plugins</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+  <gazebo_ros gazebo_media_path="${prefix}"/>
+
+  </export>
+</package>
