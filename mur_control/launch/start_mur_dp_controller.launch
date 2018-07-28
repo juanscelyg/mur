@@ -1,11 +1,11 @@
 <launch>
   <arg name="uuv_name"/>
   <arg name="model_name" default="$(arg uuv_name)"/>
-  <arg name="saturation" default="5000"/>
+  <arg name="saturation" default="40"/>
 
-  <arg name="Kp" default="11993.888,11993.888,11993.888,19460.069,19460.069,19460.069"/>
-  <arg name="Kd" default="9077.459,9077.459,9077.459,18880.925,18880.925,18880.925"/>
-  <arg name="Ki" default="321.417,321.417,321.417,2096.951,2096.951,2096.951"/>
+  <arg name="Kp" default="50,50,50,50,50,50"/>
+  <arg name="Kd" default="0,0,0,0,0,0"/>
+  <arg name="Ki" default="0,0,0,0,0,0"/>
 
   <arg name="output_dir" default="$(find mur_control)/config"/>
   <arg name="config_file" default="$(find mur_control)/config/thruster_manager.yaml"/>
