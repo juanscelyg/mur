@@ -30,7 +30,7 @@
       </node>
 
       <node pkg="mur_control"
-          type="scripts/mur_dp_controller.py"
+          type="mur_dp_controller.py"
           name="mur_dp_controller"
           output="screen">
           <remap from="odom" to="pose_gt"/>
