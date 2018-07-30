@@ -3,9 +3,9 @@
   <arg name="model_name" default="$(arg uuv_name)"/>
   <arg name="saturation" default="40"/>
 
-  <arg name="Kp" default="50,50,50,50,50,50"/>
-  <arg name="Kd" default="0,0,0,0,0,0"/>
-  <arg name="Ki" default="0,0,0,0,0,0"/>
+  <arg name="Kp" default="119,119,119,194,194,194"/>
+  <arg name="Kd" default="90,90,90,188,188,188"/>
+  <arg name="Ki" default="3.21417,3.21417,3.21417,20,20,20"/>
 
   <arg name="output_dir" default="$(find mur_control)/config"/>
   <arg name="config_file" default="$(find mur_control)/config/thruster_manager.yaml"/>
@@ -19,7 +19,7 @@
       <arg name="tam_file" value="$(arg tam_file)"/>
       <arg name="reset_tam" value="false"/>
   </include>
-
+<!--
   <group ns="$(arg uuv_name)">
       <node pkg="uuv_control_utils"
             type="trajectory_marker_publisher.py"
@@ -47,5 +47,5 @@
               Ki: [$(arg Ki)]
           </rosparam>
       </node>
-  </group>
+  </group>-->
 </launch>

@@ -15,7 +15,7 @@
         <arg name="namespace" default="mur"/>
     </include>
 
-    <!-- Start the controller -->
+    <!-- Start the controller-->
     <include file="$(find mur_control)/launch/start_mur_dp_controller.launch">
         <arg name="uuv_name" value="mur"/>
         <arg name="model_name" value="mur"/>

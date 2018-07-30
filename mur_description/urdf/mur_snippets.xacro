@@ -62,14 +62,14 @@
         <gain>1</gain>
 
         <!-- Maximum allowed input value for the input signal for thruster unit -->
-        <clampMax>0</clampMax>
+        <clampMax>1900</clampMax>
 
         <!-- Minimum allowed value for the input signal for thruster unit -->
-        <clampMin>0</clampMin>
+        <clampMin>1100</clampMin>
 
         <!-- Minimum and maximum thrust force output allowed -->
-        <thrustMin>0</thrustMin>
-        <thrustMax>0</thrustMax>
+        <thrustMin>-30</thrustMin>
+        <thrustMax>34</thrustMax>
 
         <!--
         Value from 0 to 1 to set the efficiency of the output thrust force
@@ -140,11 +140,11 @@
         Input: x
         Output: thrust
         Function: thrust = rotorConstant * x * abs(x)
-        -->
+
         <conversion>
           <type>Basic</type>
-          <rotorConstant>0.0</rotorConstant>
-        </conversion>
+          <rotorConstant>1.0</rotorConstant>
+        </conversion>-->
 
         <!-- 2) Dead-zone nonlinearity described in Bessa, 2006
         Input: x
@@ -166,13 +166,13 @@
         If you have access to the thruster's data sheet, for example,
         you can enter samples of the curve's input and output values
         and the thruster output will be found through linear interpolation
-        of the given samples.
+        of the given samples.-->
 
         <conversion>
           <type>LinearInterp</type>
-          <inputValues>0 1 2 3</inputValues>
-          <outputValues>0 1 2 3</outputValues>
-        </conversion>-->
+          <inputValues>0.0072  -10.6673</inputValues>
+          <outputValues>0.0072  -10.6673</outputValues>
+        </conversion>
 
       </plugin>
     </gazebo>
