@@ -11,14 +11,21 @@
 
     <xacro:macro name="thruster_macro"
       params="namespace thruster_id *origin">
-      <xacro:thruster_module_first_order_basic_fcn_macro
+      <xacro:generic_thruster_macro
         namespace="${namespace}"
         thruster_id="${thruster_id}"
-        mesh_filename="${prop_mesh_file}"
-        dyn_time_constant="0.05"
-        rotor_constant="0.00031">
+        mesh_filename="${prop_mesh_file}">
         <xacro:insert_block name="origin"/>
-      </xacro:thruster_module_first_order_basic_fcn_macro>
+        <dynamics>
+          <type>FirstOrder</type>
+          <timeConstant>0.52</timeConstant>
+        </dynamics>
+        <xacro:thruster_cf_dead_zone_macro
+          rotor_constant_l="0.096047"
+          rotor_constant_r="0.111192"
+          delta_l="-3.5604"
+          delta_r="2.5132"/>
+      </xacro:generic_thruster_macro>
     </xacro:macro>
 
     <xacro:thruster_macro namespace="${namespace}" thruster_id="0">

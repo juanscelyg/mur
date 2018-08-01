@@ -10,7 +10,7 @@
   <arg name="output_dir" default="$(find mur_control)/config"/>
   <arg name="config_file" default="$(find mur_control)/config/thruster_manager.yaml"/>
   <arg name="tam_file" default="$(find mur_control)/config/TAM.yaml"/>
-
+<!--
   <include file="$(find mur_control)/launch/start_thruster_manager.launch">
       <arg name="uuv_name" value="$(arg uuv_name)"/>
       <arg name="model_name" value="$(arg model_name)"/>
@@ -19,7 +19,7 @@
       <arg name="tam_file" value="$(arg tam_file)"/>
       <arg name="reset_tam" value="false"/>
   </include>
-<!--
+
   <group ns="$(arg uuv_name)">
       <node pkg="uuv_control_utils"
             type="trajectory_marker_publisher.py"

@@ -3,8 +3,8 @@
     <!-- Import macro files -->
     <xacro:include filename="$(find uuv_descriptions)/models/common/urdf/common.urdf.xacro" />
     <xacro:include filename="$(find uuv_sensor_ros_plugins)/urdf/sensor_snippets.xacro"/>
-    <xacro:include filename="$(find mur_description)/urdf/mur_snippets.xacro"/>
     <xacro:include filename="$(find uuv_gazebo_ros_plugins)/urdf/snippets.xacro"/>
+    <!--xacro:include filename="$(find mur_description)/urdf/mur_snippets.xacro"/-->
     <!-- Properties -->
     <xacro:property name="mass" value="8.37"/>
     <xacro:property name="volume" value="0.004837965"/>
