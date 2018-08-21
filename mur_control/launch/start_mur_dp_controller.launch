@@ -3,24 +3,24 @@
   <arg name="model_name" default="$(arg uuv_name)"/>
   <arg name="saturation" default="40"/>
 
-  <arg name="Kp" default="119,119,119,194,194,194"/>
-  <arg name="Kd" default="90,90,90,188,188,188"/>
-  <arg name="Ki" default="3.21417,3.21417,3.21417,20,20,20"/>
+  <arg name="Kp" default="10,10,10,10,10,10"/>
+  <arg name="Kd" default="0,0,0,0,0,0"/>
+  <arg name="Ki" default="1,1,1,1,1,1"/>
+
+  <arg name="x" default="0"/>
+  <arg name="y" default="0"/>
+  <arg name="z" default="-20"/>
+  <arg name="phi" default="0"/>
+  <arg name="theta" default="0"/>
+  <arg name="psi" default="0"/>
 
   <arg name="output_dir" default="$(find mur_control)/config"/>
   <arg name="config_file" default="$(find mur_control)/config/thruster_manager.yaml"/>
   <arg name="tam_file" default="$(find mur_control)/config/TAM.yaml"/>
-<!--
-  <include file="$(find mur_control)/launch/start_thruster_manager.launch">
-      <arg name="uuv_name" value="$(arg uuv_name)"/>
-      <arg name="model_name" value="$(arg model_name)"/>
-      <arg name="output_dir" value="$(arg output_dir)"/>
-      <arg name="config_file" value="$(arg config_file)"/>
-      <arg name="tam_file" value="$(arg tam_file)"/>
-      <arg name="reset_tam" value="false"/>
-  </include>
+
 
   <group ns="$(arg uuv_name)">
+  <!--
       <node pkg="uuv_control_utils"
             type="trajectory_marker_publisher.py"
             name="trajectory_marker_publisher"
@@ -28,24 +28,30 @@
           <remap from="trajectory" to="dp_controller/trajectory"/>
           <remap from="waypoints" to="dp_controller/waypoints"/>
       </node>
-
+-->
       <node pkg="mur_control"
-          type="mur_dp_controller.py"
-          name="mur_dp_controller"
-          output="screen">
+          type="mur_altitude_controller.py"
+          name="mur_altitude_controller"
+          output="screen"><!--
           <remap from="odom" to="pose_gt"/>
           <remap from="trajectory" to="dp_controller/trajectory"/>
           <remap from="input_trajectory" to="dp_controller/input_trajectory"/>
           <remap from="waypoints" to="dp_controller/waypoints"/>
           <remap from="error" to="dp_controller/error"/>
           <remap from="reference" to="dp_controller/reference"/>
-          <remap from="thruster_output" to="thruster_manager/input_stamped"/>
+          <remap from="thruster_output" to="thruster_manager/input_stamped"/>-->
           <rosparam subst_value="true">
-              saturation: $(arg saturation)
+              x: [$(arg x)]
+              y: [$(arg y)]
+              z: [$(arg z)]
+              phi: [$(arg phi)]
+              theta: [$(arg theta)]
+              psi: [$(arg psi)]
               Kp: [$(arg Kp)]
               Kd: [$(arg Kd)]
               Ki: [$(arg Ki)]
+              saturation: $(arg saturation)
           </rosparam>
       </node>
-  </group>-->
+  </group>
 </launch>

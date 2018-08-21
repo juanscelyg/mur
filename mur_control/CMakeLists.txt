@@ -12,8 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package()
 
-catkin_install_python(PROGRAMS  scripts/mur_dp_controller.py
-                                scripts/mur_altitude_controller.py
+catkin_install_python(PROGRAMS  scripts/mur_altitude_controller.py
                         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(DIRECTORY launch
