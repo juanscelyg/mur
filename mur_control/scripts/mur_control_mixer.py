@@ -1,145 +1,87 @@
 #!/usr/bin/env python
 
-import rospy
 import numpy as np
+import rospy
+import logging
+import sys
+import tf
+import message_filters
+from mur_control.msg import FloatStamped
+from geometry_msgs.msg import WrenchStamped
+from tf.transformations import quaternion_from_euler, euler_from_quaternion
+from nav_msgs.msg import Odometry
 
+# Constants
+NUM_THRUSTERS = 4
+ANGLE = 0
+X_BAR = 0.197
+Y_BAR = 0.18022
+# Init the desired dt
+RATE = 10
+# Matrix allocator
+T = np.matrix([[0, 0, 0, 0], [np.sin(np.deg2rad(ANGLE)), np.sin(np.deg2rad(-ANGLE)), np.sin(np.deg2rad(-ANGLE)), np.sin(np.deg2rad(ANGLE))], [1,1,1,1], [np.cos(np.deg2rad(ANGLE))*Y_BAR, -np.cos(np.deg2rad(-ANGLE))*Y_BAR, -np.cos(np.deg2rad(-ANGLE))*Y_BAR, np.cos(np.deg2rad(ANGLE))*Y_BAR], [-X_BAR, -X_BAR, -X_BAR, -X_BAR], [-np.sin(np.deg2rad(ANGLE))*X_BAR, np.sin(np.deg2rad(-ANGLE))*X_BAR, -np.sin(np.deg2rad(-ANGLE))*X_BAR, np.sin(np.deg2rad(ANGLE))*X_BAR]])
+# Topics to Publish the info
+thruster_0_pub = rospy.Publisher('/mur/thrusters/0/input', FloatStamped, queue_size=1)
+thruster_1_pub = rospy.Publisher('/mur/thrusters/1/input', FloatStamped, queue_size=1)
+thruster_2_pub = rospy.Publisher('/mur/thrusters/2/input', FloatStamped, queue_size=1)
+thruster_3_pub = rospy.Publisher('/mur/thrusters/3/input', FloatStamped, queue_size=1)
 
-class MURControlMixer():
-    # A new controller that is based on the DPControllerBase must at least provide the implementation of
-    # the method update_controller.
-    # The _reset_controller method can also be overridden and it will be called every time there is a service call
-    # <vehicle namespace>/reset_controller. The default implementation sets the reference and error vectors to
-    # zero.
-    # The update_controller method must contain the implementation of the control algorithm and will be called
-    # by every update of the vehicle's odometry message. It is therefore not necessary to explicitly call this update
-    # function in this controller implementation.
-    # For the controller to send the control torques to the vehicle's thruster manager, at the end of the
-    # update_controller function the 6 x 1 control vector (type numpy.ndarray) sent using the function
-    # publish_control_wrench from the super class, which will generate a Wrench ROS message and publish it to the
-    # correspondent thruster manager node.
-    # For this tutorial, a simple PID controller will be implemented. The controller's control torque output is
-    # "tau" therefore computed as:
-    #
-    #   tau = Kp * e + Kd * de/dt + Ki int_e
-    #
-    # where e is the pose error vector, in this case defined as e = (x, y, z, roll, pitch, yaw)^T
+def callback(posegt, setforces):
+    global T
+    pose_rot = np.array([posegt.pose.pose.orientation.x,posegt.pose.pose.orientation.y,posegt.pose.pose.orientation.z,posegt.pose.pose.orientation.w])
+    nita2_t = euler_from_quaternion(pose_rot)
+    nita2 = np.array([nita2_t[0],nita2_t[1],nita2_t[2]])
+    r = nita2[0]
+    p = nita2[1]
+    y = nita2[2]
+    sr = np.sin(nita2[0])
+    sp = np.sin(nita2[1])
+    sy = np.sin(nita2[2])
+    cr = np.cos(nita2[0])
+    cp = np.cos(nita2[1])
+    cy = np.cos(nita2[2])
+    tp = np.tan(nita2[1])
+    J = np.array([[cy*cp, -sy*cr+cy*sp*sr, sy*sr+cy*cr*sp, 0, 0, 0],[sy*cp, cy*cr+sr*sp*sy, -cy*sr+sp*sy*cr, 0, 0, 0],[-sp, cp*sr, cp*cr, 0, 0, 0],[0, 0, 0, 1, sr*tp, cr*tp],[0, 0, 0, 0, cr, -sr],[0, 0, 0, 0, sr/cp, cr/cp]])
+    force = np.array([setforces.wrench.force.x, setforces.wrench.force.y, setforces.wrench.force.z])
+    torque = np.array([setforces.wrench.torque.x, setforces.wrench.torque.y, setforces.wrench.torque.z])
+    tau = np.array([force[0],force[1],force[2],torque[0],torque[1],torque[2]]).reshape(6,1)
+    A = np.linalg.inv(np.transpose(J))
+    Tt = np.matmul(A,T)
+    thrusters = np.matmul(np.transpose(Tt),tau)
+    thruster_0_msg = FloatStamped()
+    thruster_1_msg = FloatStamped()
+    thruster_2_msg = FloatStamped()
+    thruster_3_msg = FloatStamped()
+    thruster_0_msg.header.stamp = rospy.Time.now()
+    thruster_0_msg.header.frame_id = 'mur/thrusters/0'
+    thruster_1_msg.header.stamp = rospy.Time.now()
+    thruster_1_msg.header.frame_id = 'mur/thrusters/1'
+    thruster_2_msg.header.stamp = rospy.Time.now()
+    thruster_2_msg.header.frame_id = 'mur/thrusters/2'
+    thruster_3_msg.header.stamp = rospy.Time.now()
+    thruster_3_msg.header.frame_id = 'mur/thrusters/3'
+    thruster_0_msg.data = thrusters[0]
+    thruster_1_msg.data = thrusters[1]
+    thruster_2_msg.data = thrusters[2]
+    thruster_3_msg.data = thrusters[3]
+    thruster_0_pub.publish(thruster_0_msg)
+    thruster_1_pub.publish(thruster_1_msg)
+    thruster_2_pub.publish(thruster_2_msg)
+    thruster_3_pub.publish(thruster_3_msg)
 
-    def __init__(self):
-        # Calling the constructor of the super-class DPControllerBase, which has the implementation of the error
-        # computation update and to publish the resulting torque control vector.
-        super(MURDPController, self).__init__(self)
+def listener():
+    posegt_sub = message_filters.Subscriber('/mur/pose_gt', Odometry)
+    setforces_sub = message_filters.Subscriber('/control/Wrench', WrenchStamped)
 
-        # The controller should read its parameters from the ROS parameter server for initial setup
-        # One way to do this is to read the parameters from the node's private parameter namespace, which is done by
-        # reading the parameter tag with an "~" at the beginning. If this method is used, the parameters should be
-        # initialized accordingly in the controller startup launch file, such as
-        #
-        # <launch>
-        #   <node pkg="example_package" type="example_node.py" name="example_node" output="screen">
-        #       <rosparam>
-        #           param_1: 0.0
-        #           param_2: 0.0
-        #       </rosparam>
-        #   </node>
-        # </launch>
-        #
-        # For more information, see http://wiki.ros.org/roscpp_tutorials/Tutorials/AccessingPrivateNamesWithNodeHandle
-
-        # Let's initialize the controller gain matrices Kp, Kd and Ki
-        self._Kp = np.zeros(shape=(6, 6))
-        self._Kd = np.zeros(shape=(6, 6))
-        self._Ki = np.zeros(shape=(6, 6))
-        # Initialize the integrator component
-        self._int = np.zeros(shape=(6,))
-        # Initialize variable that will store the vehicle pose error
-        self._error_pose = np.zeros(shape=(6,))
-
-        # Now the gain matrices need to be set according to the variables stored in the parameter server
-        # For simplicity, the gain matrices are defined as diagonal matrices, so only 6 coefficients are
-        # needed
-        if rospy.get_param('~Kp'):
-            Kp_diag = rospy.get_param('~Kp')
-            if len(Kp_diag) == 6:
-                self._Kp = np.diag(Kp_diag)
-            else:
-                # If the vector provided has the wrong dimension, raise an exception
-                raise rospy.ROSException('For the Kp diagonal matrix, 6 coefficients are needed')
-
-        # Do the same for the other two matrices
-        if rospy.get_param('~Kd'):
-            diag = rospy.get_param('~Kd')
-            if len(diag) == 6:
-                self._Kd = np.diag(diag)
-                print 'Kd=\n', self._Kd
-            else:
-                # If the vector provided has the wrong dimension, raise an exception
-                raise rospy.ROSException('For the Kd diagonal matrix, 6 coefficients are needed')
-
-        if rospy.get_param('~Ki'):
-            diag = rospy.get_param('~Ki')
-            if len(diag) == 6:
-                self._Ki = np.diag(diag)
-                print 'Ki=\n', self._Ki
-            else:
-                # If the vector provided has the wrong dimension, raise an exception
-                raise rospy.ROSException('For the Ki diagonal matrix, 6 coefficients are needed')
-            self._is_init = True
-
-    def _reset_controller(self):
-        # The _reset_controller method from the super class DPControllerBase already sets the error
-        # and reference vectors to zero, but this class has additional attributes that should also
-        # be taken care of.
-        # This implementation will, therefore, first call the super class reset method
-        super(MURDPController, self)._reset_controller()
-        # And then proceed to set the internal variables back to zero
-        self._error_pose = np.zeros(shape=(6,))
-        self._int = np.zeros(shape=(6,))
-
-    def update_controller(self):
-        if not self._is_init:
-            return False
-        # The controller algorithm must be implemented here, the super class will connect this method
-        # to the odometry update as a callback function
-
-        # First test whether or not the odometry topic subscriber has already been initialized
-        if not self.odom_is_init:
-            return
-
-        # Update the integrator, read the super class vector for the pose error (orientation is represented
-        # with Euler angles in RPY convention) and integrate to the stored pose error from the last
-        # iteration
-        self._int = self._int + 0.5 * (self.error_pose_euler + self._error_pose) * self._dt
-
-        # Store the current pose error for the next iteration
-        self._error_pose = self.error_pose_euler
-
-        # Compute the control forces and torques using the current error vectors available
-        tau = np.dot(self._Kp, self.error_pose_euler) + np.dot(self._Kd, self._errors['vel']) + \
-            np.dot(self._Ki, self._int)
-
-        # Use the super class method to convert the control force vector into a ROS message
-        # and publish it as an input to the vehicle's thruster manager. The thruster manager module
-        # will then distribute the efforts amongst the thrusters using the thruster allocation matrix
-        self.publish_control_wrench(tau)
+    ts = message_filters.TimeSynchronizer([posegt_sub, setforces_sub], 10)
+    ts.registerCallback(callback)
+    rospy.spin()
 
 if __name__ == '__main__':
-    # Since this is an ROS node, this Python script has to be treated as an executable
-    # Remember to convert this Python file into an executable. This can be done with
-    #
-    # cd <path_to_ros_package>/scripts
-    # chmod 777 tutorial_dp_controller.py
-    #
-    # This file has also to be included in this package's CMakeLists.txt
-    # After the line catkin_package() in the CMakeLists.txt, include the following
-    #
-    # catkin_install_python(PROGRAMS scripts/tutorial_dp_controller.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
-    print('MUR - Control Mixer')
-    rospy.init_node('mur_control_mixer')
-
     try:
-        node = MURControlMixer()
-        rospy.spin()
-    except rospy.ROSInterruptException:
-        print('caught exception')
-    print('exiting')
+        rospy.init_node('mur_control_mixer')
+        rospy.Rate(RATE) # 10 Hz
+
+        listener()
+
+    except rospy.ROSInterruptException:  pass

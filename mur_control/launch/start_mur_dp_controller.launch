@@ -3,7 +3,7 @@
   <arg name="model_name" default="$(arg uuv_name)"/>
   <arg name="saturation" default="40"/>
 
-  <arg name="Kp" default="10,10,10,10,10,10"/>
+  <arg name="Kp" default="2,2,2,1,1,1"/>
   <arg name="Kd" default="0,0,0,0,0,0"/>
   <arg name="Ki" default="1,1,1,1,1,1"/>
 
@@ -14,21 +14,15 @@
   <arg name="theta" default="0"/>
   <arg name="psi" default="0"/>
 
-  <arg name="output_dir" default="$(find mur_control)/config"/>
-  <arg name="config_file" default="$(find mur_control)/config/thruster_manager.yaml"/>
-  <arg name="tam_file" default="$(find mur_control)/config/TAM.yaml"/>
 
 
   <group ns="$(arg uuv_name)">
-  <!--
-      <node pkg="uuv_control_utils"
-            type="trajectory_marker_publisher.py"
-            name="trajectory_marker_publisher"
+      <node pkg="mur_control"
+            type="mur_control_mixer.py"
+            name="mur_control_mixer"
             output="screen">
-          <remap from="trajectory" to="dp_controller/trajectory"/>
-          <remap from="waypoints" to="dp_controller/waypoints"/>
       </node>
--->
+
       <node pkg="mur_control"
           type="mur_altitude_controller.py"
           name="mur_altitude_controller"
