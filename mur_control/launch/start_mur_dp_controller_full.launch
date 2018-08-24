@@ -1,9 +1,9 @@
 <launch>
     <!-- If you want to generate a ROS bag with the recorded simulated data, set this flag to true -->
-    <arg name="record" default="false"/>
+    <arg name="record" default="true"/>
 
     <!-- Start the a underwater world simulation scenario -->
-    <include file="$(find uuv_descriptions)/launch/ocean_waves.launch"/>
+    <include file="$(find uuv_descriptions)/launch/lake.launch"/>
 
     <!-- Add the MUR vehicle to the simulation (namespace: mur) -->
     <include file="$(find mur_description)/launch/upload_mur.launch">

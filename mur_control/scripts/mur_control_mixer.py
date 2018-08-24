@@ -25,10 +25,27 @@ thruster_0_pub = rospy.Publisher('/mur/thrusters/0/input', FloatStamped, queue_s
 thruster_1_pub = rospy.Publisher('/mur/thrusters/1/input', FloatStamped, queue_size=1)
 thruster_2_pub = rospy.Publisher('/mur/thrusters/2/input', FloatStamped, queue_size=1)
 thruster_3_pub = rospy.Publisher('/mur/thrusters/3/input', FloatStamped, queue_size=1)
+if rospy.get_param('/mur/mur_control_mixer/saturation'):
+    thruster_saturation = rospy.get_param('/mur/mur_control_mixer/saturation')
+else:
+    thruster_saturation = 30.0
 
-def callback(posegt, setforces):
-    global T
-    pose_rot = np.array([posegt.pose.pose.orientation.x,posegt.pose.pose.orientation.y,posegt.pose.pose.orientation.z,posegt.pose.pose.orientation.w])
+def saturator_thruster(force):
+    global thruster_saturation
+    thrusters = np.empty_like(force)
+
+    for i in range(len(force)):
+        if force[i]<-thruster_saturation:
+            thrusters[i]=-thruster_saturation
+            rospy.logwarn("The motor %s was min saturated %s",i,force[i])
+        elif force[i]>thruster_saturation:
+            thrusters[i]=thruster_saturation
+            rospy.logwarn("The motor %s was max saturated %s",i,force[i])
+        else:
+            thrusters[i]=force[i]
+    return thrusters
+
+def convert_to_global_frame(pose_rot):
     nita2_t = euler_from_quaternion(pose_rot)
     nita2 = np.array([nita2_t[0],nita2_t[1],nita2_t[2]])
     r = nita2[0]
@@ -42,12 +59,21 @@ def callback(posegt, setforces):
     cy = np.cos(nita2[2])
     tp = np.tan(nita2[1])
     J = np.array([[cy*cp, -sy*cr+cy*sp*sr, sy*sr+cy*cr*sp, 0, 0, 0],[sy*cp, cy*cr+sr*sp*sy, -cy*sr+sp*sy*cr, 0, 0, 0],[-sp, cp*sr, cp*cr, 0, 0, 0],[0, 0, 0, 1, sr*tp, cr*tp],[0, 0, 0, 0, cr, -sr],[0, 0, 0, 0, sr/cp, cr/cp]])
+    return J
+
+
+def callback(posegt, setforces):
+    global T
+    pose_rot = np.array([posegt.pose.pose.orientation.x,posegt.pose.pose.orientation.y,posegt.pose.pose.orientation.z,posegt.pose.pose.orientation.w])
+    J = convert_to_global_frame(pose_rot)
     force = np.array([setforces.wrench.force.x, setforces.wrench.force.y, setforces.wrench.force.z])
     torque = np.array([setforces.wrench.torque.x, setforces.wrench.torque.y, setforces.wrench.torque.z])
     tau = np.array([force[0],force[1],force[2],torque[0],torque[1],torque[2]]).reshape(6,1)
     A = np.linalg.inv(np.transpose(J))
     Tt = np.matmul(A,T)
     thrusters = np.matmul(np.transpose(Tt),tau)
+    thrusters = saturator_thruster(thrusters)
+    rospy.loginfo("thrusters := \n%s" %thrusters)
     thruster_0_msg = FloatStamped()
     thruster_1_msg = FloatStamped()
     thruster_2_msg = FloatStamped()

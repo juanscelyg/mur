@@ -1,39 +1,33 @@
 <launch>
   <arg name="uuv_name"/>
   <arg name="model_name" default="$(arg uuv_name)"/>
-  <arg name="saturation" default="40"/>
+  <arg name="saturation" default="30"/>
 
-  <arg name="Kp" default="2,2,2,1,1,1"/>
-  <arg name="Kd" default="0,0,0,0,0,0"/>
-  <arg name="Ki" default="1,1,1,1,1,1"/>
+  <arg name="Kp" default="11,11,11,9.5,9.5,9.5"/>
+  <arg name="Kd" default="5,5,5,3,3,3"/>
+  <arg name="Ki" default="0,0,0,0,0,0"/>
 
   <arg name="x" default="0"/>
   <arg name="y" default="0"/>
-  <arg name="z" default="-20"/>
+  <arg name="z" default="-15"/>
   <arg name="phi" default="0"/>
   <arg name="theta" default="0"/>
   <arg name="psi" default="0"/>
-
-
 
   <group ns="$(arg uuv_name)">
       <node pkg="mur_control"
             type="mur_control_mixer.py"
             name="mur_control_mixer"
             output="screen">
+            <rosparam subst_value="true">
+                saturation: $(arg saturation)
+            </rosparam>
       </node>
 
       <node pkg="mur_control"
           type="mur_altitude_controller.py"
           name="mur_altitude_controller"
-          output="screen"><!--
-          <remap from="odom" to="pose_gt"/>
-          <remap from="trajectory" to="dp_controller/trajectory"/>
-          <remap from="input_trajectory" to="dp_controller/input_trajectory"/>
-          <remap from="waypoints" to="dp_controller/waypoints"/>
-          <remap from="error" to="dp_controller/error"/>
-          <remap from="reference" to="dp_controller/reference"/>
-          <remap from="thruster_output" to="thruster_manager/input_stamped"/>-->
+          output="screen">
           <rosparam subst_value="true">
               x: [$(arg x)]
               y: [$(arg y)]
@@ -44,7 +38,6 @@
               Kp: [$(arg Kp)]
               Kd: [$(arg Kd)]
               Ki: [$(arg Ki)]
-              saturation: $(arg saturation)
           </rosparam>
       </node>
   </group>

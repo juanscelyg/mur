@@ -1,6 +1,6 @@
 <launch>
   <arg name="record" default="false"/>
-  <arg name="bag_filename" default="recording.bag"/>
+  <arg name="bag_filename" default="/tmp/recording.bag"/>
   <arg name="use_ned_frame" default="false"/>
 
   <group if="$(arg record)">
@@ -10,12 +10,14 @@
     -->
     <node pkg="rosbag" type="record" name="recording"
       args="record -O $(arg bag_filename)
-        /mur/dp_controller/trajectory
-        /mur/dp_controller/reference
         /mur/pose_gt_ned
         /hydrodynamics/current_velocity
-        /mur/thruster_manager/input
+        /control/Wrench
         /mur/wrench_perturbation
+        /mur/thrusters/0/input
+        /mur/thrusters/1/input
+        /mur/thrusters/2/input
+        /mur/thrusters/3/input
         /mur/thrusters/0/thrust
         /mur/thrusters/1/thrust
         /mur/thrusters/2/thrust
@@ -28,12 +30,14 @@
       -->
       <node pkg="rosbag" type="record" name="recording"
         args="record -O $(arg bag_filename)
-          /mur/dp_controller/trajectory
-          /mur/dp_controller/reference
           /mur/pose_gt
           /hydrodynamics/current_velocity
-          /mur/thruster_manager/input
+          /control/Wrench
           /mur/wrench_perturbation
+          /mur/thrusters/0/input
+          /mur/thrusters/1/input
+          /mur/thrusters/2/input
+          /mur/thrusters/3/input
           /mur/thrusters/0/thrust
           /mur/thrusters/1/thrust
           /mur/thrusters/2/thrust
