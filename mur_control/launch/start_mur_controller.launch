@@ -1,0 +1,14 @@
+<launch>
+  <arg name="uuv_name"/>
+  <arg name="model_name" default="$(arg uuv_name)"/>
+
+  <group ns="$(arg uuv_name)">
+        <rosparam file="$(find mur_control)/config/mur_height_control.yaml" command="load"/>
+        <rosparam file="$(find mur_control)/config/mur_yaw_control.yaml" command="load"/>
+        <rosparam file="$(find mur_control)/config/mur_velocity_control.yaml" command="load"/>
+
+        <node pkg="mur_control" type="mur_height_control.py" name="mur_height_control" output="screen"></node>
+        <node pkg="mur_control" type="mur_yaw_control.py" name="mur_yaw_control" output="screen"></node>
+        <node pkg="mur_control" type="mur_velocity_control.py" name="mur_velocity_control" output="screen"></node>
+  </group>
+</launch>
