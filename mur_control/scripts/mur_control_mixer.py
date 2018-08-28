@@ -6,108 +6,128 @@ import logging
 import sys
 import tf
 import message_filters
+from common import mur_common
+from dynamic_reconfigure.server import Server
+from mur_control.cfg import MurControlMixerConfig
 from mur_control.msg import FloatStamped
 from geometry_msgs.msg import WrenchStamped
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from nav_msgs.msg import Odometry
 
-# Constants
-NUM_THRUSTERS = 4
-ANGLE = 0
-X_BAR = 0.197
-Y_BAR = 0.18022
-# Init the desired dt
-RATE = 10
-# Matrix allocator
-T = np.matrix([[0, 0, 0, 0], [np.sin(np.deg2rad(ANGLE)), np.sin(np.deg2rad(-ANGLE)), np.sin(np.deg2rad(-ANGLE)), np.sin(np.deg2rad(ANGLE))], [1,1,1,1], [np.cos(np.deg2rad(ANGLE))*Y_BAR, -np.cos(np.deg2rad(-ANGLE))*Y_BAR, -np.cos(np.deg2rad(-ANGLE))*Y_BAR, np.cos(np.deg2rad(ANGLE))*Y_BAR], [-X_BAR, -X_BAR, -X_BAR, -X_BAR], [-np.sin(np.deg2rad(ANGLE))*X_BAR, np.sin(np.deg2rad(-ANGLE))*X_BAR, -np.sin(np.deg2rad(-ANGLE))*X_BAR, np.sin(np.deg2rad(ANGLE))*X_BAR]])
-# Topics to Publish the info
-thruster_0_pub = rospy.Publisher('/mur/thrusters/0/input', FloatStamped, queue_size=1)
-thruster_1_pub = rospy.Publisher('/mur/thrusters/1/input', FloatStamped, queue_size=1)
-thruster_2_pub = rospy.Publisher('/mur/thrusters/2/input', FloatStamped, queue_size=1)
-thruster_3_pub = rospy.Publisher('/mur/thrusters/3/input', FloatStamped, queue_size=1)
-if rospy.get_param('/mur/mur_control_mixer/saturation'):
-    thruster_saturation = rospy.get_param('/mur/mur_control_mixer/saturation')
-else:
-    thruster_saturation = 30.0
+class MURControlMixerNode():
 
-def saturator_thruster(force):
-    global thruster_saturation
-    thrusters = np.empty_like(force)
+    def __init__(self):
+        # Init constants
+        self.num_thrusters = 4
+        self.angle = 0
+        self.x_bar = 0.197
+        self.y_bar = 0.18022
 
-    for i in range(len(force)):
-        if force[i]<-thruster_saturation:
-            thrusters[i]=-thruster_saturation
-            rospy.logwarn("The motor %s was min saturated %s",i,force[i])
-        elif force[i]>thruster_saturation:
-            thrusters[i]=thruster_saturation
-            rospy.logwarn("The motor %s was max saturated %s",i,force[i])
-        else:
-            thrusters[i]=force[i]
-    return thrusters
+        # Desire parameters
+        self.saturation = 30.0
 
-def convert_to_global_frame(pose_rot):
-    nita2_t = euler_from_quaternion(pose_rot)
-    nita2 = np.array([nita2_t[0],nita2_t[1],nita2_t[2]])
-    r = nita2[0]
-    p = nita2[1]
-    y = nita2[2]
-    sr = np.sin(nita2[0])
-    sp = np.sin(nita2[1])
-    sy = np.sin(nita2[2])
-    cr = np.cos(nita2[0])
-    cp = np.cos(nita2[1])
-    cy = np.cos(nita2[2])
-    tp = np.tan(nita2[1])
-    J = np.array([[cy*cp, -sy*cr+cy*sp*sr, sy*sr+cy*cr*sp, 0, 0, 0],[sy*cp, cy*cr+sr*sp*sy, -cy*sr+sp*sy*cr, 0, 0, 0],[-sp, cp*sr, cp*cr, 0, 0, 0],[0, 0, 0, 1, sr*tp, cr*tp],[0, 0, 0, 0, cr, -sr],[0, 0, 0, 0, sr/cp, cr/cp]])
-    return J
+        # Variables
+        self.force_vel = np.zeros(shape=(6,1))
+        self.force_yaw = np.zeros(shape=(6,1))
+        self.force_height = np.zeros(shape=(6,1))
 
+        # Convert parameters
+        self.T = self.get_t_matrix()
 
-def callback(posegt, setforces):
-    global T
-    pose_rot = np.array([posegt.pose.pose.orientation.x,posegt.pose.pose.orientation.y,posegt.pose.pose.orientation.z,posegt.pose.pose.orientation.w])
-    J = convert_to_global_frame(pose_rot)
-    force = np.array([setforces.wrench.force.x, setforces.wrench.force.y, setforces.wrench.force.z])
-    torque = np.array([setforces.wrench.torque.x, setforces.wrench.torque.y, setforces.wrench.torque.z])
-    tau = np.array([force[0],force[1],force[2],torque[0],torque[1],torque[2]]).reshape(6,1)
-    A = np.linalg.inv(np.transpose(J))
-    Tt = np.matmul(A,T)
-    thrusters = np.matmul(np.transpose(Tt),tau)
-    thrusters = saturator_thruster(thrusters)
-    rospy.loginfo("thrusters := \n%s" %thrusters)
-    thruster_0_msg = FloatStamped()
-    thruster_1_msg = FloatStamped()
-    thruster_2_msg = FloatStamped()
-    thruster_3_msg = FloatStamped()
-    thruster_0_msg.header.stamp = rospy.Time.now()
-    thruster_0_msg.header.frame_id = 'mur/thrusters/0'
-    thruster_1_msg.header.stamp = rospy.Time.now()
-    thruster_1_msg.header.frame_id = 'mur/thrusters/1'
-    thruster_2_msg.header.stamp = rospy.Time.now()
-    thruster_2_msg.header.frame_id = 'mur/thrusters/2'
-    thruster_3_msg.header.stamp = rospy.Time.now()
-    thruster_3_msg.header.frame_id = 'mur/thrusters/3'
-    thruster_0_msg.data = thrusters[0]
-    thruster_1_msg.data = thrusters[1]
-    thruster_2_msg.data = thrusters[2]
-    thruster_3_msg.data = thrusters[3]
-    thruster_0_pub.publish(thruster_0_msg)
-    thruster_1_pub.publish(thruster_1_msg)
-    thruster_2_pub.publish(thruster_2_msg)
-    thruster_3_pub.publish(thruster_3_msg)
+        # ROS parameter server
+        self.config = {}
 
-def listener():
-    posegt_sub = message_filters.Subscriber('/mur/pose_gt', Odometry)
-    setforces_sub = message_filters.Subscriber('/control/Wrench', WrenchStamped)
+        # ROS infraestucture
+        self.srv_reconfigure = Server(MurControlMixerConfig, self.config_callback)
+        self.pub_thruster_0 = rospy.Publisher('/mur/thrusters/0/input', FloatStamped, queue_size=1)
+        self.pub_thruster_1 = rospy.Publisher('/mur/thrusters/1/input', FloatStamped, queue_size=1)
+        self.pub_thruster_2 = rospy.Publisher('/mur/thrusters/2/input', FloatStamped, queue_size=1)
+        self.pub_thruster_3 = rospy.Publisher('/mur/thrusters/3/input', FloatStamped, queue_size=1)
+        self.sub_posegt = message_filters.Subscriber('/mur/pose_gt', Odometry)
+        self.sub_getvel = message_filters.Subscriber('/control/Wrench/velocity', WrenchStamped)
+        self.sub_getyaw = message_filters.Subscriber('/control/Wrench/yaw', WrenchStamped)
+        self.sub_getheight = message_filters.Subscriber('/control/Wrench/height', WrenchStamped)
+        self.ts = message_filters.TimeSynchronizer([self.sub_posegt, self.sub_getvel, self.sub_getyaw, self.sub_getheight], 10)
+        self.ts.registerCallback(self.callback)
+        rospy.spin()
 
-    ts = message_filters.TimeSynchronizer([posegt_sub, setforces_sub], 10)
-    ts.registerCallback(callback)
-    rospy.spin()
+    def get_t_matrix(self):
+        t_matrix = np.matrix([[0, 0, 0, 0], [np.sin(np.deg2rad(self.angle)), np.sin(np.deg2rad(-self.angle)), np.sin(np.deg2rad(-self.angle)), np.sin(np.deg2rad(self.angle))], [1,1,1,1], [np.cos(np.deg2rad(self.angle))*self.y_bar, -np.cos(np.deg2rad(-self.angle))*self.y_bar, -np.cos(np.deg2rad(-self.angle))*self.y_bar, np.cos(np.deg2rad(self.angle))*self.y_bar], [-self.x_bar, -self.x_bar, -self.x_bar, -self.x_bar], [-np.sin(np.deg2rad(self.angle))*self.x_bar, np.sin(np.deg2rad(-self.angle))*self.x_bar, -np.sin(np.deg2rad(-self.angle))*self.x_bar, np.sin(np.deg2rad(self.angle))*self.x_bar]])
+        return t_matrix
+
+    def config_callback(self, config, level):
+        self.saturation = config['saturation']
+        self.config = config
+        return config
+
+    def saturator_thruster(self,force):
+        thrusters = np.empty_like(force)
+        for i in range(len(force)):
+            if force[i]<=-self.saturation:
+                thrusters[i]=(-self.saturation)
+                rospy.logwarn("The motor %s was min saturated %s",i,force[i])
+            elif force[i]>=self.saturation:
+                thrusters[i]=self.saturation
+                rospy.logwarn("The motor %s was max saturated %s",i,force[i])
+            else:
+                    thrusters[i]=force[i]
+            return thrusters
+
+    def getvel(self, msg):
+        self.force_vel = np.array([[msg.wrench.force.x], [msg.wrench.force.y], [msg.wrench.force.z], [msg.wrench.torque.x], [msg.wrench.torque.y], [msg.wrench.torque.z]])
+        rospy.loginfo("force_vel := \n" %self.force_vel)
+
+    def getyaw(self, msg):
+        self.force_yaw = np.array([[msg.wrench.force.x], [msg.wrench.force.y], [msg.wrench.force.z], [msg.wrench.torque.x], [msg.wrench.torque.y], [msg.wrench.torque.z]])
+        rospy.loginfo("force_yaw := \n" %self.force_yaw)
+
+    def getheight(self, msg):
+        self.force_height = np.array([[msg.wrench.force.x], [msg.wrench.force.y], [msg.wrench.force.z], [msg.wrench.torque.x], [msg.wrench.torque.y], [msg.wrench.torque.z]])
+        rospy.loginfo("force_height := \n" %self.force_height)
+
+    def callback(self, msg_posegt, msg_getvel, msg_getyaw, msg_getheight):
+        # Get rotation
+        self.pose_rot = np.array([msg_posegt.pose.pose.orientation.x, msg_posegt.pose.pose.orientation.y, msg_posegt.pose.pose.orientation.z, msg_posegt.pose.pose.orientation.w])
+        rospy.loginfo("pose_rot := \n" %self.pose_rot)
+        self.getvel(msg_getvel)
+        self.getyaw(msg_getyaw)
+        self.getheight(msg_getheight)
+        # Global rotation
+        self.J = mur_common.convert_body_world(self.pose_rot)
+        rospy.loginfo("J := \n" %self.J)
+        # Get force values from another topics
+        tau = self.force_vel + self.force_yaw + self.force_height
+        # Thrusters matrix on the world frame
+        A = np.linalg.inv(np.transpose(self.J))
+        Tt = np.matmul(A,self.T)
+        thrusters_forces = np.matmul(np.transpose(Tt),tau)
+        self.thrusters = self.saturator_thruster(thrusters_forces)
+        rospy.loginfo("thrusters := \n%s" %self.thrusters)
+        msg_thruster_0 = FloatStamped()
+        msg_thruster_1 = FloatStamped()
+        msg_thruster_2 = FloatStamped()
+        msg_thruster_3 = FloatStamped()
+        msg_thruster_0.header.stamp = rospy.Time.now()
+        msg_thruster_0.header.frame_id = 'mur/thrusters/0'
+        msg_thruster_1.header.stamp = rospy.Time.now()
+        msg_thruster_1.header.frame_id = 'mur/thrusters/1'
+        msg_thruster_2.header.stamp = rospy.Time.now()
+        msg_thruster_2.header.frame_id = 'mur/thrusters/2'
+        msg_thruster_3.header.stamp = rospy.Time.now()
+        msg_thruster_3.header.frame_id = 'mur/thrusters/3'
+        msg_thruster_0.data = self.thrusters[0]
+        msg_thruster_1.data = self.thrusters[1]
+        msg_thruster_2.data = self.thrusters[2]
+        msg_thruster_3.data = self.thrusters[3]
+        self.pub_thruster_0.publish(msg_thruster_0)
+        self.pub_thruster_1.publish(msg_thruster_1)
+        self.pub_thruster_2.publish(msg_thruster_2)
+        self.pub_thruster_3.publish(msg_thruster_3)
 
 if __name__ == '__main__':
+    rospy.init_node('mur_control_mixer')
     try:
-        rospy.init_node('mur_control_mixer')
-        rospy.Rate(RATE) # 10 Hz
-
-        listener()
-
-    except rospy.ROSInterruptException:  pass
+        node = MURControlMixerNode()
+    except rospy.ROSInterruptException:
+        print('caught exception')
+    print('exiting')

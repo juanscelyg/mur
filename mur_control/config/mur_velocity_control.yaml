@@ -1,10 +1,6 @@
-velocity_control/p_x: 0.1
-velocity_control/p_y: 0.1
-velocity_control/d_x: 2.0
-velocity_control/d_y: 2.0
-velocity_control/p_p: 100.0
-velocity_control/p_r: 100.0
-velocity_control/d_p: 1
-velocity_control/d_r: 1
+velocity_control/p_xy: 0.1
+velocity_control/d_xy: 2.0
+velocity_control/p_pr: 100.0
+velocity_control/d_pr: 1
 velocity_control/pos_x: 0.0
 velocity_control/pos_y: 0.0

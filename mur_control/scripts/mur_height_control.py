@@ -22,7 +22,7 @@ class MURHeightControlNode:
         self.mur_weight = 8.5 * 9.81
 
         # State vectors
-        self.nitad = np.array(shape=(6,1))
+        self.nitad = np.zeros(shape=(6,1))
         self.error_pos = np.zeros(shape=(6,1))
         self.error_vel = np.zeros(shape=(6,1))
 
@@ -37,8 +37,8 @@ class MURHeightControlNode:
         self.d_y = 0.0
 
         # ROS infrastructure
-        self.srv_reconfigure = Server(MurYawControlConfig, self.config_callback)
-        self.sub_cmd_pose = rospy.Subscriber('/mur/pose_gt', Odometry, self.cmd_pose_callback))
+        self.srv_reconfigure = Server(MurHeightControlConfig, self.config_callback)
+        self.sub_cmd_pose = rospy.Subscriber('/mur/pose_gt', Odometry, self.cmd_pose_callback)
         self.pub_cmd_force = rospy.Publisher('/control/Wrench/height', WrenchStamped, queue_size=1)
 
     def cmd_pose_callback(self, msg):
@@ -54,7 +54,7 @@ class MURHeightControlNode:
         self.nita2 = np.array([self.nita2_t[0],self.nita2_t[1],self.nita2_t[2]])
         self.nita = np.array([self.pose_pos[0],self.pose_pos[1],self.pose_pos[2], self.nita2[0],self.nita2[1],self.nita2[2]]).reshape(self.nitad.shape)
         # Global rotation
-        self.J = convert_body_world(self.pose_rot)
+        self.J = mur_common.convert_body_world(self.pose_rot)
         # Convert to SNAME Velocity
         self.vitad = np.zeros(self.nitad.shape)
         self.vita = np.array([self.twist_pos[0],self.twist_pos[1],self.twist_pos[2], self.twist_rot[0],self.twist_rot[1],self.twist_rot[2]]).reshape(self.vitad.shape)
@@ -66,6 +66,7 @@ class MURHeightControlNode:
     def get_errors(self):
         # Create the errors
         self.error_pos = self.nitad - self.nita
+        vitad = np.empty_like(self.error_pos)
         for i in range(len(self.error_pos)):
             vitad[i]=self.error_pos[i]/self.dt_vel
         self.error_vel = self.vitad - self.vita
@@ -74,10 +75,9 @@ class MURHeightControlNode:
         # Control Law
         height_error = self.error_pos[2]
         # PD control
-        height_rate_error = height_error - self.d_z*self.nita_d[2]
+        height_rate_error = height_error - self.d_z*self.nitad[2]
         Tz = self.mur_weight + self.p_z*height_rate_error
         # To create the message
-        rospy.loginfo("Force := \n%s" %force)
         force_msg = WrenchStamped()
         force_msg.header.stamp = rospy.Time.now()
         force_msg.header.frame_id = 'mur/control'

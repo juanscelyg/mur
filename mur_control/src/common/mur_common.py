@@ -20,7 +20,7 @@ def convert_body_world(pose_rot):
     return J
 
 def rot2(ang):
-        ct = np.cos(ang);
-        st = np.sin(ang);
-        R=np.matrix([[ct,-st],[st,ct]])
-        return R
+    ct = np.cos(ang);
+    st = np.sin(ang);
+    R=np.matrix([[ct,-st],[st,ct]])
+    return R
