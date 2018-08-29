@@ -29,21 +29,24 @@ class MURVelocityControlNode:
         # Desire values
         self.pos_x = 0.0
         self.pos_y = 0.0
-        self.angle = 0
 
         # ROS param server
         self.config = {}
 
         # Control gains
-        self.p_xy = np.eye(2)
-        self.d_xy = 0.0
-        self.p_pr = 0.0
-        self.d_pr = 0.0
+        self.p_x = 5.0
+        self.d_x = 10.0
+        self.p_r = 0.1
+        self.d_r = 10.0
+        self.p_y = 5.0
+        self.d_y = 10.0
+        self.p_p = 0.1
+        self.d_p = 10.0
 
         # ROS infrastructure
         self.srv_reconfigure = Server(MurVelocityControlConfig, self.config_callback)
         self.sub_cmd_pose = rospy.Subscriber('/mur/pose_gt', Odometry, self.cmd_pose_callback)
-        self.pub_cmd_force = rospy.Publisher('/control/Wrench/velocity', WrenchStamped, queue_size=1)
+        self.pub_cmd_force = rospy.Publisher('/control/Wrench/velocity', WrenchStamped, queue_size=10)
 
     def cmd_pose_callback(self, msg):
         if not bool(self.config):
@@ -80,29 +83,33 @@ class MURVelocityControlNode:
         # Control Law
         pos_error = self.error_pos[0:2]
         # PD control
-        position_rate_error = np.matmul(np.transpose(mur_common.rot2(self.nita[5,0])), pos_error) - np.multiply(self.d_xy, self.nita_p[0:2,])
-        attitude_error = np.matmul(self.p_xy, position_rate_error) - self.nita[3:5,]
-        attitude_rate_error = attitude_error - np.multiply(self.d_pr, self.nita_p[3:5,])
-        force = np.dot(self.p_pr,attitude_rate_error)
+        f1 = self.p_x * self.error_pos[0,] + self.d_x * self.error_vel[0,]
+        f2 = self.p_r * self.error_pos[3,] + self.d_r * self.error_vel[3,]
+        f3 = 0#self.p_y * self.error_pos[1,] + self.d_y * self.error_vel[1,]
+        f4 = 0#self.p_p * self.error_pos[4,] + self.d_p * self.error_vel[4,]
+        force = np.array([[f1],[f2],[f3],[f4]])
         # To create the message
         force_msg = WrenchStamped()
         force_msg.header.stamp = rospy.Time.now()
         force_msg.header.frame_id = 'mur/control'
-        force_msg.wrench.torque.x = force[0]
-        force_msg.wrench.torque.y = force[1]
+        force_msg.wrench.force.x = force[0,]
+        force_msg.wrench.force.y = force[2,]
+        force_msg.wrench.torque.x = force[1,]
+        force_msg.wrench.torque.y = force[3,]
         # To publish the message
         self.pub_cmd_force.publish(force_msg)
 
 
     def config_callback(self, config, level):
         # Config has changed, reset PD controllers
-        par_xy = config['p_xy']
-        self.p_pr = config['p_pr']
-        self.d_xy = config['d_xy']
-        self.d_pr = config['d_pr']
-
-        # To put info into the matrix
-        np.put(self.p_xy, [0,1,2,3], [0, par_xy, -par_xy, 0])
+        self.p_x = config['p_x']
+        self.p_r = config['p_r']
+        self.d_x = config['d_x']
+        self.d_r = config['d_r']
+        self.p_y = config['p_y']
+        self.p_p = config['p_p']
+        self.d_y = config['d_y']
+        self.d_p = config['d_p']
         # To refresh the desire points (To topics after, while like parameters)
         self.pos_x = config['pos_x']
         self.pos_y = config['pos_y']
@@ -118,6 +125,7 @@ if __name__ == '__main__':
     rospy.init_node('mur_velocity_control')
     try:
         node = MURVelocityControlNode()
+        rospy.Rate(10)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')

@@ -17,7 +17,7 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion
 class MURHeightControlNode:
     def __init__(self):
         # Init constants
-        self.dt_vel = 2
+        self.dt_vel = 5
         self.station_keeping = 2
         self.mur_weight = 8.5 * 9.81
 
@@ -33,13 +33,13 @@ class MURHeightControlNode:
         self.config = {}
 
         # Control gains
-        self.p_y = 0.0
-        self.d_y = 0.0
+        self.p_z = 10.0
+        self.d_z = 2.0
 
         # ROS infrastructure
         self.srv_reconfigure = Server(MurHeightControlConfig, self.config_callback)
         self.sub_cmd_pose = rospy.Subscriber('/mur/pose_gt', Odometry, self.cmd_pose_callback)
-        self.pub_cmd_force = rospy.Publisher('/control/Wrench/height', WrenchStamped, queue_size=1)
+        self.pub_cmd_force = rospy.Publisher('/control/Wrench/height', WrenchStamped, queue_size=10)
 
     def cmd_pose_callback(self, msg):
         if not bool(self.config):
@@ -73,10 +73,8 @@ class MURHeightControlNode:
 
     def force_callback(self):
         # Control Law
-        height_error = self.error_pos[2]
         # PD control
-        height_rate_error = height_error - self.d_z*self.nitad[2]
-        Tz = self.mur_weight + self.p_z*height_rate_error
+        Tz = self.p_z*self.error_pos[2] + self.d_z*self.error_vel[2]
         # To create the message
         force_msg = WrenchStamped()
         force_msg.header.stamp = rospy.Time.now()
@@ -104,6 +102,7 @@ if __name__ == '__main__':
     rospy.init_node('mur_height_control')
     try:
         node = MURHeightControlNode()
+        rospy.Rate(15)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')

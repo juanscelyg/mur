@@ -32,13 +32,13 @@ class MURYawControlNode:
         self.config = {}
 
         # Control gains
-        self.p_y = 0.0
+        self.p_y = 1.0
         self.d_y = 0.0
 
         # ROS infrastructure
         self.srv_reconfigure = Server(MurYawControlConfig, self.config_callback)
         self.sub_cmd_pose = rospy.Subscriber('/mur/pose_gt', Odometry, self.cmd_pose_callback)
-        self.pub_cmd_force = rospy.Publisher('/control/Wrench/yaw', WrenchStamped, queue_size=1)
+        self.pub_cmd_force = rospy.Publisher('/control/Wrench/yaw', WrenchStamped, queue_size=10)
 
     def cmd_pose_callback(self, msg):
         if not bool(self.config):
@@ -72,10 +72,8 @@ class MURYawControlNode:
 
     def force_callback(self):
         # Control Law
-        yaw_angle_error = self.error_pos[5]
         # PD control
-        yaw_rate_error = yaw_angle_error - self.d_y*self.nita_p[5]
-        yaw_force = self.p_y*yaw_rate_error
+        yaw_force = self.p_y*self.error_pos[5] + self.d_y*self.error_vel[5]
         # To create the message
         force_msg = WrenchStamped()
         force_msg.header.stamp = rospy.Time.now()
@@ -103,6 +101,7 @@ if __name__ == '__main__':
     rospy.init_node('mur_yaw_control')
     try:
         node = MURYawControlNode()
+        rospy.Rate(20)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')
