@@ -85,8 +85,8 @@ class MURVelocityControlNode:
         # PD control
         f1 = self.p_x * self.error_pos[0,] + self.d_x * self.error_vel[0,]
         f2 = self.p_r * self.error_pos[3,] + self.d_r * self.error_vel[3,]
-        f3 = 0#self.p_y * self.error_pos[1,] + self.d_y * self.error_vel[1,]
-        f4 = 0#self.p_p * self.error_pos[4,] + self.d_p * self.error_vel[4,]
+        f3 = self.p_y * self.error_pos[1,] + self.d_y * self.error_vel[1,]
+        f4 = self.p_p * self.error_pos[4,] + self.d_p * self.error_vel[4,]
         force = np.array([[f1],[f2],[f3],[f4]])
         # To create the message
         force_msg = WrenchStamped()

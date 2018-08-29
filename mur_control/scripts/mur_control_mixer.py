@@ -105,16 +105,18 @@ class MURControlMixerNode():
         # Get the position and velocities
         self.pose_pos = np.array([msg_pose.pose.pose.position.x, msg_pose.pose.pose.position.y, msg_pose.pose.pose.position.z])
         self.pose_rot = np.array([msg_pose.pose.pose.orientation.x,msg_pose.pose.pose.orientation.y,msg_pose.pose.pose.orientation.z,msg_pose.pose.pose.orientation.w])
-        rospy.loginfo("Pos := \n %s" %self.pose_pos)
+        #rospy.loginfo("Pos := \n %s" %self.pose_pos)
         self.J = mur_common.convert_body_world(self.pose_rot)
         self.force_vel = self.get_force_callback(msg_fvel)
         self.force_yaw = self.get_force_callback(msg_fyaw)
         self.force_height = self.get_force_callback(msg_falt)
-        tau = self.force_height + self.force_yaw + self.force_vel
+        tau = self.force_height + self.force_vel #+ self.force_yaw + self.force_vel
         # Thrusters matrix on the world frame
         A = np.linalg.inv(np.transpose(self.J))
         Tt = np.matmul(A,self.T)
         thrusters_forces = np.matmul(np.transpose(Tt),tau)
+        rospy.loginfo("tau := \n %s" %tau)
+        rospy.loginfo("thrusters_forces := \n %s" %thrusters_forces)
         self.thrusters = self.saturator_thruster(thrusters_forces)
         self.set_force_thrusters()
 
