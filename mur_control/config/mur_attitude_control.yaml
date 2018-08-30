@@ -1,0 +1,12 @@
+attitude_control/p_r: 1.0
+attitude_control/i_r: 1.0
+attitude_control/p_r: 1.0
+attitude_control/roll_d: 0.0
+attitude_control/p_p: 1.0
+attitude_control/i_p: 1.0
+attitude_control/p_p: 1.0
+attitude_control/pitch_d: 0.0
+attitude_control/p_yaw: 1.0
+attitude_control/i_yaw: 1.0
+attitude_control/p_yaw: 1.0
+attitude_control/yaw_d: 1.0
