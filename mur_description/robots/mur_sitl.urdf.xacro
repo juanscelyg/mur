@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<!-- Copyright (c) 2016 The UUV Simulator Authors.
+     All rights reserved.
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<robot name="mur" xmlns:xacro="http://www.ros.org/wiki/xacro" >
+  <xacro:arg name="debug" default="0"/>
+  <xacro:arg name="namespace" default="mur"/>
+  <xacro:arg name="path_lib" default="/home/juanscelyg/src/pixhawk_sitl/sitl_gazebo/Build"/>
+  <!-- Include the UUV macro file -->
+  <xacro:include filename="$(find mur_description)/urdf/mur_base.xacro"/>
+  <!-- Create the mur -->
+  <xacro:mur_base namespace="$(arg namespace)" debug="$(arg debug)"/>
+
+  <!-- Joint state publisher plugin -->
+  <gazebo>
+    <plugin name="joint_state_publisher" filename="libjoint_state_publisher.so">
+      <robotNamespace>$(arg namespace)</robotNamespace>
+      <updateRate>50</updateRate>
+    </plugin>
+
+    <plugin name='mavlink_interface' filename='$(arg path_lib)/librotors_gazebo_mavlink_interface.so'>
+      <robotNamespace>$(arg namespace)</robotNamespace>
+      <imuSubTopic>imu</imuSubTopic>
+      <motorSpeedCommandPubTopic>gazebo/command/motor_speed</motorSpeedCommandPubTopic>
+    </plugin>
+
+<plugin name='rosbag' filename='$(arg path_lib)/librotors_gazebo_multirotor_base_plugin.so'>
+  <robotNamespace>$(arg namespace)</robotNamespace>
+  <linkName>$(arg namespace)/base_link</linkName>
+  <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+</plugin>
+<plugin name='front_right_motor_model' filename='$(arg path_lib)/librotors_gazebo_motor_model.so'>
+  <robotNamespace>$(arg namespace)</robotNamespace>
+  <jointName>$(arg namespace)/thruster_0_joint</jointName>
+  <linkName>$(arg namespace)/thruster_0</linkName>
+  <turningDirection>ccw</turningDirection>
+  <timeConstantUp>0.0125</timeConstantUp>
+  <timeConstantDown>0.025</timeConstantDown>
+  <maxRotVelocity>838</maxRotVelocity>
+  <motorConstant>8.54858e-06</motorConstant>
+  <momentConstant>0.16</momentConstant>
+  <commandSubTopic>gazebo/command/motor_speed</commandSubTopic>
+  <motorNumber>0</motorNumber>
+  <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+  <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+  <motorSpeedPubTopic>motor_speed/0</motorSpeedPubTopic>
+  <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+</plugin>
+<plugin name='back_left_motor_model' filename='$(arg path_lib)/librotors_gazebo_motor_model.so'>
+  <robotNamespace>$(arg namespace)</robotNamespace>
+  <jointName>$(arg namespace)/thruster_1_joint</jointName>
+  <linkName>$(arg namespace)/thruster_1</linkName>
+  <turningDirection>cw</turningDirection>
+  <timeConstantUp>0.0125</timeConstantUp>
+  <timeConstantDown>0.025</timeConstantDown>
+  <maxRotVelocity>838</maxRotVelocity>
+  <motorConstant>8.54858e-06</motorConstant>
+  <momentConstant>0.16</momentConstant>
+  <commandSubTopic>gazebo/command/motor_speed</commandSubTopic>
+  <motorNumber>1</motorNumber>
+  <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+  <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+  <motorSpeedPubTopic>motor_speed/1</motorSpeedPubTopic>
+  <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+</plugin>
+<plugin name='front_left_motor_model' filename='$(arg path_lib)/librotors_gazebo_motor_model.so'>
+  <robotNamespace>$(arg namespace)</robotNamespace>
+  <jointName>$(arg namespace)/thruster_2_joint</jointName>
+  <linkName>$(arg namespace)/thruster_2</linkName>
+  <turningDirection>ccw</turningDirection>
+  <timeConstantUp>0.0125</timeConstantUp>
+  <timeConstantDown>0.025</timeConstantDown>
+  <maxRotVelocity>838</maxRotVelocity>
+  <motorConstant>8.54858e-06</motorConstant>
+  <momentConstant>0.16</momentConstant>
+  <commandSubTopic>gazebo/command/motor_speed</commandSubTopic>
+  <motorNumber>2</motorNumber>
+  <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+  <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+  <motorSpeedPubTopic>motor_speed/2</motorSpeedPubTopic>
+  <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+</plugin>
+<plugin name='back_right_motor_model' filename='$(arg path_lib)/librotors_gazebo_motor_model.so'>
+  <robotNamespace>$(arg namespace)</robotNamespace>
+  <jointName>$(arg namespace)/thruster_3_joint</jointName>
+  <linkName>$(arg namespace)/thruster_3</linkName>
+  <turningDirection>cw</turningDirection>
+  <timeConstantUp>0.0125</timeConstantUp>
+  <timeConstantDown>0.025</timeConstantDown>
+  <maxRotVelocity>838</maxRotVelocity>
+  <motorConstant>8.54858e-06</motorConstant>
+  <momentConstant>0.16</momentConstant>
+  <commandSubTopic>gazebo/command/motor_speed</commandSubTopic>
+  <motorNumber>3</motorNumber>
+  <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+  <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+  <motorSpeedPubTopic>motor_speed/3</motorSpeedPubTopic>
+  <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+</plugin>
+<plugin name='mavlink_interface' filename='$(arg path_lib)/librotors_gazebo_mavlink_interface.so'>
+  <robotNamespace>$(arg namespace)</robotNamespace>
+  <imuSubTopic>imu</imuSubTopic>
+  <motorSpeedCommandPubTopic>gazebo/command/motor_speed</motorSpeedCommandPubTopic>
+</plugin>
+<static>0</static>
+<plugin name='rotors_gazebo_imu_plugin' filename='$(arg path_lib)/librotors_gazebo_imu_plugin.so'>
+  <robotNamespace>$(arg namespace)</robotNamespace>
+  <linkName>$(arg namespace)/imu_link</linkName>
+  <imuTopic>imu</imuTopic>
+  <gyroscopeNoiseDensity>0.0003394</gyroscopeNoiseDensity>
+  <gyroscopeRandomWalk>3.8785e-05</gyroscopeRandomWalk>
+  <gyroscopeBiasCorrelationTime>1000.0</gyroscopeBiasCorrelationTime>
+  <gyroscopeTurnOnBiasSigma>0.0087</gyroscopeTurnOnBiasSigma>
+  <accelerometerNoiseDensity>0.004</accelerometerNoiseDensity>
+  <accelerometerRandomWalk>0.006</accelerometerRandomWalk>
+  <accelerometerBiasCorrelationTime>300.0</accelerometerBiasCorrelationTime>
+  <accelerometerTurnOnBiasSigma>0.196</accelerometerTurnOnBiasSigma>
+</plugin>
+
+
+
+
+
+  </gazebo>
+
+
+</robot>
