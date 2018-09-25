@@ -36,6 +36,7 @@ catkin_install_python(PROGRAMS  scripts/mur_altitude_control.py
                                 scripts/mur_attitude_control.py
                                 scripts/mur_position_control.py
                                 scripts/mur_control_mixer.py
+                                scripts/mur_sim_to_into.py
                         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(DIRECTORY launch config cfg

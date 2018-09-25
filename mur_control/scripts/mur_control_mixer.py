@@ -10,6 +10,7 @@ from common import mur_common
 from dynamic_reconfigure.server import Server
 from mur_control.cfg import MurControlMixerConfig
 from mur_control.msg import FloatStamped
+from mavros_msgs.msg import ActuatorControl
 from geometry_msgs.msg import WrenchStamped
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from nav_msgs.msg import Odometry
@@ -39,14 +40,10 @@ class MURControlMixerNode():
 
         # ROS infraestucture
         self.srv_reconfigure = Server(MurControlMixerConfig, self.config_callback)
-        self.pub_thruster_0 = rospy.Publisher('/mur/thrusters/0/input', FloatStamped, queue_size=1)
-        self.pub_thruster_1 = rospy.Publisher('/mur/thrusters/1/input', FloatStamped, queue_size=1)
-        self.pub_thruster_2 = rospy.Publisher('/mur/thrusters/2/input', FloatStamped, queue_size=1)
-        self.pub_thruster_3 = rospy.Publisher('/mur/thrusters/3/input', FloatStamped, queue_size=1)
+        self.pub_actuators = rospy.Publisher('/mavros/actuator_control', ActuatorControl, queue_size=1)
         self.sub_pose = message_filters.Subscriber('/mur/pose_gt', Odometry)
-        self.sub_falt = message_filters.Subscriber('/control/wrench/force', WrenchStamped)
-        self.sub_fatt = message_filters.Subscriber('/control/wrench/torque', WrenchStamped)
-        self.ts = message_filters.TimeSynchronizer([self.sub_pose, self.sub_falt, self.sub_fatt], 10)
+        self.sub_force = message_filters.Subscriber('/control/force', WrenchStamped)
+        self.ts = message_filters.TimeSynchronizer([self.sub_pose, self.sub_force], 10)
         self.ts.registerCallback(self.cmd_force_callback)
 
     def config_callback(self, config, level):
@@ -65,26 +62,12 @@ class MURControlMixerNode():
         return t_matrix
 
     def set_force_thrusters(self):
-        msg_thruster_0 = FloatStamped()
-        msg_thruster_1 = FloatStamped()
-        msg_thruster_2 = FloatStamped()
-        msg_thruster_3 = FloatStamped()
-        msg_thruster_0.header.stamp = rospy.Time.now()
-        msg_thruster_0.header.frame_id = 'mur/thrusters/0'
-        msg_thruster_1.header.stamp = rospy.Time.now()
-        msg_thruster_1.header.frame_id = 'mur/thrusters/1'
-        msg_thruster_2.header.stamp = rospy.Time.now()
-        msg_thruster_2.header.frame_id = 'mur/thrusters/2'
-        msg_thruster_3.header.stamp = rospy.Time.now()
-        msg_thruster_3.header.frame_id = 'mur/thrusters/3'
-        msg_thruster_0.data = self.thrusters[0]
-        msg_thruster_1.data = self.thrusters[1]
-        msg_thruster_2.data = self.thrusters[2]
-        msg_thruster_3.data = self.thrusters[3]
-        self.pub_thruster_0.publish(msg_thruster_0)
-        self.pub_thruster_1.publish(msg_thruster_1)
-        self.pub_thruster_2.publish(msg_thruster_2)
-        self.pub_thruster_3.publish(msg_thruster_3)
+        msg_actuators = ActuatorControl()
+        msg_actuators.header.stamp = rospy.Time.now()
+        msg_actuators.header.frame_id = 'mur/actuators_control'
+        msg_actuators.group_mix = 3
+        msg_actuators.controls = np.array([self.thrusters[0],self.thrusters[1],self.thrusters[2],self.thrusters[3],0,0,0,0])
+        self.pub_actuators.publish(msg_actuators)
 
     def saturator_thruster(self,force):
         thrusters = np.empty_like(force)
@@ -97,25 +80,23 @@ class MURControlMixerNode():
                 rospy.logwarn("The motor %s was max saturated %s",i,force[i])
             else:
                 thrusters[i]=force[i]
-        return thrusters
+        return np.true_divide(thrusters, self.saturation)
 
-
-    def cmd_force_callback(self, msg_pose, msg_falt, msg_fatt):
+    def cmd_force_callback(self, msg_pose, msg_force):
         # Get the position and velocities
         self.pose_pos = np.array([msg_pose.pose.pose.position.x, msg_pose.pose.pose.position.y, msg_pose.pose.pose.position.z])
         self.pose_rot = np.array([msg_pose.pose.pose.orientation.x,msg_pose.pose.pose.orientation.y,msg_pose.pose.pose.orientation.z,msg_pose.pose.pose.orientation.w])
         #rospy.loginfo("Pos := \n %s" %self.pose_pos)
         self.J = mur_common.convert_body_world(self.pose_rot)
-        self.force_attitude = self.get_force_callback(msg_fatt)
-        self.force_altitude = self.get_force_callback(msg_falt)
-        tau = self.force_attitude + self.force_altitude
+        self.force_attitude = self.get_force_callback(msg_force)
+        tau = self.force_attitude
         # Thruster forces
         Tt = np.matmul(np.transpose(self.J),tau)
         B = np.linalg.pinv(self.T)
         thrusters_forces = np.matmul(B,Tt)
-        rospy.loginfo("Force :=\n %s" %tau)
-        rospy.loginfo("Thrusters :=\n %s" %thrusters_forces)
-        rospy.loginfo("Pos :=\n %s" %self.pose_pos)
+        ### rospy.loginfo("Force :=\n %s" %tau)
+        ### rospy.loginfo("Thrusters :=\n %s" %thrusters_forces)
+        ### rospy.loginfo("Pos :=\n %s" %self.pose_pos)
         self.thrusters = self.saturator_thruster(thrusters_forces)
         self.set_force_thrusters()
 

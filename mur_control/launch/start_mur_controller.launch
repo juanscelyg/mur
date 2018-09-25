@@ -8,9 +8,10 @@
         <rosparam file="$(find mur_control)/config/mur_position_control.yaml" command="load"/>
         <rosparam file="$(find mur_control)/config/mur_control_mixer.yaml" command="load"/>
 
-        <!--node pkg="mur_control" type="mur_altitude_control.py" name="mur_altitude_control" output="screen"></node>
-        <node pkg="mur_control" type="mur_attitude_control.py" name="mur_attitude_control" output="screen"></node>
-        <node pkg="mur_control" type="mur_position_control.py" name="mur_position_control" output="screen"></node-->
+        <node pkg="mur_control" type="mur_altitude_control.py" name="mur_altitude_control" output="screen"></node>
+        <!--node pkg="mur_control" type="mur_attitude_control.py" name="mur_attitude_control" output="screen"></node-->
+        <!--node pkg="mur_control" type="mur_position_control.py" name="mur_position_control" output="screen"></node-->
         <node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node>
+        <node pkg="mur_control" type="mur_sim_to_into.py" name="mur_sim_to_into" output="screen"></node>
   </group>
 </launch>
