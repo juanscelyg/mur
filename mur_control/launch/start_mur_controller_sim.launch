@@ -1,0 +1,51 @@
+<launch>
+    <!-- If you want to generate a ROS bag with the recorded simulated data, set this flag to true -->
+    <arg name="record" default="true"/>
+
+    <!-- Start the a underwater world simulation scenario -->
+    <include file="$(find uuv_descriptions)/launch/ocean_waves.launch"/>
+
+    <!-- Add the MUR vehicle to the simulation (namespace: mur) -->
+    <include file="$(find mur_description)/launch/upload_mur.launch">
+        <arg name="x" default="5"/>
+        <arg name="y" default="-2"/>
+        <arg name="z" default="-94.5"/>
+        <arg name="yaw" default="0"/>
+        <arg name="mode" default="default"/>
+        <arg name="namespace" default="mur"/>
+    </include>
+
+    <!-- Start the controller-->
+    <arg name="uuv_name" value="mur"/>
+    <arg name="model_name" value="mur"/>
+    <group ns="$(arg uuv_name)">
+          <rosparam file="$(find mur_control)/config/mur_altitude_control.yaml" command="load"/>
+          <rosparam file="$(find mur_control)/config/mur_attitude_control.yaml" command="load"/>
+          <rosparam file="$(find mur_control)/config/mur_position_control.yaml" command="load"/>
+          <rosparam file="$(find mur_control)/config/mur_control_mixer.yaml" command="load"/>
+
+          <node pkg="mur_control" type="mur_altitude_control.py" name="mur_altitude_control" output="screen"></node>
+          <!--node pkg="mur_control" type="mur_attitude_control.py" name="mur_attitude_control" output="screen"></node-->
+          <!--node pkg="mur_control" type="mur_position_control.py" name="mur_position_control" output="screen"></node-->
+          <node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node>
+    </group>
+
+    <!-- Start the recording node  -->
+    <include file="$(find mur_control)/launch/record_demo.launch">
+      <arg name="record" value="$(arg record)"/>
+    </include>
+
+    <!-- Open RViz for visualization of sensor data and visualization markers -->
+    <!--node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find mur_control)/rviz/controller_demo.rviz"/-->
+
+
+    <!--
+    You can run this demo as
+
+    >> roslaunch uuv_tutorial_dp_controller start_tutorial_dp_controller_demo.launch
+
+    and you can then send some waypoints to the vehicle to see it working
+
+    >> roslaunch uuv_control_utils send_waypoints_file.launch uuv_name:=rexrov
+    -->
+</launch>

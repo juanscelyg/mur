@@ -5,6 +5,7 @@ import rospy
 import logging
 import sys
 import tf
+import message_filters
 from common import mur_common, mur_PID
 from dynamic_reconfigure.server import Server
 from mur_control.cfg import MurAltitudeControlConfig
@@ -13,6 +14,7 @@ from geometry_msgs.msg import WrenchStamped, PoseStamped, TwistStamped,Vector3, 
 from std_msgs.msg import Time
 from nav_msgs.msg import Odometry
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
+from sensor_msgs.msg import FluidPressure, Imu
 
 class MURAltitudeControlNode:
     def __init__(self):
@@ -22,6 +24,7 @@ class MURAltitudeControlNode:
         self.mur_weight = 8.5 * 9.81
 
         # State vectors
+        self.h_last = 0;
         self.nitad = np.zeros(shape=(6,1))
         self.error_pos = np.zeros(shape=(6,1))
         self.error_vel = np.zeros(shape=(6,1))
@@ -42,17 +45,24 @@ class MURAltitudeControlNode:
 
         # ROS infrastructure
         self.srv_reconfigure = Server(MurAltitudeControlConfig, self.config_callback)
-        self.sub_cmd_pose = rospy.Subscriber('/mur/pose_gt', Odometry, self.cmd_pose_callback)
+        self.sub_pose = message_filters.Subscriber('/mavros/local_position/pose', PoseStamped)
+        self.sub_imu = message_filters.Subscriber('/mavros/imu/data', Imu)
+        self.sub_pres = message_filters.Subscriber('/mavros/imu/pressure', FluidPressure)
+        self.ts = message_filters.TimeSynchronizer([self.sub_pose, self.sub_pres, self.sub_imu], 10)
+        self.ts.registerCallback(self.cmd_control_callback)
         self.pub_cmd_force = rospy.Publisher('/control/force', WrenchStamped, queue_size=10)
 
-    def cmd_pose_callback(self, msg):
+    def cmd_control_callback(self, msg_pose, msg_pres, msg_imu):
         if not bool(self.config):
             return
+        self.t = msg_pose.header.stamp.to_sec()
         # Get the position and velocities
-        self.pose_pos = np.array([msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z])
-        self.pose_rot = np.array([msg.pose.pose.orientation.x,msg.pose.pose.orientation.y,msg.pose.pose.orientation.z,msg.pose.pose.orientation.w])
-        self.twist_pos = np.array([msg.twist.twist.linear.x, msg.twist.twist.linear.y, msg.twist.twist.linear.z])
-        self.twist_rot = np.array([msg.twist.twist.angular.x, msg.twist.twist.angular.y, msg.twist.twist.angular.z])
+        h = mur_common.pressure_to_meters(msg_pres.fluid_pressure);
+        rospy.loginfo("H :=\n %s" %h)
+        self.pose_pos = np.array([0,0,h])
+        self.pose_rot = np.array([msg_pose.pose.orientation.x, msg_pose.pose.orientation.y, msg_pose.pose.orientation.z, msg_pose.pose.orientation.w])
+        self.twist_pos = np.array([0,0,(h-self.h_last)/self.t])
+        self.twist_rot = np.array([msg_imu.angular_velocity.x, msg_imu.angular_velocity.y, msg_imu.angular_velocity.z])
         # Convert to SNAME Position
         self.nita2_t = euler_from_quaternion(self.pose_rot)
         self.nita2 = np.array([self.nita2_t[0],self.nita2_t[1],self.nita2_t[2]])
@@ -64,7 +74,7 @@ class MURAltitudeControlNode:
         self.vita = np.array([self.twist_pos[0],self.twist_pos[1],self.twist_pos[2], self.twist_rot[0],self.twist_rot[1],self.twist_rot[2]]).reshape(self.vitad.shape)
         self.nita_p = np.matmul(self.J,self.vita)
         # Get position error
-        self.t = msg.header.stamp.to_sec()
+        self.h_last = h;
         self.get_errors()
         self.force_callback()
 

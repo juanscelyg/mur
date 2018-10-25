@@ -23,4 +23,9 @@
     <arg name="namespace" value="$(arg namespace)"/>
   </include>
 
+  <group ns="$(arg namespace)">
+    <node pkg="mur_description" type="mur_sim_to_into.py" name="mur_sim_to_into" output="screen"></node>
+    <node pkg="mur_description" type="mur_sim_to_out.py" name="mur_sim_to_out" output="screen"></node>
+  </group>
+
 </launch>

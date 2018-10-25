@@ -24,3 +24,23 @@ def rot2(ang):
     st = np.sin(ang);
     R=np.matrix([[ct,-st],[st,ct]])
     return R
+
+def push_to_pwm(push_value):
+    push_value = int(push_value);
+    if push_value > 0:
+        params=np.array([-0.11398604,14.048945,1538.7531]);
+    elif push_value < 0:
+        params=np.array([0.18721626,17.284769,1460.6878]);
+    else:
+        push_value = 0;
+        params=np.array([0,0,1500]);
+    pwm_value = (params[0]*push_value**2)+(params[1]*push_value)+params[2]
+    return pwm_value
+
+def pressure_to_meters(pressure):
+    gravity_value = 9.8;
+    water_density=1027.0;
+    pressure_init_value = 101325.0;
+    pressure_factor=10;
+    meters=((pressure-pressure_init_value)*pressure_factor)/(gravity_value*water_density);
+    return meters
