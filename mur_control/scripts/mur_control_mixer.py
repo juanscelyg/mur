@@ -78,7 +78,7 @@ class MURControlMixerNode():
                 rospy.logwarn("The motor %s is max saturated %s",i,force[i])
             else:
                 thrusters[i]=force[i]
-        return np.true_divide(thrusters, self.saturation)
+        return thrusters
 
     def cmd_force_callback(self, msg_pose, msg_pres, msg_force):
         # Get the position and velocities
@@ -94,8 +94,8 @@ class MURControlMixerNode():
         ### rospy.loginfo("Force :=\n %s" %tau)
         ### rospy.loginfo("Thrusters :=\n %s" %thrusters_forces)
         ### rospy.loginfo("Pos :=\n %s" %self.pose_pos)
-        ### self.thrusters = self.saturator_thruster(thrusters_forces)
-        self.thrusters = thrusters_forces
+        self.thrusters = self.saturator_thruster(thrusters_forces)
+        ### self.thrusters = thrusters_forces
         rospy.loginfo("Thrusters :=\n %s" %self.thrusters)
         self.set_force_thrusters()
 

@@ -12,7 +12,8 @@
       args="record -O $(arg bag_filename)
         /mur/pose_gt_ned
         /hydrodynamics/current_velocity
-        /control/Wrench
+        /control/force
+        /mavros/imu/pressure
         /mur/wrench_perturbation
         /mur/thrusters/0/input
         /mur/thrusters/1/input
@@ -32,8 +33,8 @@
         args="record -O $(arg bag_filename)
           /mur/pose_gt
           /hydrodynamics/current_velocity
-          /control/Wrench
-          /mur/wrench_perturbation
+          /control/force
+          /mavros/imu/pressure
           /mur/thrusters/0/input
           /mur/thrusters/1/input
           /mur/thrusters/2/input

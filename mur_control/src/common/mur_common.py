@@ -38,9 +38,7 @@ def push_to_pwm(push_value):
     return pwm_value
 
 def pressure_to_meters(pressure):
-    gravity_value = 9.8;
-    water_density=1027.0;
-    pressure_init_value = 101325.0;
-    pressure_factor=10;
-    meters=((pressure-pressure_init_value)*pressure_factor)/(gravity_value*water_density);
+    a=-0.101981;
+    b=10.339130;
+    meters=a*pressure+b;
     return meters

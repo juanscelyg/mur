@@ -114,12 +114,10 @@ class MURAltitudeControlNode:
         # Return the config value
         return config
 
-
 if __name__ == '__main__':
     rospy.init_node('mur_altitude_control')
     try:
         node = MURAltitudeControlNode()
-        rospy.Rate(5)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')
