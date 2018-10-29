@@ -96,7 +96,7 @@ class MURControlMixerNode():
         ### rospy.loginfo("Pos :=\n %s" %self.pose_pos)
         self.thrusters = self.saturator_thruster(thrusters_forces)
         ### self.thrusters = thrusters_forces
-        rospy.loginfo("Thrusters :=\n %s" %self.thrusters)
+        ### rospy.loginfo("Thrusters :=\n %s" %self.thrusters)
         self.set_force_thrusters()
 
 if __name__ == '__main__':

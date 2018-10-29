@@ -30,15 +30,15 @@ class MURAltitudeControlNode:
         self.error_vel = np.zeros(shape=(6,1))
 
         # Desire values
-        self.pos_z = -93
+        self.pos_z = -1
 
         # ROS param server
         self.config = {}
 
         # Control gains
-        self.p_z = 58.0
-        self.i_z = 25.0
-        self.d_z = 32.0
+        self.p_z = 38.0
+        self.i_z = 5.0
+        self.d_z = 12.0
 
         # PID Control
         self.pid_z = mur_PID.mur_PID(self.p_z, self.i_z, self.d_z, 120)
@@ -81,6 +81,7 @@ class MURAltitudeControlNode:
     def get_errors(self):
         # Create the errors
         self.error_pos = self.nitad - self.nita
+        ### rospy.loginfo("Error :=\n %s" %self.error_pos)
         vitad = np.empty_like(self.error_pos)
         for i in range(len(self.error_pos)):
             vitad[i]=self.error_pos[i]/self.dt_vel

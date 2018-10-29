@@ -3,13 +3,13 @@
     <arg name="record" default="true"/>
 
     <!-- Start the a underwater world simulation scenario -->
-    <include file="$(find uuv_descriptions)/launch/ocean_waves.launch"/>
+    <include file="$(find grmi_worlds)/launch/GRMI_pool_world.launch"/>
 
     <!-- Add the MUR vehicle to the simulation (namespace: mur) -->
     <include file="$(find mur_description)/launch/upload_mur.launch">
-        <arg name="x" default="5"/>
-        <arg name="y" default="-2"/>
-        <arg name="z" default="-94.5"/>
+        <arg name="x" default="0"/>
+        <arg name="y" default="0"/>
+        <arg name="z" default="0.2"/>
         <arg name="yaw" default="0"/>
         <arg name="mode" default="default"/>
         <arg name="namespace" default="mur"/>
