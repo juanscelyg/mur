@@ -6,23 +6,16 @@ import logging
 import sys
 import tf
 import message_filters
-from common import mur_common
-from dynamic_reconfigure.server import Server
-from mur_control.cfg import MurControlMixerConfig
 from mur_control.msg import FloatStamped
-from mavros_msgs.msg import OverrideRCIn
 from geometry_msgs.msg import WrenchStamped, PoseStamped
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import FluidPressure
 
-class MURControlMixerNode():
+class MURExtendedKalmanFilter():
     def __init__(self):
         # Init constants
-        self.num_thrusters = 4
-        self.angle = 0
-        self.x_bar = 0.197
-        self.y_bar = 0.18022
+        self.Q = np.diag([0.1,0.1,0.1,0.01,0.01,0.01])
 
         # Desire parameters
         self.saturation = 30.0
@@ -39,7 +32,6 @@ class MURControlMixerNode():
         self.config = {}
 
         # ROS infraestucture
-        self.srv_reconfigure = Server(MurControlMixerConfig, self.config_callback)
         self.pub_actuators = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=1)
         self.sub_pose = message_filters.Subscriber('/mavros/local_position/pose', PoseStamped)
         self.sub_pres = message_filters.Subscriber('/mavros/imu/pressure', FluidPressure)
@@ -47,12 +39,6 @@ class MURControlMixerNode():
         self.ts = message_filters.TimeSynchronizer([self.sub_pose, self.sub_pres, self.sub_force], 10)
         self.ts.registerCallback(self.cmd_force_callback)
 
-    def config_callback(self, config, level):
-        self.saturation = config['saturation']
-        # To refresh the config value
-        self.config = config
-        # Return the config value
-        return config
 
     def get_force_callback(self, msg):
         force = np.array([[msg.wrench.force.x], [msg.wrench.force.y], [msg.wrench.force.z], [msg.wrench.torque.x], [msg.wrench.torque.y], [msg.wrench.torque.z]])
@@ -97,9 +83,9 @@ class MURControlMixerNode():
         self.set_force_thrusters()
 
 if __name__ == '__main__':
-    rospy.init_node('mur_control_mixer')
+    rospy.init_node('mur_extended_kalman_filter')
     try:
-        node = MURControlMixerNode()
+        node = MURExtendedKalmanFilter()
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')
