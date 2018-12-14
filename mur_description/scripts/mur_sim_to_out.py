@@ -17,7 +17,7 @@ class MURSimToOutNode:
     def __init__(self):
         # ROS infrastructure
         self.pub_pose = rospy.Publisher('/mavros/local_position/pose', PoseStamped, queue_size=1)
-        self.pub_pres = rospy.Publisher('/mavros/imu/pressure', FluidPressure, queue_size=1)
+        self.pub_pres = rospy.Publisher('/mavros/imu/diff_pressure', FluidPressure, queue_size=1)
         self.pub_imu = rospy.Publisher('/mavros/imu/data', Imu, queue_size=1)
         self.sub_pose = message_filters.Subscriber('/mur/pose_gt', Odometry)
         self.sub_pres = message_filters.Subscriber('/mur/pressure', FluidPressure)

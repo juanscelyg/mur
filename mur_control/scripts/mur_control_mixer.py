@@ -42,7 +42,7 @@ class MURControlMixerNode():
         self.srv_reconfigure = Server(MurControlMixerConfig, self.config_callback)
         self.pub_actuators = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=1)
         self.sub_pose = message_filters.Subscriber('/mavros/local_position/pose', PoseStamped)
-        self.sub_pres = message_filters.Subscriber('/mavros/imu/pressure', FluidPressure)
+        self.sub_pres = message_filters.Subscriber('/mavros/imu/diff_pressure', FluidPressure)
         self.sub_force = message_filters.Subscriber('/control/force', WrenchStamped)
         self.ts = message_filters.TimeSynchronizer([self.sub_pose, self.sub_pres, self.sub_force], 10)
         self.ts.registerCallback(self.cmd_force_callback)

@@ -13,7 +13,11 @@
         /mur/pose_gt_ned
         /hydrodynamics/current_velocity
         /control/force
-        /mavros/imu/pressure
+        /mavros/imu/data
+        /mavros/imu/diff_pressure
+        /mur/ekf
+        /mur/Acc
+        /mur/imu
         /mur/wrench_perturbation
         /mur/thrusters/0/input
         /mur/thrusters/1/input
@@ -34,7 +38,11 @@
           /mur/pose_gt
           /hydrodynamics/current_velocity
           /control/force
-          /mavros/imu/pressure
+          /mavros/imu/data
+          /mavros/imu/diff_pressure
+          /mur/ekf
+          /mur/Acc
+          /mur/imu
           /mur/thrusters/0/input
           /mur/thrusters/1/input
           /mur/thrusters/2/input

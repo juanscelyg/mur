@@ -47,7 +47,7 @@ class MURAltitudeControlNode:
         self.srv_reconfigure = Server(MurAltitudeControlConfig, self.config_callback)
         self.sub_pose = message_filters.Subscriber('/mavros/local_position/pose', PoseStamped)
         self.sub_imu = message_filters.Subscriber('/mavros/imu/data', Imu)
-        self.sub_pres = message_filters.Subscriber('/mavros/imu/pressure', FluidPressure)
+        self.sub_pres = message_filters.Subscriber('/mavros/imu/diff_pressure', FluidPressure)
         self.ts = message_filters.TimeSynchronizer([self.sub_pose, self.sub_pres, self.sub_imu], 10)
         self.ts.registerCallback(self.cmd_control_callback)
         self.pub_cmd_force = rospy.Publisher('/control/force', WrenchStamped, queue_size=10)

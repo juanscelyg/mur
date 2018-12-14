@@ -10,7 +10,7 @@
         <arg name="x" default="0"/>
         <arg name="y" default="0"/>
         <arg name="z" default="0.2"/>
-        <arg name="yaw" default="0"/>
+        <arg name="yaw" default="-1.57"/>
         <arg name="mode" default="default"/>
         <arg name="namespace" default="mur"/>
     </include>
@@ -24,9 +24,10 @@
           <rosparam file="$(find mur_control)/config/mur_position_control.yaml" command="load"/>
           <rosparam file="$(find mur_control)/config/mur_control_mixer.yaml" command="load"/>
 
-          <node pkg="mur_control" type="mur_altitude_control.py" name="mur_altitude_control" output="screen"></node>
+          <!--node pkg="mur_control" type="mur_altitude_control.py" name="mur_altitude_control" output="screen"></node-->
           <!--node pkg="mur_control" type="mur_attitude_control.py" name="mur_attitude_control" output="screen"></node-->
           <!--node pkg="mur_control" type="mur_position_control.py" name="mur_position_control" output="screen"></node-->
+          <node pkg="mur_control" type="mur_ekf.py" name="mur_ekf" output="screen"></node>
           <node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node>
     </group>
 
