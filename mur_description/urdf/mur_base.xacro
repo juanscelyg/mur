@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
     <!-- Import macro files -->
-    <xacro:include filename="$(find uuv_descriptions)/models/common/urdf/common.urdf.xacro" />
+    <xacro:include filename="$(find uuv_descriptions)/urdf/common.urdf.xacro" />
     <xacro:include filename="$(find uuv_sensor_ros_plugins)/urdf/sensor_snippets.xacro"/>
     <xacro:include filename="$(find uuv_gazebo_ros_plugins)/urdf/snippets.xacro"/>
     <!--xacro:include filename="$(find mur_description)/urdf/mur_snippets.xacro"/-->
@@ -12,7 +12,7 @@
     <xacro:property name="rho" value="1027.0"/>
 
     <xacro:property name="visual_mesh_file" value="file://$(find mur_description)/mesh/mur.dae"/>
-    <xacro:property name="collision_mesh_file" value="file://$(find mur_description)/mesh/mur.stl"/>
+    <xacro:property name="collision_mesh_file" value="file://$(find mur_description)/mesh/mur.dae"/>
     <xacro:property name="prop_mesh_file" value="file://$(find mur_description)/mesh/mur_prop.dae"/>
 
     <xacro:macro name="mur_base" params="namespace debug">

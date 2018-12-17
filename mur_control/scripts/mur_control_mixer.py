@@ -14,7 +14,7 @@ from mavros_msgs.msg import OverrideRCIn
 from geometry_msgs.msg import WrenchStamped, PoseStamped
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from nav_msgs.msg import Odometry
-from sensor_msgs.msg import FluidPressure
+from sensor_msgs.msg import FluidPressure, Imu
 
 class MURControlMixerNode():
     def __init__(self):
@@ -41,10 +41,10 @@ class MURControlMixerNode():
         # ROS infraestucture
         self.srv_reconfigure = Server(MurControlMixerConfig, self.config_callback)
         self.pub_actuators = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=1)
-        self.sub_pose = message_filters.Subscriber('/mavros/local_position/pose', PoseStamped)
+        self.sub_imu = message_filters.Subscriber('/mavros/imu/data', Imu)
         self.sub_pres = message_filters.Subscriber('/mavros/imu/diff_pressure', FluidPressure)
         self.sub_force = message_filters.Subscriber('/control/force', WrenchStamped)
-        self.ts = message_filters.TimeSynchronizer([self.sub_pose, self.sub_pres, self.sub_force], 10)
+        self.ts = message_filters.TimeSynchronizer([self.sub_imu, self.sub_pres, self.sub_force], 10)
         self.ts.registerCallback(self.cmd_force_callback)
 
     def config_callback(self, config, level):
@@ -82,7 +82,7 @@ class MURControlMixerNode():
 
     def cmd_force_callback(self, msg_pose, msg_pres, msg_force):
         # Get the position and velocities
-        self.pose_rot = np.array([msg_pose.pose.orientation.x, msg_pose.pose.orientation.y, msg_pose.pose.orientation.z, msg_pose.pose.orientation.w])
+        self.pose_rot = np.array([msg_pose.orientation.x, msg_pose.orientation.y, msg_pose.orientation.z, msg_pose.orientation.w])
         #rospy.loginfo("Pos := \n %s" %self.pose_pos)
         self.J = mur_common.convert_body_world(self.pose_rot)
         self.force_attitude = self.get_force_callback(msg_force)
@@ -100,6 +100,7 @@ if __name__ == '__main__':
     rospy.init_node('mur_control_mixer')
     try:
         node = MURControlMixerNode()
+        rate = rospy.Rate(25)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')

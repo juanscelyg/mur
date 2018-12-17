@@ -45,22 +45,21 @@ class MURAltitudeControlNode:
 
         # ROS infrastructure
         self.srv_reconfigure = Server(MurAltitudeControlConfig, self.config_callback)
-        self.sub_pose = message_filters.Subscriber('/mavros/local_position/pose', PoseStamped)
         self.sub_imu = message_filters.Subscriber('/mavros/imu/data', Imu)
         self.sub_pres = message_filters.Subscriber('/mavros/imu/diff_pressure', FluidPressure)
-        self.ts = message_filters.TimeSynchronizer([self.sub_pose, self.sub_pres, self.sub_imu], 10)
+        self.ts = message_filters.TimeSynchronizer([self.sub_pres, self.sub_imu], 10)
         self.ts.registerCallback(self.cmd_control_callback)
         self.pub_cmd_force = rospy.Publisher('/control/force', WrenchStamped, queue_size=10)
 
-    def cmd_control_callback(self, msg_pose, msg_pres, msg_imu):
+    def cmd_control_callback(self, msg_pres, msg_imu):
         if not bool(self.config):
             return
-        self.t = msg_pose.header.stamp.to_sec()
+        self.t = msg_pres.header.stamp.to_sec()
         # Get the position and velocities
         h = mur_common.pressure_to_meters(msg_pres.fluid_pressure);
         rospy.loginfo("H :=\n %s" %h)
         self.pose_pos = np.array([0,0,h])
-        self.pose_rot = np.array([msg_pose.pose.orientation.x, msg_pose.pose.orientation.y, msg_pose.pose.orientation.z, msg_pose.pose.orientation.w])
+        self.pose_rot = np.array([msg_imu.orientation.x, msg_imu.orientation.y, msg_imu.orientation.z, msg_imu.orientation.w])
         self.twist_pos = np.array([0,0,(h-self.h_last)/self.t])
         self.twist_rot = np.array([msg_imu.angular_velocity.x, msg_imu.angular_velocity.y, msg_imu.angular_velocity.z])
         # Convert to SNAME Position

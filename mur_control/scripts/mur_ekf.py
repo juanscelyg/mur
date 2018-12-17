@@ -94,56 +94,64 @@ class MURExtendedKalmanFilter():
         R = np.zeros(shape=(num_meas, num_meas))
         # Fill the matrixes
         for num_meas_index in range(num_meas):
-            # Acc
+            # Angles
             if num_meas_index == 0:
+                H[num_meas_index,3] = 1.0
+                zPred[num_meas_index,0] = XPred[3,0]
+                R[num_meas_index,num_meas_index] = self.cov_ang
+            if num_meas_index == 1:
+                H[num_meas_index,4] = 1.0
+                zPred[num_meas_index,0] = XPred[4,0]
+                R[num_meas_index,num_meas_index] = self.cov_ang
+            if num_meas_index == 2:
+                H[num_meas_index,5] = 1.0
+                zPred[num_meas_index,0] = XPred[5,0]
+                R[num_meas_index,num_meas_index] = self.cov_ang
+            # Acc
+            if num_meas_index == 3:
                 H[num_meas_index,12] = 1.0
                 zPred[num_meas_index,0] = XPred[12,0]
                 R[num_meas_index,num_meas_index] = self.cov_acc
-            if num_meas_index == 1:
+            if num_meas_index == 4:
                 H[num_meas_index,13] = 1.0
                 zPred[num_meas_index,0] = XPred[13,0]
                 R[num_meas_index,num_meas_index] = self.cov_acc
-            if num_meas_index == 2:
+            if num_meas_index == 5:
                 H[num_meas_index,14] = 1.0
                 zPred[num_meas_index,0] = XPred[14,0]
                 R[num_meas_index,num_meas_index] = self.cov_acc
             # Ang Vel
-            if num_meas_index == 3:
+            if num_meas_index == 6:
                 H[num_meas_index,9] = 1.0
                 zPred[num_meas_index,0] = XPred[9,0]
                 R[num_meas_index,num_meas_index] = self.cov_ang
-            if num_meas_index == 4:
+            if num_meas_index == 7:
                 H[num_meas_index,10] = 1.0
                 zPred[num_meas_index,0] = XPred[10,0]
                 R[num_meas_index,num_meas_index] = self.cov_ang
-            if num_meas_index == 5:
+            if num_meas_index == 8:
                 H[num_meas_index,11] = 1.0
                 zPred[num_meas_index,0] = XPred[11,0]
                 R[num_meas_index,num_meas_index] = self.cov_ang
-            # Yaw
-            if num_meas_index == 6:
-                H[num_meas_index,5] = 1.0
-                zPred[num_meas_index,0] = XPred[5,0]
-                R[num_meas_index,num_meas_index] = self.cov_mag
             # Barometer
-            if num_meas_index == 7:
+            if num_meas_index == 9:
                 H[num_meas_index,2] = 1.0
-                zPred[num_meas_index,0] = XPred[3,0] + 0.38
+                zPred[num_meas_index,0] = XPred[3,0]
                 R[num_meas_index,num_meas_index] = self.cov_bar
             # Camera
-            if num_meas_index == 8:
+            if num_meas_index == 10:
                 H[num_meas_index,0] = 1.0
                 zPred[num_meas_index,0] = XPred[0,0]
                 R[num_meas_index,num_meas_index] = self.cov_img
-            if num_meas_index == 9:
+            if num_meas_index == 11:
                 H[num_meas_index,1] = 1.0
                 zPred[num_meas_index,0] = XPred[1,0]
                 R[num_meas_index,num_meas_index] = self.cov_img
-            if num_meas_index == 10:
+            if num_meas_index == 12:
                 H[num_meas_index,2] = 1.0
                 zPred[num_meas_index,0] = XPred[2,0]
                 R[num_meas_index,num_meas_index] = self.cov_img
-            if num_meas_index == 11:
+            if num_meas_index == 13:
                 H[num_meas_index,5] = 1.0
                 zPred[num_meas_index,0] = XPred[5,0]
                 R[num_meas_index,num_meas_index] = self.cov_img
@@ -164,35 +172,39 @@ class MURExtendedKalmanFilter():
         RB_I = np.array([[1-2*((e2**2)+(e3**2)), 2*(e1*e2+e3*n), 2*(e1*e3+e2*n)],[2*(e1*e2-e3*n), 1-2*((e1**2)+(e3**2)),2*(e2*e3+e1*n)],[2*(e1*e3+e2*n),2*(e2*e3+e1*n), 1-2*((e1**2)+(e2**2))]])
         g_v = np.array([[0],[0],[g]])
         GB_I = np.matmul(RB_I,g_v)
+        #corr_bias = np.array([[0.994929],[0.997965],[0.967455]])
+        corr_bias = np.array([[1],[1],[1]])
+        GB_I[0,0] = GB_I[0,0] * corr_bias[0,0] + 0.26
+        GB_I[1,0] = GB_I[1,0] * corr_bias[1,0] - 0.09
+        GB_I[2,0] = GB_I[2,0] * corr_bias[2,0] - 0.0215
         return GB_I
 
 
-    def cmd_ekf_callback(self, msg_pose, msg_pres):
+    def cmd_ekf_callback(self, msg_imu, msg_pres):
         # Time refresh
         now = rospy.Time.now()
         time_now = now.secs + now.nsecs/1E9
         self.dT = time_now - self.last_time
         # Set rotation
-        e1 = msg_pose.orientation.x
-        e2 = msg_pose.orientation.y
-        e3 = msg_pose.orientation.z
-        n  = msg_pose.orientation.w
+        e1 = msg_imu.orientation.y
+        e2 = msg_imu.orientation.x
+        e3 = -msg_imu.orientation.z
+        n  = msg_imu.orientation.w
         quaternion = (e1,e2,e3,n)
         GB_I = self.get_gravity_vector(self.GRAVITY_VALUE,e1,e2,e3,n)
-        rospy.loginfo("GB_I :=\n %s",GB_I)
         # Measurement vector
-        num_meas = 8;
+        # z = [phi,theta,yaw,accx,accy,accz,ang_x,ang_y,ang_z,Z]
+        num_meas = 10;
         z = np.zeros(shape=(num_meas,1))
-        z[0,0] = msg_pose.linear_acceleration.y - GB_I[0,0]
-        z[1,0] = msg_pose.linear_acceleration.x - GB_I[1,0]
-        z[2,0] = -msg_pose.linear_acceleration.z - GB_I[2,0]
-        z[3,0] = msg_pose.angular_velocity.x
-        z[4,0] = msg_pose.angular_velocity.y
-        z[5,0] = msg_pose.angular_velocity.z
-        _,_,z[6,0] = euler_from_quaternion(quaternion) # yaw magnetometer
-        z[7,0] = mur_common.pressure_to_meters(msg_pres.fluid_pressure) # barometer
+        z[0,0],z[1,0],z[2,0] = euler_from_quaternion(quaternion) # yaw magnetometer
+        z[3,0] = msg_imu.linear_acceleration.y - GB_I[0,0]
+        z[4,0] = -msg_imu.linear_acceleration.x - GB_I[1,0]
+        z[5,0] = -msg_imu.linear_acceleration.z - GB_I[2,0]
+        z[6,0] = msg_imu.angular_velocity.y
+        z[7,0] = msg_imu.angular_velocity.x
+        z[8,0] = -msg_imu.angular_velocity.z
+        z[9,0] = mur_common.pressure_to_meters(msg_pres.fluid_pressure) # barometer
         rospy.loginfo("z :=\n %s",z)
-
         # EKF
         self.ekf_estimation(self.X, self.P, z)
         # Publish
@@ -217,9 +229,9 @@ class MURExtendedKalmanFilter():
         acce_msg = AccelStamped()
         acce_msg.header.stamp = rospy.Time.now()
         acce_msg.header.frame_id = 'mur/ekf'
-        acce_msg.accel.linear.x = z[0,0]
-        acce_msg.accel.linear.y = z[1,0]
-        acce_msg.accel.linear.z = z[2,0]
+        acce_msg.accel.linear.x = z[3,0]
+        acce_msg.accel.linear.y = z[4,0]
+        acce_msg.accel.linear.z = z[5,0]
         self.pub_acce.publish(acce_msg)
         rospy.loginfo("X :=\n %s",self.X)
         # Next iteration
@@ -229,6 +241,7 @@ if __name__ == '__main__':
     rospy.init_node('mur_extended_kalman_filter')
     try:
         node = MURExtendedKalmanFilter()
+        rate = rospy.Rate(50)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')

@@ -70,6 +70,7 @@ if __name__ == '__main__':
     rospy.init_node('mur_sim_to_into_node')
     try:
         node = MURSimToIntoNode()
+        rate = rospy.Rate(50)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')

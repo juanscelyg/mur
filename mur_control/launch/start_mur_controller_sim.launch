@@ -3,10 +3,21 @@
     <arg name="record" default="true"/>
 
     <!-- Start the a underwater world simulation scenario -->
-    <include file="$(find grmi_worlds)/launch/GRMI_pool_world.launch"/>
+    <!--include file="$(find grmi_worlds)/launch/GRMI_pool_world.launch"/-->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
 
     <!-- Add the MUR vehicle to the simulation (namespace: mur) -->
     <include file="$(find mur_description)/launch/upload_mur.launch">
+        <arg name="x" default="0"/>
+        <arg name="y" default="0"/>
+        <arg name="z" default="0.2"/>
+        <arg name="yaw" default="-1.57"/>
+        <arg name="mode" default="default"/>
+        <arg name="namespace" default="mur"/>
+    </include>
+
+    <!-- Start robot localization -->
+    <include file="$(find robot_localization)/launch/ekf_template.launch">
         <arg name="x" default="0"/>
         <arg name="y" default="0"/>
         <arg name="z" default="0.2"/>
@@ -27,8 +38,8 @@
           <!--node pkg="mur_control" type="mur_altitude_control.py" name="mur_altitude_control" output="screen"></node-->
           <!--node pkg="mur_control" type="mur_attitude_control.py" name="mur_attitude_control" output="screen"></node-->
           <!--node pkg="mur_control" type="mur_position_control.py" name="mur_position_control" output="screen"></node-->
-          <node pkg="mur_control" type="mur_ekf.py" name="mur_ekf" output="screen"></node>
-          <node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node>
+          <!--node pkg="mur_control" type="mur_ekf.py" name="mur_ekf" output="screen"></node-->
+          <!--node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node-->
     </group>
 
     <!-- Start the recording node  -->
