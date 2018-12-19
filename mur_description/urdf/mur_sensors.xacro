@@ -32,7 +32,7 @@
         stddev="0.02"
         scale="0.5">
         <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
-        <origin xyz="0.05 0.160 0" rpy="0 0 ${pi/2}"/>
+        <origin xyz="0.160 0.05 0" rpy="0 0 0"/>
     </xacro:regular_camera_plugin_macro>
 
     <!-- Mount a GPS.

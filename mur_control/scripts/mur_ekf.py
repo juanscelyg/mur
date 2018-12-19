@@ -18,10 +18,13 @@ class MURExtendedKalmanFilter():
         # Init constants
         self.GRAVITY_VALUE = -9.81
         self.DIM_STATE = 15
-        self.cov_acc = 0.06
+        self.cov_pos = 0.05
+        self.cov_vel = 0.025
+        self.cov_acc = 0.0006
+        self.cov_ori = 0.006108
         self.cov_ang = 0.0027
-        self.cov_mag = 0.05
-        self.cov_bar = 0.01
+        self.cov_mag = 0.06108
+        self.cov_bar = 0.002
         self.cov_img = 0.01
 
         # EKF infraestructure
@@ -29,13 +32,14 @@ class MURExtendedKalmanFilter():
         self.P = np.zeros(shape=(self.DIM_STATE,self.DIM_STATE))
         self.Q = np.zeros(shape=(self.DIM_STATE,self.DIM_STATE))
         self.F = np.eye(self.DIM_STATE)
-        self.set_QMatrix()
+        #self.set_QMatrix()
+        self.set_PMatrix()
 
         # Variables
         self.pose = np.zeros(shape=(6,1))
         self.twist = np.zeros(shape=(6,1))
         self.acc = np.zeros(shape=(3,1))
-        self.dT = 0.01 # Variable
+        self.dT = 0.1 # Variable
         self.last_time = 0.0 #init
 
         # ROS infraestucture
@@ -63,6 +67,23 @@ class MURExtendedKalmanFilter():
         self.Q[13,13] = 0.01 # ddy
         self.Q[14,14] = 0.015  # ddz
 
+    def set_PMatrix(self):
+        self.P[0,0] = 1.0  # x
+        self.P[1,1] = 1.0  # y
+        self.P[2,2] = 1.0  # z
+        self.P[3,3] = 1.0  # phi
+        self.P[4,4] = 1.0  # theta
+        self.P[5,5] = 1.0  # gamma
+        self.P[6,6] = 1.0  # dx
+        self.P[7,7] = 1.0  # dy
+        self.P[8,8] = 1.0 # dz
+        self.P[9,9] =  1.0 # dphi
+        self.P[10,10] = 1.0 # dtheta
+        self.P[11,11] = 1.0  # dgamma
+        self.P[12,12] = 1.0  # ddx
+        self.P[13,13] = 1.0 # ddy
+        self.P[14,14] = 1.0  # ddz
+
     def get_FMatrix(self):
         self.F[0,6] = self.dT
         self.F[1,7] = self.dT
@@ -79,10 +100,12 @@ class MURExtendedKalmanFilter():
 
     def ekf_estimation(self, XEst, PEst, z):
         ### Predict
-        self.get_FMatrix()
-        XPred = np.matmul(self.F, XEst)
+        #self.get_FMatrix()
+        #XPred = np.matmul(self.F, XEst)
         # F = dF/dX
-        PPred = self.F * PEst * np.transpose(self.F) + self.Q
+        #PPred = self.F * PEst * np.transpose(self.F) + self.Q
+        XPred = XEst;
+        PPred = PEst;
         ### Update or Correction
         # Full dimensions
         #--- Provisional ---
@@ -98,15 +121,15 @@ class MURExtendedKalmanFilter():
             if num_meas_index == 0:
                 H[num_meas_index,3] = 1.0
                 zPred[num_meas_index,0] = XPred[3,0]
-                R[num_meas_index,num_meas_index] = self.cov_ang
+                R[num_meas_index,num_meas_index] = self.cov_ori
             if num_meas_index == 1:
                 H[num_meas_index,4] = 1.0
                 zPred[num_meas_index,0] = XPred[4,0]
-                R[num_meas_index,num_meas_index] = self.cov_ang
+                R[num_meas_index,num_meas_index] = self.cov_ori
             if num_meas_index == 2:
                 H[num_meas_index,5] = 1.0
                 zPred[num_meas_index,0] = XPred[5,0]
-                R[num_meas_index,num_meas_index] = self.cov_ang
+                R[num_meas_index,num_meas_index] = self.cov_ori
             # Acc
             if num_meas_index == 3:
                 H[num_meas_index,12] = 1.0
@@ -161,6 +184,7 @@ class MURExtendedKalmanFilter():
         # Innovation covariance
         S1 = np.matmul(H, PPred)
         S = np.matmul(S1, np.transpose(H)) + R
+        rospy.loginfo("P :=\n %s",PPred)
         # Filter gain
         K1 = np.matmul(PPred, np.transpose(H))
         K = np.matmul(K1, np.linalg.inv(S))
@@ -172,11 +196,6 @@ class MURExtendedKalmanFilter():
         RB_I = np.array([[1-2*((e2**2)+(e3**2)), 2*(e1*e2+e3*n), 2*(e1*e3+e2*n)],[2*(e1*e2-e3*n), 1-2*((e1**2)+(e3**2)),2*(e2*e3+e1*n)],[2*(e1*e3+e2*n),2*(e2*e3+e1*n), 1-2*((e1**2)+(e2**2))]])
         g_v = np.array([[0],[0],[g]])
         GB_I = np.matmul(RB_I,g_v)
-        #corr_bias = np.array([[0.994929],[0.997965],[0.967455]])
-        corr_bias = np.array([[1],[1],[1]])
-        GB_I[0,0] = GB_I[0,0] * corr_bias[0,0] + 0.26
-        GB_I[1,0] = GB_I[1,0] * corr_bias[1,0] - 0.09
-        GB_I[2,0] = GB_I[2,0] * corr_bias[2,0] - 0.0215
         return GB_I
 
 
@@ -204,7 +223,7 @@ class MURExtendedKalmanFilter():
         z[7,0] = msg_imu.angular_velocity.x
         z[8,0] = -msg_imu.angular_velocity.z
         z[9,0] = mur_common.pressure_to_meters(msg_pres.fluid_pressure) # barometer
-        rospy.loginfo("z :=\n %s",z)
+        #rospy.loginfo("z :=\n %s",z)
         # EKF
         self.ekf_estimation(self.X, self.P, z)
         # Publish
@@ -233,7 +252,7 @@ class MURExtendedKalmanFilter():
         acce_msg.accel.linear.y = z[4,0]
         acce_msg.accel.linear.z = z[5,0]
         self.pub_acce.publish(acce_msg)
-        rospy.loginfo("X :=\n %s",self.X)
+        #rospy.loginfo("X :=\n %s",self.X)
         # Next iteration
         self.last_time = time_now
 

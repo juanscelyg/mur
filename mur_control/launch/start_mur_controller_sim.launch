@@ -3,28 +3,21 @@
     <arg name="record" default="true"/>
 
     <!-- Start the a underwater world simulation scenario -->
-    <!--include file="$(find grmi_worlds)/launch/GRMI_pool_world.launch"/-->
-    <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
+    <include file="$(find grmi_worlds)/launch/GRMI_pool_world.launch"/>
+    <!--include file="$(find grmi_worlds)/launch/GRMI_empty_world_ekf.launch"/-->
 
     <!-- Add the MUR vehicle to the simulation (namespace: mur) -->
     <include file="$(find mur_description)/launch/upload_mur.launch">
         <arg name="x" default="0"/>
         <arg name="y" default="0"/>
         <arg name="z" default="0.2"/>
-        <arg name="yaw" default="-1.57"/>
+        <arg name="yaw" default="0"/>
         <arg name="mode" default="default"/>
         <arg name="namespace" default="mur"/>
     </include>
 
     <!-- Start robot localization -->
-    <include file="$(find robot_localization)/launch/ekf_template.launch">
-        <arg name="x" default="0"/>
-        <arg name="y" default="0"/>
-        <arg name="z" default="0.2"/>
-        <arg name="yaw" default="-1.57"/>
-        <arg name="mode" default="default"/>
-        <arg name="namespace" default="mur"/>
-    </include>
+    <!--include file="$(find mur_control)/launch/start_ekf_node.launch"></include-->
 
     <!-- Start the controller-->
     <arg name="uuv_name" value="mur"/>
@@ -48,7 +41,7 @@
     </include>
 
     <!-- Open RViz for visualization of sensor data and visualization markers -->
-    <!--node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find mur_control)/rviz/controller_demo.rviz"/-->
+    <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find mur_control)/rviz/controller_demo.rviz"/>
 
 
     <!--
