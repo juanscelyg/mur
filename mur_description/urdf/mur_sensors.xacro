@@ -24,15 +24,15 @@
         suffix=""
         parent_link="${namespace}/base_link"
         topic="camera"
-        mass="0.015"
+        mass="0.1"
         update_rate="30"
-        hfov="1.8125"
+        hfov="1.5125"
         width="768"
         height="492"
         stddev="0.02"
-        scale="0.5">
+        scale="1.0">
         <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
-        <origin xyz="0.160 0.05 0" rpy="0 0 0"/>
+        <origin xyz="0.055 0.160 0" rpy="0 0 ${0.5*pi}"/>
     </xacro:regular_camera_plugin_macro>
 
     <!-- Mount a GPS.

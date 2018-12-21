@@ -29,19 +29,19 @@
     </xacro:macro>
 
     <xacro:thruster_macro namespace="${namespace}" thruster_id="0">
-        <origin xyz="0.18022 0.197 0.074" rpy="0 ${-pi/2} 0" />
+        <origin xyz="0.197 0.18022 0.074" rpy="0 ${-pi/2} 0" />
     </xacro:thruster_macro>
 
     <xacro:thruster_macro namespace="${namespace}" thruster_id="1">
-        <origin xyz="0.18022 -0.197 0.074" rpy="0 ${-pi/2} 0" />
+        <origin xyz="-0.197 0.18022 0.074" rpy="0 ${-pi/2} 0" />
     </xacro:thruster_macro>
 
     <xacro:thruster_macro namespace="${namespace}" thruster_id="2">
-        <origin xyz="-0.18022 -0.197 0.074" rpy="0 ${-pi/2} 0" />
+        <origin xyz="-0.197 -0.18022 0.074" rpy="0 ${-pi/2} 0" />
     </xacro:thruster_macro>
 
     <xacro:thruster_macro namespace="${namespace}" thruster_id="3">
-        <origin xyz="-0.18022 0.197 0.074" rpy="0 ${-pi/2} 0" />
+        <origin xyz="0.197 -0.18022 0.074" rpy="0 ${-pi/2} 0" />
     </xacro:thruster_macro>
 
 </robot>
