@@ -16,7 +16,6 @@
         /mavros/imu/data
         /mavros/imu/diff_pressure
         /mur/ekf
-        /mur/Acc
         /mur/imu
         /mur/wrench_perturbation
         /mur/thrusters/0/input
@@ -41,7 +40,6 @@
           /mavros/imu/data
           /mavros/imu/diff_pressure
           /mur/ekf
-          /mur/Acc
           /mur/imu
           /mur/thrusters/0/input
           /mur/thrusters/1/input

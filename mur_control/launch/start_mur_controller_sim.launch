@@ -8,7 +8,7 @@
 
     <!-- Add the MUR vehicle to the simulation (namespace: mur) -->
     <include file="$(find mur_description)/launch/upload_mur.launch">
-        <arg name="x" default="-1.5"/>
+        <arg name="x" default="-1.1"/>
         <arg name="y" default="0.0"/>
         <arg name="z" default="0.2"/>
         <arg name="yaw" default="-1.57"/>
@@ -23,16 +23,13 @@
     <arg name="uuv_name" value="mur"/>
     <arg name="model_name" value="mur"/>
     <group ns="$(arg uuv_name)">
-          <rosparam file="$(find mur_control)/config/mur_altitude_control.yaml" command="load"/>
-          <rosparam file="$(find mur_control)/config/mur_attitude_control.yaml" command="load"/>
-          <rosparam file="$(find mur_control)/config/mur_position_control.yaml" command="load"/>
-          <rosparam file="$(find mur_control)/config/mur_control_mixer.yaml" command="load"/>
-
           <!--node pkg="mur_control" type="mur_altitude_control.py" name="mur_altitude_control" output="screen"></node-->
           <!--node pkg="mur_control" type="mur_attitude_control.py" name="mur_attitude_control" output="screen"></node-->
           <!--node pkg="mur_control" type="mur_position_control.py" name="mur_position_control" output="screen"></node-->
           <!--node pkg="mur_control" type="mur_ekf.py" name="mur_ekf" output="screen"></node-->
-          <node pkg="mur_control" type="mur_aruco_detector.py" name="mur_aruco_detector" output="screen"></node>
+            <node pkg="mur_control" type="mur_aruco_detector.py" name="mur_aruco_detector" output="screen">
+                <rosparam command="load" file="$(find mur_control)/config/head_camera.yaml" />
+            </node>
           <node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node>
     </group>
 
@@ -42,7 +39,7 @@
     </include>
 
     <!-- Open RViz for visualization of sensor data and visualization markers -->
-    <!--node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find mur_control)/rviz/controller_demo.rviz"/-->
+    <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find mur_control)/rviz/controller_demo.rviz"/>
 
 
     <!--

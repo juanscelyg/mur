@@ -1,25 +1,40 @@
 <launch>
     <!-- If you want to generate a ROS bag with the recorded simulated data, set this flag to true -->
-    <arg name="record" default="true"/>
+    <arg name="record" default="false"/>
 
     <!-- Start the a underwater world simulation scenario -->
-    <include file="$(find uuv_gazebo_worlds)/launch/ocean_waves.launch"/>
+    <!--include file="$(find grmi_worlds)/launch/GRMI_pool_world.launch"/-->
+    <include file="$(find grmi_worlds)/launch/GRMI_empty_world_ekf.launch"/>
 
     <!-- Add the MUR vehicle to the simulation (namespace: mur) -->
     <include file="$(find mur_description)/launch/upload_mur.launch">
-        <arg name="x" default="5"/>
-        <arg name="y" default="-2"/>
-        <arg name="z" default="-94.5"/>
-        <arg name="yaw" default="0"/>
+        <arg name="x" default="0.1"/>
+        <arg name="y" default="0.0"/>
+        <arg name="z" default="0.2"/>
+        <arg name="yaw" default="-1.57"/>
         <arg name="mode" default="default"/>
         <arg name="namespace" default="mur"/>
     </include>
 
+    <!-- Start robot localization -->
+    <!--include file="$(find mur_control)/launch/start_ekf_node.launch"></include-->
+
     <!-- Start the controller-->
-    <include file="$(find mur_control)/launch/start_mur_controller.launch">
-        <arg name="uuv_name" value="mur"/>
-        <arg name="model_name" value="mur"/>
-    </include>
+    <arg name="uuv_name" value="mur"/>
+    <arg name="model_name" value="mur"/>
+    <group ns="$(arg uuv_name)">
+          <rosparam file="$(find mur_control)/config/mur_altitude_control.yaml" command="load"/>
+          <rosparam file="$(find mur_control)/config/mur_attitude_control.yaml" command="load"/>
+          <rosparam file="$(find mur_control)/config/mur_position_control.yaml" command="load"/>
+          <rosparam file="$(find mur_control)/config/mur_control_mixer.yaml" command="load"/>
+
+          <!--node pkg="mur_control" type="mur_altitude_control.py" name="mur_altitude_control" output="screen"></node-->
+          <!--node pkg="mur_control" type="mur_attitude_control.py" name="mur_attitude_control" output="screen"></node-->
+          <!--node pkg="mur_control" type="mur_position_control.py" name="mur_position_control" output="screen"></node-->
+          <!--node pkg="mur_control" type="mur_ekf.py" name="mur_ekf" output="screen"></node-->
+          <!--node pkg="mur_control" type="mur_aruco_detector.py" name="mur_aruco_detector" output="screen"></node-->
+          <!--node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node-->
+    </group>
 
     <!-- Start the recording node  -->
     <include file="$(find mur_control)/launch/record_demo.launch">

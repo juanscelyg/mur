@@ -6,12 +6,13 @@ import logging
 import sys
 import tf
 import message_filters
-from mur_control.msg import FloatStamped
+from mur_control.msg import FloatStamped, BoolStamped
 from common import mur_common
 from geometry_msgs.msg import WrenchStamped, PoseStamped, AccelStamped
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import FluidPressure, Imu
+from std_msgs.msg import Bool
 
 class MURExtendedKalmanFilter():
     def __init__(self):
@@ -32,8 +33,11 @@ class MURExtendedKalmanFilter():
         self.P = np.zeros(shape=(self.DIM_STATE,self.DIM_STATE))
         self.Q = np.zeros(shape=(self.DIM_STATE,self.DIM_STATE))
         self.F = np.eye(self.DIM_STATE)
-        #self.set_QMatrix()
+        self.set_QMatrix()
         self.set_PMatrix()
+        self.pres_flag = False
+        self.pose_flag = False
+        self.flag_flag = False
 
         # Variables
         self.pose = np.zeros(shape=(6,1))
@@ -45,10 +49,29 @@ class MURExtendedKalmanFilter():
         # ROS infraestucture
         self.pub_pose = rospy.Publisher('/mur/ekf', Odometry, queue_size=1)
         self.pub_acce = rospy.Publisher('/mur/Acc', AccelStamped, queue_size=1)
-        self.sub_imu = message_filters.Subscriber('/mavros/imu/data', Imu)
-        self.sub_pres = message_filters.Subscriber('/mavros/imu/diff_pressure', FluidPressure)
-        self.tsync = message_filters.TimeSynchronizer([self.sub_imu, self.sub_pres], 10)
-        self.tsync.registerCallback(self.cmd_ekf_callback)
+        self.sub_imu = rospy.Subscriber('/mavros/imu/data', Imu, self.call_imu)
+        self.sub_pres = rospy.Subscriber('/mavros/imu/diff_pressure', FluidPressure, self.call_pres)
+        self.sub_pose = rospy.Subscriber('/mur/aruco_pose', PoseStamped, self.call_pose)
+        self.sub_flag = rospy.Subscriber('/mur/aruco_flag', BoolStamped, self.call_flag)
+
+    def call_imu(self, msg_imu):
+        self.msg_imu = msg_imu
+        if self.pres_flag and self.pose_flag and self.flag_flag:
+            self.cmd_ekf_callback(self.msg_imu, self.msg_pres, self.msg_pose, self.msg_flag)
+        else:
+            rospy.loginfo("Unsycronized")
+
+    def call_pres(self, msg_pres):
+        self.pres_flag = True
+        self.msg_pres = msg_pres
+
+    def call_pose(self, msg_pose):
+        self.pose_flag = True
+        self.msg_pose = msg_pose
+
+    def call_flag(self, msg_flag):
+        self.flag_flag = True
+        self.msg_flag = msg_flag
 
     def set_QMatrix(self):
         self.Q[0,0] = 0.05  # x
@@ -68,21 +91,21 @@ class MURExtendedKalmanFilter():
         self.Q[14,14] = 0.015  # ddz
 
     def set_PMatrix(self):
-        self.P[0,0] = 1.0  # x
-        self.P[1,1] = 1.0  # y
-        self.P[2,2] = 1.0  # z
-        self.P[3,3] = 1.0  # phi
-        self.P[4,4] = 1.0  # theta
-        self.P[5,5] = 1.0  # gamma
-        self.P[6,6] = 1.0  # dx
-        self.P[7,7] = 1.0  # dy
-        self.P[8,8] = 1.0 # dz
-        self.P[9,9] =  1.0 # dphi
-        self.P[10,10] = 1.0 # dtheta
-        self.P[11,11] = 1.0  # dgamma
-        self.P[12,12] = 1.0  # ddx
-        self.P[13,13] = 1.0 # ddy
-        self.P[14,14] = 1.0  # ddz
+        self.P[0,0] = 0.05  # x
+        self.P[1,1] = 0.05  # y
+        self.P[2,2] = 0.06  # z
+        self.P[3,3] = 0.03  # phi
+        self.P[4,4] = 0.03  # theta
+        self.P[5,5] = 0.06  # gamma
+        self.P[6,6] = 0.025  # dx
+        self.P[7,7] = 0.025  # dy
+        self.P[8,8] = 0.04 # dz
+        self.P[9,9] =  0.01 # dphi
+        self.P[10,10] = 0.01 # dtheta
+        self.P[11,11] = 0.02  # dgamma
+        self.P[12,12] = 0.01  # ddx
+        self.P[13,13] = 0.01 # ddy
+        self.P[14,14] = 0.015  # ddz
 
     def get_FMatrix(self):
         self.F[0,6] = self.dT
@@ -99,18 +122,21 @@ class MURExtendedKalmanFilter():
         self.F[2,14] = 0.5*((self.dT)**2)
 
     def ekf_estimation(self, XEst, PEst, z):
-        ### Predict
-        #self.get_FMatrix()
-        #XPred = np.matmul(self.F, XEst)
-        # F = dF/dX
-        #PPred = self.F * PEst * np.transpose(self.F) + self.Q
-        XPred = XEst;
-        PPred = PEst;
-        ### Update or Correction
         # Full dimensions
-        #--- Provisional ---
         num_meas,_ = np.shape(z)
+        ### Predict
+        if num_meas is not 14:
+            self.get_FMatrix()
+            XPred = np.matmul(self.F, XEst)
+            # F = dF/dX
+            PPred = self.F * PEst * np.transpose(self.F) + self.Q
+        else:
+            XPred = XEst
+            PPred = PEst
+            rospy.loginfo("Not Prediction")
+        ### Update or Correction
         # We have just 8 sensors: IMU(3 acc lin, 3 vel ang, 1 angle) Barometer (1 pos)
+        # Using aruco we have 4 measurements more
         zPred = np.zeros(shape=(num_meas,1))
         v = np.zeros(shape=(num_meas,1))
         H = np.zeros(shape=(num_meas, self.DIM_STATE))
@@ -159,7 +185,7 @@ class MURExtendedKalmanFilter():
             # Barometer
             if num_meas_index == 9:
                 H[num_meas_index,2] = 1.0
-                zPred[num_meas_index,0] = XPred[3,0]
+                zPred[num_meas_index,0] = XPred[2,0]
                 R[num_meas_index,num_meas_index] = self.cov_bar
             # Camera
             if num_meas_index == 10:
@@ -184,7 +210,6 @@ class MURExtendedKalmanFilter():
         # Innovation covariance
         S1 = np.matmul(H, PPred)
         S = np.matmul(S1, np.transpose(H)) + R
-        rospy.loginfo("P :=\n %s",PPred)
         # Filter gain
         K1 = np.matmul(PPred, np.transpose(H))
         K = np.matmul(K1, np.linalg.inv(S))
@@ -198,23 +223,37 @@ class MURExtendedKalmanFilter():
         GB_I = np.matmul(RB_I,g_v)
         return GB_I
 
-
-    def cmd_ekf_callback(self, msg_imu, msg_pres):
+    def cmd_ekf_callback(self, msg_imu, msg_pres,msg_pose,msg_flag):
         # Time refresh
         now = rospy.Time.now()
         time_now = now.secs + now.nsecs/1E9
         self.dT = time_now - self.last_time
         # Set rotation
-        e1 = msg_imu.orientation.y
-        e2 = msg_imu.orientation.x
-        e3 = -msg_imu.orientation.z
+        e1 = msg_imu.orientation.x
+        e2 = msg_imu.orientation.y
+        e3 = msg_imu.orientation.z
         n  = msg_imu.orientation.w
         quaternion = (e1,e2,e3,n)
         GB_I = self.get_gravity_vector(self.GRAVITY_VALUE,e1,e2,e3,n)
         # Measurement vector
-        # z = [phi,theta,yaw,accx,accy,accz,ang_x,ang_y,ang_z,Z]
-        num_meas = 10;
-        z = np.zeros(shape=(num_meas,1))
+        # z = [phi,theta,yaw,accx,accy,accz,ang_x,ang_y,ang_z,Z, x,y,z,ang_z2]
+        mflag = msg_flag.data
+        #mflag = True
+        if mflag == True:
+            num_meas = 14
+            z = np.zeros(shape=(num_meas,1))
+            z[10,0] = msg_pose.pose.position.x
+            z[11,0] = msg_pose.pose.position.y
+            z[12,0] = msg_pose.pose.position.z
+            e1 = msg_pose.pose.orientation.x
+            e2 = msg_pose.pose.orientation.y
+            e3 = msg_pose.pose.orientation.z
+            n  = msg_pose.pose.orientation.w
+            q_aruco = (e1,e2,e3,n)
+            _,_,z[13,0] = euler_from_quaternion(q_aruco)
+        else:
+            num_meas = 10
+            z = np.zeros(shape=(num_meas,1))
         z[0,0],z[1,0],z[2,0] = euler_from_quaternion(quaternion) # yaw magnetometer
         z[3,0] = msg_imu.linear_acceleration.y - GB_I[0,0]
         z[4,0] = -msg_imu.linear_acceleration.x - GB_I[1,0]
@@ -229,7 +268,7 @@ class MURExtendedKalmanFilter():
         # Publish
         odom_msg = Odometry()
         odom_msg.header.stamp = rospy.Time.now()
-        odom_msg.header.frame_id = 'mur/base_link'
+        odom_msg.header.frame_id = 'world'
         odom_msg.pose.pose.position.x = self.X[0,0]
         odom_msg.pose.pose.position.y = self.X[1,0]
         odom_msg.pose.pose.position.z = self.X[2,0]
@@ -260,7 +299,6 @@ if __name__ == '__main__':
     rospy.init_node('mur_extended_kalman_filter')
     try:
         node = MURExtendedKalmanFilter()
-        rate = rospy.Rate(50)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')

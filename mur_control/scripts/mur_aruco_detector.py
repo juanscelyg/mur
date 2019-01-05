@@ -5,14 +5,17 @@ import rospy
 import logging
 import sys
 import tf
+import tf2_ros
 import cv2
 import message_filters
 from cv_bridge import CvBridge, CvBridgeError
 from common import mur_common
-from geometry_msgs.msg import WrenchStamped, PoseStamped, AccelStamped
-from tf.transformations import quaternion_from_euler, euler_from_quaternion
+from mur_control.msg import BoolStamped
+from geometry_msgs.msg import WrenchStamped, PoseStamped, AccelStamped, TransformStamped
+from tf.transformations import quaternion_from_euler, euler_from_quaternion, compose_matrix, decompose_matrix
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import FluidPressure, Imu, Image
+from std_msgs.msg import Bool
 
 class MURArucoDetector():
     def __init__(self):
@@ -21,61 +24,122 @@ class MURArucoDetector():
         self.markerLength = 0.2 # in meters
 
         # Camera
-        self.calibrationFile = "calibrationFileName.xml"
-        self.calibrationParams = cv2.FileStorage(self.calibrationFile, cv2.FILE_STORAGE_READ)
-        self.camera_matrix = self.calibrationParams.getNode("cameraMatrix").mat()
-        self.dist_coeffs = self.calibrationParams.getNode("distCoeffs").mat()
+        camera_matrix = rospy.get_param('/mur/mur_aruco_detector/camera_matrix/data')
+        self.camera_matrix = np.array([[camera_matrix[0], camera_matrix[1], camera_matrix[2]],
+        [camera_matrix[3], camera_matrix[4], camera_matrix[5]],
+        [0, 0, 1]], dtype = "double")
+        dist_coeffs = rospy.get_param('/mur/mur_aruco_detector/distortion_coefficients/data')
+        self.dist_coeffs = np.array([dist_coeffs[0],dist_coeffs[1],dist_coeffs[2],dist_coeffs[3],dist_coeffs[4]])
 
         # ROS infraestucture
-        self.image_pub = rospy.Publisher("/mur/image_detector",Image)
+        self.image_pub = rospy.Publisher("/mur/image_detector",Image, queue_size=1)
+        self.pose_pub = rospy.Publisher("/mur/aruco_pose", PoseStamped, queue_size=1)
+        self.aruco_pub = rospy.Publisher("/mur/aruco_flag", BoolStamped, queue_size=1)
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("/mur/mur/camera/camera_image",Image,self.callback)
+        self.listener = tf.TransformListener()
 
+    def get_camera_pose_robot(self):
+        try:
+            (trans,rot) = self.listener.lookupTransform('mur/base_link','/mur/camera_link_optical', rospy.Time())
+        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+            trans = np.array([0,0,0])
+            rot= np.array([0,0,0,0])
+        rot = euler_from_quaternion(rot)
+        RB_C = compose_matrix(None, None, rot, trans, None)
+        return RB_C
 
-    def cameraPoseFromHomography(self, H):
-        H1 = H[:, 0]
-        H2 = H[:, 1]
-        H3 = np.cross(H1, H2)
+    def get_aruco_pose(self, id):
+        if id==10:
+            tvec = np.array([0.2, 0.97, -1.2])
+            rvec = np.array([np.pi/2, 0, 0])
+        elif id == 11:
+            tvec = np.array([2.15, -0.2, -1.2])
+            rvec = np.array([np.pi/2, 0, -np.pi/2])
+        elif id == 12:
+            tvec = np.array([-0.2, -0.98, -1.2])
+            rvec = np.array([np.pi/2, 0, np.pi])
+        elif id == 13:
+            tvec = np.array([-2.15, 0.2, -1.2])
+            rvec = np.array([np.pi/2, 0, np.pi/2])
+        else:
+            tvec = np.array([0.0, 0.0, 0.0])
+            rvec = np.array([0, 0, 0])
+        return  tvec, rvec
 
-        norm1 = np.linalg.norm(H1)
-        norm2 = np.linalg.norm(H2)
-        tnorm = (norm1 + norm2) / 2.0;
+    def pose_callback(self,tvec,rvec,aruco_flag):
+        msg_flag = BoolStamped()
+        msg_flag.header.stamp = rospy.Time.now()
+        msg_flag.header.frame_id = 'mur/base_link'
+        msg_flag.data = aruco_flag
+        msg_pose = PoseStamped()
+        msg_pose.header.stamp = rospy.Time.now()
+        msg_pose.header.frame_id = 'mur/base_link'
+        msg_pose.pose.position.x = tvec[0]
+        msg_pose.pose.position.y = tvec[1]
+        msg_pose.pose.position.z = tvec[2]
+        q = quaternion_from_euler(rvec[0], rvec[1], rvec[2])
+        msg_pose.pose.orientation.x = q[0]
+        msg_pose.pose.orientation.y = q[1]
+        msg_pose.pose.orientation.z = q[2]
+        msg_pose.pose.orientation.w = q[3]
+        self.pose_pub.publish(msg_pose)
+        self.aruco_pub.publish(msg_flag)
 
-        T = H[:, 2] / tnorm
-        return np.mat([H1, H2, H3, T])
 
     def callback(self, msg_image):
         try:
-          cv_image = self.bridge.imgmsg_to_cv2(msg_image, "bgr8")
+            cv_image = self.bridge.imgmsg_to_cv2(msg_image, "bgr8")
         except CvBridgeError as e:
-          print(e)
-        camera_matrix = np.array([[1.2519588293098975E+03, 0, 6.6684948780852471E+02],
-            [0, 1.2519588293098975E+03, 3.6298123112613683E+02],
-            [0, 0, 1]], dtype = "double")
+            print(e)
         corners, ids, ripoints = cv2.aruco.detectMarkers(cv_image,self.aruco_dic)
-        rvec, tvec, _objPoints = cv2.aruco.estimatePoseSingleMarkers(corners[0], self.markerLength, camera_matrix, self.dist_coeffs)
+        aruco_flag = False
         if ids is not None:
-        #if len(ids) > 0:
-            #rospy.loginfo("Size ids:= \n%s",len(ids))
-            #rospy.loginfo("Size tvec:= \n%s",tvec)
-            pts_dst = np.array([[corners[0][0][0][0], corners[0][0][0][1]], [corners[0][0][1][0], corners[0][0][1][1]], [corners[0][0][2][0], corners[0][0][2][1]], [corners[0][0][3][0], corners[0][0][3][1]]])
-            pts_src = pts_dst
-            h, status = cv2.findHomography(pts_src, pts_dst)
-            cv2.aruco.drawDetectedMarkers(cv_image,corners, ids)
-            cv_image = cv2.aruco.drawAxis(cv_image, camera_matrix, self.dist_coeffs, rvec, tvec, 1)
-            cameraPose = self.cameraPoseFromHomography(h)
-            rospy.loginfo("Pose:= \n%s",h)
+            aruco_flag = True
+            rvecs = np.zeros(shape=(len(ids),3))
+            tvecs = np.zeros(shape=(len(ids),3))
+            for i in range(len(ids)):
+                rvec, tvec, _objPoints = cv2.aruco.estimatePoseSingleMarkers(corners[i], self.markerLength, self.camera_matrix, self.dist_coeffs)
+                t_vec = np.array([tvec[0][0][0],tvec[0][0][1],tvec[0][0][2]])
+                r_vec = np.array([rvec[0][0][0],rvec[0][0][1],rvec[0][0][2]])
+                cv2.aruco.drawDetectedMarkers(cv_image,corners, ids)
+                cv_image = cv2.aruco.drawAxis(cv_image, self.camera_matrix, self.dist_coeffs, rvec, tvec, 0.2)
+                br = tf2_ros.TransformBroadcaster()
+                t = TransformStamped()
+                t.header.frame_id = "/mur/camera_link_optical"
+                t.header.stamp = rospy.Time.now()
+                t.child_frame_id = "Marker_"+str(ids[i])
+                t.transform.translation.x = t_vec[0]
+                t.transform.translation.y = t_vec[1]
+                t.transform.translation.z = t_vec[2]
+                q = quaternion_from_euler(r_vec[0], r_vec[1], r_vec[2])
+                t.transform.rotation.x = q[0]
+                t.transform.rotation.y = q[1]
+                t.transform.rotation.z = q[2]
+                t.transform.rotation.w = q[3]
+                br.sendTransform(t)
+                rvecs[i,:] = rvec
+                tvecs[i,:] = tvec
+                ## Get global position about the origin
+                (trans, rot) = self.get_aruco_pose(ids[i])
+                RO_A = compose_matrix(None, None, rot, trans, None)
+                RC_A = compose_matrix(None, None, r_vec, t_vec, None)
+                RB_C = self.get_camera_pose_robot()
+                RB_A = np.matmul(RB_C,RC_A)
+                RA_B = np.linalg.inv(RB_A)
+                RO_B = np.matmul(RO_A,RA_B)
+                (_,_,rot,trans,_) = decompose_matrix(RO_B)
+            self.pose_callback(trans,rot,aruco_flag)
         try:
-          self.image_pub.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8"))
+            self.image_pub.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8"))
         except CvBridgeError as e:
-          print(e)
-
+            print(e)
 
 if __name__ == '__main__':
     rospy.init_node('mur_aruco_detector')
     try:
+        #np.set_printoptions(suppress=True)
         node = MURArucoDetector()
-        rate = rospy.Rate(20)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')

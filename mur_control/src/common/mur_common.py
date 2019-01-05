@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import numpy as np
-from tf.transformations import quaternion_from_euler, euler_from_quaternion
+import math
+from tf.transformations import quaternion_from_euler, euler_from_quaternion, euler_matrix,rotation_matrix
 
 def convert_body_world(pose_rot):
     nita2_t = euler_from_quaternion(pose_rot)
@@ -42,3 +43,21 @@ def pressure_to_meters(pressure):
     b=10.339130;
     meters=a*pressure+b;
     return meters
+
+def aruco_to_world(id, rvec, tvec):
+    roll = rvec[0][0][0]
+    pitch = rvec[0][0][1]
+    yaw = rvec[0][0][2]
+    tx = tvec[0][0][0]
+    ty = tvec[0][0][1]
+    tz = tvec[0][0][2]
+    rot_matrix = euler_matrix(roll, pitch, yaw)
+    M = np.identity(4)
+    M[0:3,:] = rot_matrix[0:3,:]
+    trans = np.array([[tx],[ty],[tz]])
+    M[:3,3] = trans[:3,0]
+    if id == 11:
+        R = rotation_matrix(-math.pi/2, [1,0,0])
+        Mo = np.identity(3)
+        Mo = np.matmul(R[:3,:3],trans)
+    return Mo
