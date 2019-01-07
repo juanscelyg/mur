@@ -47,8 +47,7 @@ class MURExtendedKalmanFilter():
         self.last_time = 0.0 #init
 
         # ROS infraestucture
-        self.pub_pose = rospy.Publisher('/mur/ekf', Odometry, queue_size=1)
-        self.pub_acce = rospy.Publisher('/mur/Acc', AccelStamped, queue_size=1)
+        self.pub_pose = rospy.Publisher('/mur/Odometry', Odometry, queue_size=1)
         self.sub_imu = rospy.Subscriber('/mavros/imu/data', Imu, self.call_imu)
         self.sub_pres = rospy.Subscriber('/mavros/imu/diff_pressure', FluidPressure, self.call_pres)
         self.sub_pose = rospy.Subscriber('/mur/aruco_pose', PoseStamped, self.call_pose)
@@ -133,7 +132,7 @@ class MURExtendedKalmanFilter():
         else:
             XPred = XEst
             PPred = PEst
-            rospy.loginfo("Not Prediction")
+            #rospy.loginfo("Not Prediction")
         ### Update or Correction
         # We have just 8 sensors: IMU(3 acc lin, 3 vel ang, 1 angle) Barometer (1 pos)
         # Using aruco we have 4 measurements more
@@ -284,13 +283,6 @@ class MURExtendedKalmanFilter():
         odom_msg.twist.twist.angular.y = self.X[10,0]
         odom_msg.twist.twist.angular.z = self.X[11,0]
         self.pub_pose.publish(odom_msg)
-        acce_msg = AccelStamped()
-        acce_msg.header.stamp = rospy.Time.now()
-        acce_msg.header.frame_id = 'mur/ekf'
-        acce_msg.accel.linear.x = z[3,0]
-        acce_msg.accel.linear.y = z[4,0]
-        acce_msg.accel.linear.z = z[5,0]
-        self.pub_acce.publish(acce_msg)
         #rospy.loginfo("X :=\n %s",self.X)
         # Next iteration
         self.last_time = time_now

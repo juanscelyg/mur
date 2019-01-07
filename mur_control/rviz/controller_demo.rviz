@@ -231,7 +231,7 @@ Visualization Manager:
         Shaft Length: 1
         Shaft Radius: 0.0500000007
         Value: Axes
-      Topic: /mur/ekf
+      Topic: /mur/Odometry
       Unreliable: false
       Value: true
     - Class: rviz/Marker
@@ -398,4 +398,4 @@ Window Geometry:
     collapsed: false
   Width: 1280
   X: 1366
-  Y: 9
+  Y: 0
