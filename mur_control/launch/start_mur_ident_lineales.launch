@@ -1,0 +1,14 @@
+<launch>
+    <arg name="bag_filename" default="/tmp/mur_ident_lineales.bag"/>
+    <!-- Include the launch of APM -->
+    <include file="$(find mavros)/launch/apm.launch">
+      <arg name="fcu_url" value="/dev/ttyACM0:115200"/>
+    </include>
+    <!-- Launch the node to get the values of the mechanism -->
+    <node pkg="mur_control" type="mur_ident_lineales.py" name="mur_ident_lineales" output="screen"></node>
+    <!-- Save the info in un rosbag-->
+    <node pkg="rosbag" type="record" name="recording"
+      args="record -O $(arg bag_filename)
+        /mur/angles"/>
+
+</launch>
