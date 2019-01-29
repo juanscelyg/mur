@@ -9,6 +9,7 @@
     <!-- Save the info in un rosbag-->
     <node pkg="rosbag" type="record" name="recording"
       args="record -O $(arg bag_filename)
-        /mur/angles"/>
+        /mur/angles
+        /mavros/imu/data"/>
 
 </launch>
