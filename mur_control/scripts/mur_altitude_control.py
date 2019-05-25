@@ -30,7 +30,7 @@ class MURAltitudeControlNode:
         self.error_vel = np.zeros(shape=(6,1))
 
         # Desire values
-        self.pos_z = -1
+        self.pos_z = -0.5
 
         # ROS param server
         self.config = {}
@@ -45,23 +45,18 @@ class MURAltitudeControlNode:
 
         # ROS infrastructure
         self.srv_reconfigure = Server(MurAltitudeControlConfig, self.config_callback)
-        self.sub_imu = message_filters.Subscriber('/mavros/imu/data', Imu)
-        self.sub_pres = message_filters.Subscriber('/mavros/imu/diff_pressure', FluidPressure)
-        self.ts = message_filters.TimeSynchronizer([self.sub_pres, self.sub_imu], 10)
-        self.ts.registerCallback(self.cmd_control_callback)
-        self.pub_cmd_force = rospy.Publisher('/control/force', WrenchStamped, queue_size=10)
+        self.sub_odometry = rospy.Subscriber('/mur/Odometry', Odometry, self.cmd_control_callback)
+        self.pub_cmd_force = rospy.Publisher('/control/force', WrenchStamped, queue_size=2)
 
-    def cmd_control_callback(self, msg_pres, msg_imu):
+    def cmd_control_callback(self, msg_odometry):
         if not bool(self.config):
             return
-        self.t = msg_pres.header.stamp.to_sec()
+        self.t = msg_odometry.header.stamp.to_sec()
         # Get the position and velocities
-        h = mur_common.pressure_to_meters(msg_pres.fluid_pressure);
-        rospy.loginfo("H :=\n %s" %h)
-        self.pose_pos = np.array([0,0,h])
-        self.pose_rot = np.array([msg_imu.orientation.x, msg_imu.orientation.y, msg_imu.orientation.z, msg_imu.orientation.w])
-        self.twist_pos = np.array([0,0,(h-self.h_last)/self.t])
-        self.twist_rot = np.array([msg_imu.angular_velocity.x, msg_imu.angular_velocity.y, msg_imu.angular_velocity.z])
+        self.pose_pos = np.array([msg_odometry.pose.pose.position.x, msg_odometry.pose.pose.position.y, msg_odometry.pose.pose.position.z])
+        self.pose_rot = np.array([msg_odometry.pose.pose.orientation.x, msg_odometry.pose.pose.orientation.y, msg_odometry.pose.pose.orientation.z, msg_odometry.pose.pose.orientation.w])
+        self.twist_pos = np.array([msg_odometry.twist.twist.linear.x, msg_odometry.twist.twist.linear.y, msg_odometry.twist.twist.linear.z])
+        self.twist_rot = np.array([msg_odometry.twist.twist.angular.x, msg_odometry.twist.twist.angular.y, msg_odometry.twist.twist.angular.z])
         # Convert to SNAME Position
         self.nita2_t = euler_from_quaternion(self.pose_rot)
         self.nita2 = np.array([self.nita2_t[0],self.nita2_t[1],self.nita2_t[2]])
@@ -72,15 +67,16 @@ class MURAltitudeControlNode:
         self.vitad = np.zeros(self.nitad.shape)
         self.vita = np.array([self.twist_pos[0],self.twist_pos[1],self.twist_pos[2], self.twist_rot[0],self.twist_rot[1],self.twist_rot[2]]).reshape(self.vitad.shape)
         self.nita_p = np.matmul(self.J,self.vita)
+        # rospy.loginfo("Vita :=\n %s" %self.vita)
         # Get position error
-        self.h_last = h;
+        #self.h_last = h;
         self.get_errors()
         self.force_callback()
 
     def get_errors(self):
         # Create the errors
         self.error_pos = self.nitad - self.nita
-        ### rospy.loginfo("Error :=\n %s" %self.error_pos)
+        #rospy.loginfo("Error :=\n %s" %self.error_pos)
         vitad = np.empty_like(self.error_pos)
         for i in range(len(self.error_pos)):
             vitad[i]=self.error_pos[i]/self.dt_vel
@@ -93,8 +89,9 @@ class MURAltitudeControlNode:
         # To create the message
         force_msg = WrenchStamped()
         force_msg.header.stamp = rospy.Time.now()
-        force_msg.header.frame_id = 'mur/control'
+        force_msg.header.frame_id = 'mur/base_link'
         force_msg.wrench.force.z = Tz
+        rospy.loginfo("Force :=\n %s" %force_msg.wrench.force)
         # To publish the message
         self.pub_cmd_force.publish(force_msg)
 
@@ -109,6 +106,7 @@ class MURAltitudeControlNode:
         self.pos_z = config['pos_z']
         # To build the desire points vector
         self.nitad = np.array([0.0, 0.0, self.pos_z, 0.0, 0.0, 0.0])
+        rospy.loginfo("Desired Position :=\n %s" %self.nitad)
         # To refresh the config value
         self.config = config
         # Return the config value
