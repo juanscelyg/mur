@@ -41,11 +41,8 @@ class MURControlMixerNode():
         # ROS infraestucture
         self.srv_reconfigure = Server(MurControlMixerConfig, self.config_callback)
         self.pub_actuators = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=1)
-        self.sub_imu = message_filters.Subscriber('/mavros/imu/data', Imu)
-        self.sub_pres = message_filters.Subscriber('/mavros/imu/diff_pressure', FluidPressure)
-        self.sub_force = message_filters.Subscriber('/control/force', WrenchStamped)
-        self.ts = message_filters.TimeSynchronizer([self.sub_imu, self.sub_pres, self.sub_force], 10)
-        self.ts.registerCallback(self.cmd_force_callback)
+        self.sub_odometry = rospy.Subscriber('/mur/Odometry', Odometry, self.get_odometry)
+        self.sub_force = rospy.Subscriber('/mur/force_input', WrenchStamped, self.cmd_force_callback)
 
     def config_callback(self, config, level):
         self.saturation = config['saturation']
@@ -80,15 +77,17 @@ class MURControlMixerNode():
                 thrusters[i]=force[i]
         return thrusters
 
-    def cmd_force_callback(self, msg_pose, msg_pres, msg_force):
+    def get_odometry(self, msg_pose):
         # Get the position and velocities
-        self.pose_rot = np.array([msg_pose.orientation.x, msg_pose.orientation.y, msg_pose.orientation.z, msg_pose.orientation.w])
+        self.pose_rot = np.array([msg_pose.pose.pose.orientation.x, msg_pose.pose.pose.orientation.y, msg_pose.pose.pose.orientation.z, msg_pose.pose.pose.orientation.w])
         #rospy.loginfo("Pos := \n %s" %self.pose_pos)
         self.J = mur_common.convert_body_world(self.pose_rot)
-        self.force_attitude = self.get_force_callback(msg_force)
-        tau = self.force_attitude
+
+
+    def cmd_force_callback(self, msg_force):
+        self.force_attitude = np.array([[msg_force.wrench.force.x], [msg_force.wrench.force.y], [msg_force.wrench.force.z], [msg_force.wrench.torque.x], [msg_force.wrench.torque.y], [msg_force.wrench.torque.z]])
         # Thruster forces
-        Tt = np.matmul(np.transpose(self.J),tau)
+        Tt = np.matmul(np.transpose(self.J),self.force_attitude)
         B = np.linalg.pinv(self.T)
         thrusters_forces = np.matmul(B,Tt)
         self.thrusters = self.saturator_thruster(thrusters_forces)

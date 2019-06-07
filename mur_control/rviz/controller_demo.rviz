@@ -33,7 +33,13 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        Marker_[10]:
+          Value: true
         Marker_[11]:
+          Value: true
+        Marker_[12]:
+          Value: true
+        mur/Odometry:
           Value: true
         mur/base_footprint:
           Value: true
@@ -74,6 +80,8 @@ Visualization Manager:
       Show Names: true
       Tree:
         world:
+          mur/Odometry:
+            {}
           mur/base_footprint:
             mur/base_stabilized:
               mur/base_link:
@@ -81,7 +89,11 @@ Visualization Manager:
                   {}
                 mur/camera_link:
                   mur/camera_link_optical:
+                    Marker_[10]:
+                      {}
                     Marker_[11]:
+                      {}
+                    Marker_[12]:
                       {}
                 mur/imu_link:
                   {}
@@ -202,40 +214,6 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
-    - Angle Tolerance: 0.100000001
-      Class: rviz/Odometry
-      Covariance:
-        Orientation:
-          Alpha: 0.5
-          Color: 255; 255; 127
-          Color Style: Unique
-          Frame: Local
-          Offset: 1
-          Scale: 1
-          Value: true
-        Position:
-          Alpha: 0.300000012
-          Color: 204; 51; 204
-          Scale: 1
-          Value: true
-        Value: true
-      Enabled: true
-      Keep: 25
-      Name: Odometry
-      Position Tolerance: 0
-      Shape:
-        Alpha: 1
-        Axes Length: 1
-        Axes Radius: 0.100000001
-        Color: 255; 25; 0
-        Head Length: 0.300000012
-        Head Radius: 0.100000001
-        Shaft Length: 1
-        Shaft Radius: 0.0500000007
-        Value: Axes
-      Topic: /mur/Odometry
-      Unreliable: false
-      Value: true
     - Class: rviz/Marker
       Enabled: false
       Marker Topic: /mur/current_velocity_marker
@@ -361,25 +339,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/ThirdPersonFollower
-      Distance: 3.91273856
+      Distance: 4.04271507
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.629261374
-        Y: 0.46515739
-        Z: -1.43051147e-06
+        X: 1.16520846
+        Y: -0.225254774
+        Z: -1.69873238e-06
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.835398495
+      Pitch: 0.160399139
       Target Frame: mur/base_link
       Value: ThirdPersonFollower (rviz)
-      Yaw: 5.03357697
+      Yaw: 5.00858164
     Saved: ~
 Window Geometry:
   Displays:
@@ -399,5 +377,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1043
-  X: 2795
+  X: 2794
   Y: 0

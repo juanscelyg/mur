@@ -63,7 +63,31 @@ publish_acceleration: false
 map_frame: map              # Defaults to "map" if unspecified
 odom_frame: odom            # Defaults to "odom" if unspecified
 base_link_frame: /mur/base_link  # Defaults to "base_link" if unspecified
-world_frame: odom           # Defaults to the value of odom_frame if unspecified
+world_frame: odom     # Defaults to the value of odom_frame if unspecified
+
+pose0: /mur/aruco_pose
+pose0_config: [true,  true,  true,
+               true, true, true,
+               false, false, false,
+               false, false, false,
+               false, false, false]
+pose0_differential: true
+pose0_relative: false
+pose0_queue_size: 5
+pose0_rejection_threshold: 2  # Note the difference in parameter name
+pose0_nodelay: false
+
+pose1: /mur/depth
+pose1_config: [false, false,  true,
+               false, false, false,
+               false, false, false,
+               false, false, false,
+               false, false, false]
+pose1_differential: true
+pose1_relative: false
+pose1_queue_size: 5
+pose1_rejection_threshold: 2  # Note the difference in parameter name
+pose1_nodelay: false
 
 imu0: /mavros/imu/data
 imu0_config: [false, false, false,
@@ -95,7 +119,7 @@ imu0_remove_gravitational_acceleration: true
 # predicition. Note that if an acceleration measurement for the variable in question is available from one of the
 # inputs, the control term will be ignored.
 # Whether or not we use the control input during predicition. Defaults to false.
-use_control: true
+use_control: false
 # Whether the input (assumed to be cmd_vel) is a geometry_msgs/Twist or geometry_msgs/TwistStamped message. Defaults to
 # false.
 stamped_control: false

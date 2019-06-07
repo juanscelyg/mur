@@ -6,6 +6,6 @@
     <remap from="odometry/filtered" to=""/>
     <remap from="accel/filtered" to=""/>
     -->
-<remap from="odometry/filtered" to="/mur/ekf"/>
+<remap from="odometry/filtered" to="/mur/Odometry"/>
   </node>
 </launch>

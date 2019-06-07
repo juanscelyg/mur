@@ -10,7 +10,7 @@
     <include file="$(find mur_description)/launch/upload_mur.launch">
         <arg name="x" default="-1.1"/>
         <arg name="y" default="0.0"/>
-        <arg name="z" default="0.1"/>
+        <arg name="z" default="-0.8"/>
         <arg name="yaw" default="-1.57"/>
         <arg name="mode" default="default"/>
         <arg name="namespace" default="mur"/>
@@ -26,7 +26,8 @@
         <node pkg="mur_control" type="mur_aruco_detector.py" name="mur_aruco_detector" output="screen">
             <rosparam command="load" file="$(find mur_control)/config/head_camera.yaml" />
         </node>
-        <node pkg="mur_control" type="mur_ekf.py" name="mur_ekf" output="screen"></node>
+        <node pkg="mur_control" type="mur_barometer_parse.py" name="mur_barometer_parse" output="screen"></node>
+        <!--node pkg="mur_control" type="mur_ekf.py" name="mur_ekf" output="screen"></node-->
         <node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node>
     </group>
 

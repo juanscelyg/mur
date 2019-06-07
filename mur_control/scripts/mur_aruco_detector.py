@@ -11,7 +11,7 @@ import message_filters
 from cv_bridge import CvBridge, CvBridgeError
 from common import mur_common
 from mur_control.msg import BoolStamped
-from geometry_msgs.msg import WrenchStamped, PoseStamped, AccelStamped, TransformStamped
+from geometry_msgs.msg import WrenchStamped, PoseStamped, AccelStamped, TransformStamped, PoseWithCovarianceStamped
 from tf.transformations import quaternion_from_euler, euler_from_quaternion, compose_matrix, decompose_matrix
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import FluidPressure, Imu, Image
@@ -33,7 +33,7 @@ class MURArucoDetector():
 
         # ROS infraestucture
         self.image_pub = rospy.Publisher("/mur/image_detector",Image, queue_size=1)
-        self.pose_pub = rospy.Publisher("/mur/aruco_pose", PoseStamped, queue_size=1)
+        self.pose_pub = rospy.Publisher("/mur/aruco_pose", PoseWithCovarianceStamped, queue_size=1)
         self.aruco_pub = rospy.Publisher("/mur/aruco_flag", BoolStamped, queue_size=1)
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("/mur/mur/camera/camera_image",Image,self.callback)
@@ -46,6 +46,7 @@ class MURArucoDetector():
             trans = np.array([0,0,0])
             rot= np.array([0,0,0,0])
         rot = euler_from_quaternion(rot)
+        # rospy.loginfo("trans :=\n %s", trans)
         RB_C = compose_matrix(None, None, rot, trans, None)
         return RB_C
 
@@ -72,17 +73,17 @@ class MURArucoDetector():
         msg_flag.header.stamp = rospy.Time.now()
         msg_flag.header.frame_id = 'mur/base_link'
         msg_flag.data = aruco_flag
-        msg_pose = PoseStamped()
+        msg_pose = PoseWithCovarianceStamped()
         msg_pose.header.stamp = rospy.Time.now()
         msg_pose.header.frame_id = 'mur/base_link'
-        msg_pose.pose.position.x = tvec[0]
-        msg_pose.pose.position.y = tvec[1]
-        msg_pose.pose.position.z = tvec[2]
+        msg_pose.pose.pose.position.x = tvec[0]
+        msg_pose.pose.pose.position.y = tvec[1]
+        msg_pose.pose.pose.position.z = tvec[2]
         q = quaternion_from_euler(rvec[0], rvec[1], rvec[2])
-        msg_pose.pose.orientation.x = q[0]
-        msg_pose.pose.orientation.y = q[1]
-        msg_pose.pose.orientation.z = q[2]
-        msg_pose.pose.orientation.w = q[3]
+        msg_pose.pose.pose.orientation.x = q[0]
+        msg_pose.pose.pose.orientation.y = q[1]
+        msg_pose.pose.pose.orientation.z = q[2]
+        msg_pose.pose.pose.orientation.w = q[3]
         self.pose_pub.publish(msg_pose)
         self.aruco_pub.publish(msg_flag)
 
@@ -101,6 +102,7 @@ class MURArucoDetector():
             for i in range(len(ids)):
                 rvec, tvec, _objPoints = cv2.aruco.estimatePoseSingleMarkers(corners[i], self.markerLength, self.camera_matrix, self.dist_coeffs)
                 t_vec = np.array([tvec[0][0][0],tvec[0][0][1],tvec[0][0][2]])
+                # rospy.loginfo("t_vec :=\n %s", t_vec)
                 r_vec = np.array([rvec[0][0][0],rvec[0][0][1],rvec[0][0][2]])
                 cv2.aruco.drawDetectedMarkers(cv_image,corners, ids)
                 cv_image = cv2.aruco.drawAxis(cv_image, self.camera_matrix, self.dist_coeffs, rvec, tvec, 0.2)
@@ -122,11 +124,11 @@ class MURArucoDetector():
                 tvecs[i,:] = tvec
                 ## Get global position about the origin
                 (trans, rot) = self.get_aruco_pose(ids[i])
-                RO_A = compose_matrix(None, None, rot, trans, None)
-                RC_A = compose_matrix(None, None, r_vec, t_vec, None)
-                RB_C = self.get_camera_pose_robot()
-                RB_A = np.matmul(RB_C,RC_A)
-                RA_B = np.linalg.inv(RB_A)
+                RO_A = compose_matrix(None, None, rot, trans, None) # Aruco Pose
+                RC_A = compose_matrix(None, None, r_vec, t_vec, None) # Pose from Aruco to Camera Optical link
+                RA_C = np.linalg.inv(RC_A)
+                RC_B = self.get_camera_pose_robot() # Camera pose from Robot base link
+                RA_B = np.matmul(RA_C,RC_B)
                 RO_B = np.matmul(RO_A,RA_B)
                 (_,_,rot,trans,_) = decompose_matrix(RO_B)
             self.pose_callback(trans,rot,aruco_flag)

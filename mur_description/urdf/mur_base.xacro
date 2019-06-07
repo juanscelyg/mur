@@ -6,7 +6,7 @@
     <xacro:include filename="$(find uuv_gazebo_ros_plugins)/urdf/snippets.xacro"/>
     <!--xacro:include filename="$(find mur_description)/urdf/mur_snippets.xacro"/-->
     <!-- Properties -->
-    <xacro:property name="mass" value="8.96"/>
+    <xacro:property name="mass" value="9.6"/> <!--The real value is 8.6, but it was changed for the simulation. The real life add 1kg to the robot.-->
     <xacro:property name="volume" value="0.008550699"/>
     <xacro:property name="cob" value="0 0 0"/>
     <xacro:property name="rho" value="1027.0"/>

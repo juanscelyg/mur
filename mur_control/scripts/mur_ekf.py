@@ -5,10 +5,11 @@ import rospy
 import logging
 import sys
 import tf
+import tf2_ros
 import message_filters
 from mur_control.msg import FloatStamped, BoolStamped
 from common import mur_common
-from geometry_msgs.msg import WrenchStamped, PoseStamped, AccelStamped
+from geometry_msgs.msg import WrenchStamped, PoseStamped, AccelStamped, PoseWithCovarianceStamped, TransformStamped
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import FluidPressure, Imu
@@ -17,7 +18,7 @@ from std_msgs.msg import Bool
 class MURExtendedKalmanFilter():
     def __init__(self):
         # Init constants
-        self.GRAVITY_VALUE = -9.81
+        self.GRAVITY_VALUE = -9.79
         self.DIM_STATE = 15
         self.cov_pos = 0.05
         self.cov_vel = 0.025
@@ -49,16 +50,18 @@ class MURExtendedKalmanFilter():
         # ROS infraestucture
         self.pub_pose = rospy.Publisher('/mur/Odometry', Odometry, queue_size=1)
         self.sub_imu = rospy.Subscriber('/mavros/imu/data', Imu, self.call_imu)
-        self.sub_pres = rospy.Subscriber('/mavros/imu/diff_pressure', FluidPressure, self.call_pres)
-        self.sub_pose = rospy.Subscriber('/mur/aruco_pose', PoseStamped, self.call_pose)
+        self.sub_pres = rospy.Subscriber('/mur/depth', PoseWithCovarianceStamped, self.call_pres)
+        self.sub_pose = rospy.Subscriber('/mur/aruco_pose', PoseWithCovarianceStamped, self.call_pose)
         self.sub_flag = rospy.Subscriber('/mur/aruco_flag', BoolStamped, self.call_flag)
 
     def call_imu(self, msg_imu):
         self.msg_imu = msg_imu
-        if self.pres_flag and self.pose_flag and self.flag_flag:
+        if self.pose_flag and self.pres_flag and self.flag_flag:
             self.cmd_ekf_callback(self.msg_imu, self.msg_pres, self.msg_pose, self.msg_flag)
+            rospy.loginfo("Aruco")
         else:
-            rospy.loginfo("Unsycronized")
+            self.cmd_ekf_callback(self.msg_imu, None, None, None)
+            rospy.loginfo("Blind")
 
     def call_pres(self, msg_pres):
         self.pres_flag = True
@@ -222,7 +225,7 @@ class MURExtendedKalmanFilter():
         GB_I = np.matmul(RB_I,g_v)
         return GB_I
 
-    def cmd_ekf_callback(self, msg_imu, msg_pres,msg_pose,msg_flag):
+    def cmd_ekf_callback(self, msg_imu, msg_pres, msg_pose, msg_flag):
         # Time refresh
         now = rospy.Time.now()
         time_now = now.secs + now.nsecs/1E9
@@ -241,13 +244,13 @@ class MURExtendedKalmanFilter():
         if mflag == True:
             num_meas = 14
             z = np.zeros(shape=(num_meas,1))
-            z[10,0] = msg_pose.pose.position.x
-            z[11,0] = msg_pose.pose.position.y
-            z[12,0] = msg_pose.pose.position.z
-            e1 = msg_pose.pose.orientation.x
-            e2 = msg_pose.pose.orientation.y
-            e3 = msg_pose.pose.orientation.z
-            n  = msg_pose.pose.orientation.w
+            z[10,0] = msg_pose.pose.pose.position.x
+            z[11,0] = msg_pose.pose.pose.position.y
+            z[12,0] = msg_pose.pose.pose.position.z
+            e1 = msg_pose.pose.pose.orientation.x
+            e2 = msg_pose.pose.pose.orientation.y
+            e3 = msg_pose.pose.pose.orientation.z
+            n  = msg_pose.pose.pose.orientation.w
             q_aruco = (e1,e2,e3,n)
             _,_,z[13,0] = euler_from_quaternion(q_aruco)
         else:
@@ -260,14 +263,29 @@ class MURExtendedKalmanFilter():
         z[6,0] = msg_imu.angular_velocity.y
         z[7,0] = msg_imu.angular_velocity.x
         z[8,0] = -msg_imu.angular_velocity.z
-        z[9,0] = mur_common.pressure_to_meters(msg_pres.fluid_pressure) # barometer
+        z[9,0] = msg_pres.pose.pose.position.z # barometer
         #rospy.loginfo("z :=\n %s",z)
         # EKF
         self.ekf_estimation(self.X, self.P, z)
+        # Tf Odometry
+        br = tf2_ros.TransformBroadcaster()
+        t = TransformStamped()
+        t.header.frame_id = "world"
+        t.header.stamp = rospy.Time.now()
+        t.child_frame_id = "/mur/Odometry"
+        t.transform.translation.x = self.X[0,0]
+        t.transform.translation.y = self.X[1,0]
+        t.transform.translation.z = self.X[2,0]
+        qx,qy,qz,qw = quaternion_from_euler(self.X[3,0],self.X[4,0],self.X[5,0])
+        t.transform.rotation.x = qx
+        t.transform.rotation.y = qy
+        t.transform.rotation.z = qz
+        t.transform.rotation.w = qw
+        br.sendTransform(t)
         # Publish
         odom_msg = Odometry()
         odom_msg.header.stamp = rospy.Time.now()
-        odom_msg.header.frame_id = 'world'
+        odom_msg.header.frame_id = '/mur/Odometry'
         odom_msg.pose.pose.position.x = self.X[0,0]
         odom_msg.pose.pose.position.y = self.X[1,0]
         odom_msg.pose.pose.position.z = self.X[2,0]
@@ -283,7 +301,7 @@ class MURExtendedKalmanFilter():
         odom_msg.twist.twist.angular.y = self.X[10,0]
         odom_msg.twist.twist.angular.z = self.X[11,0]
         self.pub_pose.publish(odom_msg)
-        #rospy.loginfo("X :=\n %s",self.X)
+        rospy.loginfo("Z_estimado :=\n %s",self.X[2,0])
         # Next iteration
         self.last_time = time_now
 
@@ -291,6 +309,7 @@ if __name__ == '__main__':
     rospy.init_node('mur_extended_kalman_filter')
     try:
         node = MURExtendedKalmanFilter()
+        rate = rospy.Rate(5)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')

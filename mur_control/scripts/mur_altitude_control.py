@@ -21,7 +21,8 @@ class MURAltitudeControlNode:
         # Init constants
         self.dt_vel = 5
         self.station_keeping = 2
-        self.mur_weight = 8.5 * 9.81
+        self.mur_mass = 9.6;
+        self.mur_weight = self.mur_mass * 9.79
 
         # State vectors
         self.h_last = 0;
@@ -36,8 +37,8 @@ class MURAltitudeControlNode:
         self.config = {}
 
         # Control gains
-        self.p_z = 38.0
-        self.i_z = 5.0
+        self.p_z = 30.0
+        self.i_z = 15.0
         self.d_z = 12.0
 
         # PID Control
@@ -46,7 +47,7 @@ class MURAltitudeControlNode:
         # ROS infrastructure
         self.srv_reconfigure = Server(MurAltitudeControlConfig, self.config_callback)
         self.sub_odometry = rospy.Subscriber('/mur/Odometry', Odometry, self.cmd_control_callback)
-        self.pub_cmd_force = rospy.Publisher('/control/force', WrenchStamped, queue_size=2)
+        self.pub_cmd_force = rospy.Publisher('/mur/force_input', WrenchStamped, queue_size=2)
 
     def cmd_control_callback(self, msg_odometry):
         if not bool(self.config):
@@ -81,6 +82,7 @@ class MURAltitudeControlNode:
         for i in range(len(self.error_pos)):
             vitad[i]=self.error_pos[i]/self.dt_vel
         self.error_vel = self.vitad - self.nita_p
+        rospy.loginfo("Error Position :=\n %s" %self.error_pos)
 
     def force_callback(self):
         # Control Law
