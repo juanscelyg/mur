@@ -28,6 +28,10 @@
         </node>
         <node pkg="mur_control" type="mur_barometer_parse.py" name="mur_barometer_parse" output="screen"></node>
         <!--node pkg="mur_control" type="mur_ekf.py" name="mur_ekf" output="screen"></node-->
+        <!--node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
+          <rosparam command="load" file="$(find mur_control)/config/ekf_template.yaml" />
+          <remap from="odometry/filtered" to="/mur/Odometry"/>
+        </node-->
         <node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node>
     </group>
 
