@@ -20,14 +20,14 @@ class MURExtendedKalmanFilter():
         # Init constants
         self.GRAVITY_VALUE = -9.79
         self.DIM_STATE = 15
-        self.cov_pos = 0.05
-        self.cov_vel = 0.025
+        self.cov_pos = 0.005
+        self.cov_vel = 0.0025
         self.cov_acc = 0.0006
         self.cov_ori = 0.006108
         self.cov_ang = 0.0027
-        self.cov_mag = 0.06108
+        self.cov_mag = 0.006108
         self.cov_bar = 0.002
-        self.cov_img = 0.01
+        self.cov_img = 0.001
 
         # EKF infraestructure
         self.X = np.zeros(shape=(self.DIM_STATE,1)) # x y z phi theta yaw dx dy dz dphi dtheta dyaw accx accy accz
