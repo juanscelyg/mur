@@ -46,7 +46,7 @@ class MURAltitudeControlNode:
 
         # ROS infrastructure
         self.srv_reconfigure = Server(MurAltitudeControlConfig, self.config_callback)
-        self.sub_odometry = rospy.Subscriber('/mur/Odometry', Odometry, self.cmd_control_callback)
+        self.sub_odometry = rospy.Subscriber('/mur/odometry/filtered', Odometry, self.cmd_control_callback)
         self.pub_cmd_force = rospy.Publisher('/mur/force_input', WrenchStamped, queue_size=2)
 
     def cmd_control_callback(self, msg_odometry):
@@ -87,7 +87,7 @@ class MURAltitudeControlNode:
     def force_callback(self):
         # Control Law
         # PID control
-        Tz = self.pid_z.controlate(self.error_pos[2,],self.t)
+        Tz = -self.pid_z.controlate(self.error_pos[2,],self.t)
         # To create the message
         force_msg = WrenchStamped()
         force_msg.header.stamp = rospy.Time.now()

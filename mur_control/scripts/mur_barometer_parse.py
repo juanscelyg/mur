@@ -22,7 +22,7 @@ class MURBarometerParse():
     def call_pres(self, msg_pres):
         depth_msg = PoseWithCovarianceStamped()
         depth_msg.header.stamp = rospy.Time.now()
-        depth_msg.header.frame_id = 'mur/base_link'
+        depth_msg.header.frame_id = 'odom'
         depth_msg.pose.pose.position.z = mur_common.pressure_to_meters(msg_pres.fluid_pressure) # barometer
         # rospy.loginfo("Depth :=\n %s" %depth_msg.pose.pose.position)
         # To publish the message

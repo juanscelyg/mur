@@ -32,9 +32,9 @@ class MURSimToOutNode:
 
         msg_imu = Imu();
         msg_imu.header.stamp = rospy.Time.now()
-        msg_imu.header.frame_id = msg_imu_int.header.frame_id
+        msg_imu.header.frame_id = "base_link"
         msg_imu.orientation = msg_imu_int.orientation
-        msg_imu.orientation_covariance = np.array([1,0,0,0,1,0,0,0,1])
+        msg_imu.orientation_covariance = np.array([0,0,0,0,0,0,0,0,0])
         msg_imu.angular_velocity = msg_imu_int.angular_velocity
         msg_imu.angular_velocity_covariance = np.array([1.2184E-7,0.0,0.0,0.0,1.2184E-7,0.0,0.0,0.0,1.2184E-7])
         msg_imu.linear_acceleration.x = -msg_imu_int.linear_acceleration.x # The same configuration in the PIXHAWK

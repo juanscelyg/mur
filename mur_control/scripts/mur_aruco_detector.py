@@ -41,14 +41,14 @@ class MURArucoDetector():
 
     def get_camera_pose_robot(self):
         try:
-            (trans,rot) = self.listener.lookupTransform('mur/base_link','/mur/camera_link_optical', rospy.Time())
+            (trans,rot) = self.listener.lookupTransform('camera_link_optical','base_link', rospy.Time())
         except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-            trans = np.array([0,0,0])
-            rot= np.array([0,0,0,0])
+            trans = np.array([-0.055, 0.160, 0])
+            rot= np.array([0.7068252, 0, 0, 0.7073883])
         rot = euler_from_quaternion(rot)
         # rospy.loginfo("trans :=\n %s", trans)
-        RB_C = compose_matrix(None, None, rot, trans, None)
-        return RB_C
+        RC_B = compose_matrix(None, None, rot, trans, None)
+        return RC_B
 
     def get_aruco_pose(self, id):
         if id==10:
@@ -71,11 +71,11 @@ class MURArucoDetector():
     def pose_callback(self,tvec,rvec,aruco_flag):
         msg_flag = BoolStamped()
         msg_flag.header.stamp = rospy.Time.now()
-        msg_flag.header.frame_id = 'mur/base_link'
+        msg_flag.header.frame_id = 'odom'
         msg_flag.data = aruco_flag
         msg_pose = PoseWithCovarianceStamped()
         msg_pose.header.stamp = rospy.Time.now()
-        msg_pose.header.frame_id = 'mur/base_link'
+        msg_pose.header.frame_id = 'odom'
         msg_pose.pose.pose.position.x = tvec[0]
         msg_pose.pose.pose.position.y = tvec[1]
         msg_pose.pose.pose.position.z = tvec[2]
@@ -108,7 +108,7 @@ class MURArucoDetector():
                 cv_image = cv2.aruco.drawAxis(cv_image, self.camera_matrix, self.dist_coeffs, rvec, tvec, 0.2)
                 br = tf2_ros.TransformBroadcaster()
                 t = TransformStamped()
-                t.header.frame_id = "/mur/camera_link_optical"
+                t.header.frame_id = "camera_link_optical"
                 t.header.stamp = rospy.Time.now()
                 t.child_frame_id = "Marker_"+str(ids[i])
                 t.transform.translation.x = t_vec[0]
@@ -128,6 +128,7 @@ class MURArucoDetector():
                 RC_A = compose_matrix(None, None, r_vec, t_vec, None) # Pose from Aruco to Camera Optical link
                 RA_C = np.linalg.inv(RC_A)
                 RC_B = self.get_camera_pose_robot() # Camera pose from Robot base link
+                rospy.loginfo("RC_B :=\n %s", RC_B)
                 RA_B = np.matmul(RA_C,RC_B)
                 RO_B = np.matmul(RO_A,RA_B)
                 (_,_,rot,trans,_) = decompose_matrix(RO_B)

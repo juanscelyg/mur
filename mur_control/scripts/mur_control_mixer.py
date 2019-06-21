@@ -42,7 +42,7 @@ class MURControlMixerNode():
         # ROS infraestucture
         self.srv_reconfigure = Server(MurControlMixerConfig, self.config_callback)
         self.pub_actuators = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=1)
-        self.sub_odometry = rospy.Subscriber('/mur/Odometry', Odometry, self.get_odometry)
+        self.sub_odometry = rospy.Subscriber('/mur/odometry/filtered', Odometry, self.get_odometry)
         self.sub_force = rospy.Subscriber('/mur/force_input', WrenchStamped, self.cmd_force_callback)
 
     def config_callback(self, config, level):
