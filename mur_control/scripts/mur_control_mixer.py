@@ -32,6 +32,8 @@ class MURControlMixerNode():
         self.force_vel = np.zeros(shape=(6,1))
         self.force_yaw = np.zeros(shape=(6,1))
         self.force_height = np.zeros(shape=(6,1))
+        self.pose_rot = np.array([0,0,0,1])
+        self.J = mur_common.convert_body_world(self.pose_rot)
 
         # Convert parameters
         self.T = self.get_t_matrix()
@@ -42,7 +44,7 @@ class MURControlMixerNode():
         # ROS infraestucture
         self.srv_reconfigure = Server(MurControlMixerConfig, self.config_callback)
         self.pub_actuators = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=1)
-        self.sub_odometry = rospy.Subscriber('/mur/odometry/filtered', Odometry, self.get_odometry)
+        self.sub_odometry = rospy.Subscriber('/mur/odom_filtered', Odometry, self.get_odometry)
         self.sub_force = rospy.Subscriber('/mur/force_input', WrenchStamped, self.cmd_force_callback)
 
     def config_callback(self, config, level):

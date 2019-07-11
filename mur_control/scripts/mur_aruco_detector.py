@@ -24,11 +24,11 @@ class MURArucoDetector():
         self.markerLength = 0.2 # in meters
 
         # Camera
-        camera_matrix = rospy.get_param('/mur/mur_aruco_detector/camera_matrix/data')
+        camera_matrix = rospy.get_param('/mur_aruco_detector/camera_matrix/data')
         self.camera_matrix = np.array([[camera_matrix[0], camera_matrix[1], camera_matrix[2]],
         [camera_matrix[3], camera_matrix[4], camera_matrix[5]],
         [0, 0, 1]], dtype = "double")
-        dist_coeffs = rospy.get_param('/mur/mur_aruco_detector/distortion_coefficients/data')
+        dist_coeffs = rospy.get_param('/mur_aruco_detector/distortion_coefficients/data')
         self.dist_coeffs = np.array([dist_coeffs[0],dist_coeffs[1],dist_coeffs[2],dist_coeffs[3],dist_coeffs[4]])
 
         # ROS infraestucture
@@ -38,6 +38,7 @@ class MURArucoDetector():
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("/mur/mur/camera/camera_image",Image,self.callback)
         self.listener = tf.TransformListener()
+
 
     def get_camera_pose_robot(self):
         try:
@@ -102,8 +103,9 @@ class MURArucoDetector():
             for i in range(len(ids)):
                 rvec, tvec, _objPoints = cv2.aruco.estimatePoseSingleMarkers(corners[i], self.markerLength, self.camera_matrix, self.dist_coeffs)
                 t_vec = np.array([tvec[0][0][0],tvec[0][0][1],tvec[0][0][2]])
-                # rospy.loginfo("t_vec :=\n %s", t_vec)
+                #rospy.loginfo("t_vec :=\n %s", t_vec)
                 r_vec = np.array([rvec[0][0][0],rvec[0][0][1],rvec[0][0][2]])
+                #rospy.loginfo("r_vec :=\n %s", r_vec)
                 cv2.aruco.drawDetectedMarkers(cv_image,corners, ids)
                 cv_image = cv2.aruco.drawAxis(cv_image, self.camera_matrix, self.dist_coeffs, rvec, tvec, 0.2)
                 br = tf2_ros.TransformBroadcaster()
@@ -125,12 +127,16 @@ class MURArucoDetector():
                 ## Get global position about the origin
                 (trans, rot) = self.get_aruco_pose(ids[i])
                 RO_A = compose_matrix(None, None, rot, trans, None) # Aruco Pose
+                #rospy.loginfo("RO_A :=\n %s", RO_A)
                 RC_A = compose_matrix(None, None, r_vec, t_vec, None) # Pose from Aruco to Camera Optical link
                 RA_C = np.linalg.inv(RC_A)
+                #rospy.loginfo("RC_A :=\n %s", RC_A)
                 RC_B = self.get_camera_pose_robot() # Camera pose from Robot base link
-                rospy.loginfo("RC_B :=\n %s", RC_B)
+                #rospy.loginfo("RC_B :=\n %s", RC_B)
                 RA_B = np.matmul(RA_C,RC_B)
+                #rospy.loginfo("RA_B :=\n %s", RA_B)
                 RO_B = np.matmul(RO_A,RA_B)
+                #rospy.loginfo("RO_B :=\n %s", RO_B)
                 (_,_,rot,trans,_) = decompose_matrix(RO_B)
             self.pose_callback(trans,rot,aruco_flag)
         try:

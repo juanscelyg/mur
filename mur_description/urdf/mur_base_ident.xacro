@@ -1,0 +1,207 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <!-- Import macro files -->
+    <xacro:include filename="$(find uuv_descriptions)/urdf/common.urdf.xacro" />
+    <xacro:include filename="$(find uuv_sensor_ros_plugins)/urdf/sensor_snippets.xacro"/>
+    <xacro:include filename="$(find uuv_gazebo_ros_plugins)/urdf/snippets.xacro"/>
+    <!--xacro:include filename="$(find mur_description)/urdf/mur_snippets.xacro"/-->
+    <!-- Properties -->
+    <xacro:property name="mass" value="9.6"/> <!--The real value is 8.6, but it was changed for the simulation. The real life add 1kg to the robot.-->
+    <xacro:property name="volume" value="0.008550699"/>
+    <xacro:property name="cob" value="0 0 0"/>
+    <xacro:property name="rho" value="1027.0"/>
+
+    <xacro:property name="visual_mesh_file" value="file://$(find mur_description)/mesh/mur.dae"/>
+    <xacro:property name="collision_mesh_file" value="file://$(find mur_description)/mesh/mur.dae"/>
+    <xacro:property name="prop_mesh_file" value="file://$(find mur_description)/mesh/mur_prop.dae"/>
+
+    <xacro:macro name="mur_base_ident" params="namespace debug">
+    <!-- THE ROBOT -->
+        <link name="${namespace}/base_link">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="${visual_mesh_file}" scale="1 1 1" />
+                </geometry>
+            </visual>
+
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                    <geometry>
+                        <mesh filename="${collision_mesh_file}" scale="1 1 1" />
+                    </geometry>
+            </collision>
+
+            <inertial>
+              <mass value="${mass}" />
+              <origin xyz="0 0 0" rpy="0 0 0"/>
+              <inertia ixx="0.38467478" ixy="0" ixz="0"
+                       iyy="0.16784643" iyz="0"
+                       izz="0.46539770" />
+            </inertial>
+        </link>
+<!-- JOINT BETWEEN ROBOT AND ARM -->
+        <joint name="mur_arm_joint" type="continuous">
+          <parent link="${namespace}/base_link"/>
+          <child link="${namespace}/arm_base_link" />
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <axis xyz="1 0 0"/>
+          <limit effort="9999999999999" velocity="999999999999"/>
+        </joint>
+
+<!-- ARM -->
+        <link name="${namespace}/arm_base_link">
+          <visual>
+            <origin xyz="0 0 0.75" rpy="0 0 0" />
+            <geometry>
+                <cylinder length="1.5" radius="0.005"/>
+                <!--box size="2 4.3 0.01" /-->
+            </geometry>
+            <material name="grey">
+              <color rgba="0.8 0.8 0.8 1"/>
+            </material>
+          </visual>
+          <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+            <cylinder length="0.6" radius="0.2"/>
+            <!--cylinder length="1.5" radius="0.005"/-->
+            <!--box size="2 4.3 0.01" /-->
+            </geometry>
+          </collision>
+          <inertial>
+            <mass value="0.8" />
+            <origin xyz="0.0 0.0 0.0"/>
+            <inertia ixx="0.0" ixy="0.0" ixz="0.0"
+              iyy="0.0" iyz="0.0"
+              izz="0.0" />
+          </inertial>
+        </link>
+<!-- JOINT BETWEEN ARM AND BASE  -->
+        <joint name="arm_base_joint" type="prismatic">
+          <parent link="${namespace}/arm_base_link"/>
+          <child link="${namespace}/base_base_link" />
+          <origin xyz="0 0 1.5" rpy="0 0 0"/>
+          <axis xyz="0 0 1"/>
+          <limit effort="9999999999999" velocity="999999999999"/>
+        </joint>
+
+<!-- BASE -->
+        <link name="${namespace}/base_base_link">
+          <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+              <box size="2.5 4.5 0.01" />
+            </geometry>
+            <material name="grey">
+              <color rgba="0.8 0.8 0.8 1"/>
+            </material>
+          </visual>
+          <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+              <box size="2.5 4.5 0.01" />
+            </geometry>
+            <surface>
+              <friction>
+              <ode>
+                <mu>0.9</mu>
+                <mu2>0.9</mu2>
+              </ode>
+              </friction>
+            </surface>
+          </collision>
+          <inertial>
+            <mass value="50" />
+            <origin xyz="0.0 0.0 0.0"/>
+            <inertia ixx="0.0" ixy="0.0" ixz="0.0"
+              iyy="0.0" iyz="0.0"
+              izz="0.0" />
+          </inertial>
+        </link>
+
+
+
+  <!-- Set up hydrodynamic plugin-->
+      <gazebo>
+        <plugin name="${namespace}_uuv_plugin" filename="libuuv_underwater_object_ros_plugin.so">
+          <fluid_density>${rho}</fluid_density>
+          <flow_velocity_topic>hydrodynamics/current_velocity</flow_velocity_topic>
+          <debug>${debug}</debug>
+          <link name="${namespace}/base_link">
+            <volume>${volume}</volume>
+            <center_of_buoyancy>${cob}</center_of_buoyancy>
+            <neutrally_buoyant>0</neutrally_buoyant>
+            <hydrodynamic_model>
+              <type>fossen</type>
+              <added_mass>
+                8.37    0       0       0       0       0
+                0       8.37    0       0       0       0
+                0       0       8.37    0       0       0
+                0       0       0       0.384   0       0
+                0       0       0       0       0.465   0
+                0       0       0       0       0       0.167
+              </added_mass>
+              <!--<linear_damping_forward_speed>
+                -8      0       0       0       0       0
+                0       -162    0       0       0       150
+                0       0       -108    0       -100    0
+                0       0       0       -13     0       0
+                0       0       37      0       -20     0
+                0       -34     0       0       0       -32
+              </linear_damping_forward_speed>-->
+              <!--linear_damping>
+                -1.1033 -2.2187 -0.03113 -0.1 -0.1 -0.1
+              </linear_damping-->
+
+              <quadratic_damping>
+                -17.4666 -50.8618 -55.7484 -0.00711 -0.0123 -0.45725
+              </quadratic_damping>
+            </hydrodynamic_model>
+          </link>
+
+            <link name="${namespace}/arm_base_link">
+              <volume>0.00001</volume>
+              <center_of_buoyancy>${cob}</center_of_buoyancy>
+              <neutrally_buoyant>0</neutrally_buoyant>
+              <hydrodynamic_model>
+                <type>fossen</type>
+                <added_mass>
+                  0.0001    0       0       0       0       0
+                  0       0.0001    0       0       0       0
+                  0       0       0.0001    0       0       0
+                  0       0       0       0.0001   0       0
+                  0       0       0       0       0.0001   0
+                  0       0       0       0       0       0.0001
+                </added_mass>
+                <quadratic_damping>
+                  -0.001 -0.001 -0.001 -0.001 -0.001 -0.001
+                </quadratic_damping>
+              </hydrodynamic_model>
+            </link>
+          <link name="${namespace}/base_base_link">
+            <volume>0.01</volume>
+            <center_of_buoyancy>${cob}</center_of_buoyancy>
+            <neutrally_buoyant>0</neutrally_buoyant>
+            <hydrodynamic_model>
+              <type>fossen</type>
+              <added_mass>
+                0.01    0       0       0       0       0
+                0       0.01    0       0       0       0
+                0       0       0.01    0       0       0
+                0       0       0       0.001   0       0
+                0       0       0       0       0.001   0
+                0       0       0       0       0       0.001
+              </added_mass>
+              <quadratic_damping>
+                -1 -1 -1 -1 -1 -1
+              </quadratic_damping>
+            </hydrodynamic_model>
+          </link>
+        </plugin>
+      </gazebo>
+      <xacro:include filename="$(find mur_description)/urdf/mur_sensors.xacro"/>
+      <xacro:include filename="$(find mur_description)/urdf/mur_actuators.xacro"/>
+    </xacro:macro>
+</robot>
+

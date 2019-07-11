@@ -10,7 +10,7 @@
     <include file="$(find mur_description)/launch/upload_mur.launch">
         <arg name="x" default="-1.1"/>
         <arg name="y" default="0.0"/>
-        <arg name="z" default="-0.8"/>
+        <arg name="z" default="-1.3"/>
         <arg name="yaw" default="-1.57"/>
         <arg name="mode" default="default"/>
         <arg name="namespace" default="mur"/>
