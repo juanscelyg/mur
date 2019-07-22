@@ -61,6 +61,7 @@ class MURSimToIntoNode:
         msg_thruster_1.data = force_actuators[1]
         msg_thruster_2.data = force_actuators[2]
         msg_thruster_3.data = force_actuators[3]
+        rospy.loginfo("Force Actuators:=\n %s" %force_actuators)
         self.pub_thruster_0.publish(msg_thruster_0)
         self.pub_thruster_1.publish(msg_thruster_1)
         self.pub_thruster_2.publish(msg_thruster_2)
