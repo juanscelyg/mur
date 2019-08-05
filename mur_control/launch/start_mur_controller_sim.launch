@@ -4,11 +4,12 @@
 
     <!-- Start the a underwater world simulation scenario -->
     <include file="$(find grmi_worlds)/launch/GRMI_pool_world.launch"/>
+    <!--include file="$(find uuv_gazebo_worlds)/launch/munkholmen.launch"/-->
     <!--include file="$(find grmi_worlds)/launch/GRMI_empty_world_ekf.launch"/-->
 
     <!-- Add the MUR vehicle to the simulation (namespace: mur) -->
     <include file="$(find mur_description)/launch/upload_mur.launch">
-        <arg name="x" default="-1.1"/>
+        <arg name="x" default="0.0"/>
         <arg name="y" default="0.0"/>
         <arg name="z" default="-1.3"/>
         <arg name="yaw" default="-1.57"/>

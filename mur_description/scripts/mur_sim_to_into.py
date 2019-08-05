@@ -32,7 +32,7 @@ class MURSimToIntoNode:
         self.pub_thruster_3 = rospy.Publisher('/mur/thrusters/3/input', FloatStamped, queue_size=1)
 
     def vel_normalize(self, msg):
-        force_actuators = np.empty_like(msg.channels)
+        force_actuators = np.array([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
         force_size = len(force_actuators)
         for i in range (force_size):
             force_actuators[i] = mur_simtools.pwm_to_push(msg.channels[i])
