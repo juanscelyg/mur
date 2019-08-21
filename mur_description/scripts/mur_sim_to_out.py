@@ -37,7 +37,7 @@ class MURSimToOutNode:
         msg_imu.orientation_covariance = np.array([0,0,0,0,0,0,0,0,0])
         msg_imu.angular_velocity = msg_imu_int.angular_velocity
         msg_imu.angular_velocity_covariance = np.array([1.2184E-7,0.0,0.0,0.0,1.2184E-7,0.0,0.0,0.0,1.2184E-7])
-        msg_imu.linear_acceleration.x = -msg_imu_int.linear_acceleration.x # The same configuration in the PIXHAWK
+        msg_imu.linear_acceleration.x = msg_imu_int.linear_acceleration.x # The same configuration in the PIXHAWK
         msg_imu.linear_acceleration.y = msg_imu_int.linear_acceleration.y
         msg_imu.linear_acceleration.z = msg_imu_int.linear_acceleration.z
         msg_imu.linear_acceleration_covariance = np.array([9.0E-8,0.0,0.0,0.0,9.0E-8,0.0,0.0,0.0,9.0E-8])
