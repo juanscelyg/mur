@@ -24,7 +24,7 @@
         <arg name="x" default="0.0"/>
         <arg name="y" default="0.0"/>
         <arg name="z" default="-0.95"/>
-        <arg name="yaw" default="-1.57"/>
+        <arg name="yaw" default="0"/>
         <arg name="mode" default="ident"/>
         <arg name="namespace" default="mur"/>
     </include>

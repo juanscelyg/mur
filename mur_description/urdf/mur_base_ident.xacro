@@ -35,9 +35,9 @@
             <inertial>
               <mass value="${mass}" />
               <origin xyz="0 0 0" rpy="0 0 0"/>
-              <inertia ixx="0.38467478" ixy="0" ixz="0"
-                       iyy="0.16784643" iyz="0"
-                       izz="0.46539770" />
+              <inertia ixx="0.22228451" ixy="0" ixz="0"
+                       iyy="0.14925489" iyz="0"
+                       izz="0.32042275" />
             </inertial>
         </link>
 <!-- JOINT BETWEEN ROBOT AND ARM -->
@@ -91,7 +91,7 @@
           <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-              <box size="2.5 4.5 0.01" />
+              <box size="4.5 2.5 0.01" />
             </geometry>
             <material name="grey">
               <color rgba="0.8 0.8 0.8 1"/>
@@ -100,7 +100,7 @@
           <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-              <box size="2.5 4.5 0.01" />
+              <box size="4.5 2.5 0.01" />
             </geometry>
             <surface>
               <friction>
@@ -114,9 +114,9 @@
           <inertial>
             <mass value="50" />
             <origin xyz="0.0 0.0 0.0"/>
-            <inertia ixx="0.0" ixy="0.0" ixz="0.0"
-              iyy="0.0" iyz="0.0"
-              izz="0.0" />
+            <inertia ixx="10.0" ixy="0.0" ixz="0.0"
+              iyy="10.0" iyz="0.0"
+              izz="10.0" />
           </inertial>
         </link>
 
@@ -204,4 +204,3 @@
       <xacro:include filename="$(find mur_description)/urdf/mur_actuators.xacro"/>
     </xacro:macro>
 </robot>
-

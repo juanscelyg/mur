@@ -17,7 +17,12 @@ def convert_body_world(pose_rot):
     cp = np.cos(nita2[1])
     cy = np.cos(nita2[2])
     tp = np.tan(nita2[1])
-    J = np.array([[cy*cp, -sy*cr+cy*sp*sr, sy*sr+cy*cr*sp, 0, 0, 0],[sy*cp, cy*cr+sr*sp*sy, -cy*sr+sp*sy*cr, 0, 0, 0],[-sp, cp*sr, cp*cr, 0, 0, 0],[0, 0, 0, 1, sr*tp, cr*tp],[0, 0, 0, 0, cr, -sr],[0, 0, 0, 0, sr/cp, cr/cp]])
+    J = np.array(   [[cy*cp, -sy*cr+cy*sp*sr, sy*sr+cy*cr*sp, 0, 0, 0],
+                    [sy*cp, cy*cr+sr*sp*sy, -cy*sr+sp*sy*cr, 0, 0, 0],
+                    [-sp, cp*sr, cp*cr, 0, 0, 0],
+                    [0, 0, 0, 1, sr*tp, cr*tp],
+                    [0, 0, 0, 0, cr, -sr],
+                    [0, 0, 0, 0, sr/cp, cr/cp]])
     return J
 
 def rot2(ang):
