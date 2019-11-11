@@ -108,7 +108,7 @@ if __name__ == '__main__':
     rospy.init_node('mur_control_mixer')
     try:
         node = MURControlMixerNode()
-        rate = rospy.Rate(25)
+        rate = rospy.Rate(50)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')

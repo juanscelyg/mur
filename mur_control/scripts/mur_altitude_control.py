@@ -5,7 +5,6 @@ import rospy
 import logging
 import sys
 import tf
-import message_filters
 from common import mur_common, mur_PID
 from dynamic_reconfigure.server import Server
 from mur_control.cfg import MurAltitudeControlConfig
@@ -19,34 +18,35 @@ from sensor_msgs.msg import FluidPressure, Imu
 class MURAltitudeControlNode:
     def __init__(self):
         # Init constants
-        self.dt_vel = 5
-        self.station_keeping = 2
+        self.dt_vel = 5.0
+        self.station_keeping = 2.0
         self.mur_mass = 9.6;
         self.mur_weight = self.mur_mass * 9.79
 
         # State vectors
-        self.h_last = 0;
+        self.h_last = 0.0;
         self.nitad = np.zeros(shape=(6,1))
         self.error_pos = np.zeros(shape=(6,1))
         self.error_vel = np.zeros(shape=(6,1))
 
         # Desire values
-        self.pos_z = -0.5
+        self.pos_z = -1.0
+        self.g_z = 23.0
 
         # ROS param server
         self.config = {}
 
         # Control gains
-        self.p_z = 30.0
-        self.i_z = 15.0
-        self.d_z = 12.0
+        self.p_z = 12.0
+        self.i_z = 0.05
+        self.d_z = -40.0
 
         # PID Control
         self.pid_z = mur_PID.mur_PID(self.p_z, self.i_z, self.d_z, 120)
 
         # ROS infrastructure
         self.srv_reconfigure = Server(MurAltitudeControlConfig, self.config_callback)
-        self.sub_odometry = rospy.Subscriber('/mur/odom_filtered', Odometry, self.cmd_control_callback)
+        self.sub_odometry = rospy.Subscriber('/mur/pose_gt', Odometry, self.cmd_control_callback)
         self.pub_cmd_force = rospy.Publisher('/mur/force_input', WrenchStamped, queue_size=2)
 
     def cmd_control_callback(self, msg_odometry):
@@ -87,7 +87,7 @@ class MURAltitudeControlNode:
     def force_callback(self):
         # Control Law
         # PID control
-        Tz = self.pid_z.controlate(self.error_pos[2,],self.t)
+        Tz = self.pid_z.controlate(self.error_pos[2,],-self.error_vel[2,],self.t) + self.g_z
         # To create the message
         force_msg = WrenchStamped()
         force_msg.header.stamp = rospy.Time.now()
@@ -103,6 +103,7 @@ class MURAltitudeControlNode:
         self.p_z = config['p_z']
         self.i_z = config['i_z']
         self.d_z = config['d_z']
+        self.g_z = config['g_z']
         self.pid_z = mur_PID.mur_PID(self.p_z, self.i_z, self.d_z, 120)
         # To refresh the desire points (To topics after, while like parameters)
         self.pos_z = config['pos_z']

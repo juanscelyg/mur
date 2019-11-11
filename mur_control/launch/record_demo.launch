@@ -16,6 +16,7 @@
         /mavros/imu/data
         /mavros/imu/diff_pressure
         /mur/Odometry
+        /mur/pose_verification
         /mur/wrench_perturbation
         /mur/thrusters/0/input
         /mur/thrusters/1/input
@@ -39,6 +40,7 @@
           /mavros/imu/data
           /mavros/imu/diff_pressure
           /mur/Odometry
+          /mur/pose_verification
           /mur/thrusters/0/input
           /mur/thrusters/1/input
           /mur/thrusters/2/input
