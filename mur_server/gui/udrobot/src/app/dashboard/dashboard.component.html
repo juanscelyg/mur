@@ -1,0 +1,40 @@
+<label class="onConnected-margin">Status: {{onConnectedLabel}}</label>
+<mat-progress-bar
+    class="onConnected-margin"
+    [color]="color"
+    [mode]="onConnectedText"
+    [value]="100">
+</mat-progress-bar>
+<div class="grid-container">
+  <mat-grid-list cols="2" rowHeight="350px">
+    <mat-grid-tile *ngFor="let card of cards | async" [colspan]="card.cols" [rowspan]="card.rows">
+      <mat-card class="dashboard-card">
+        <mat-card-header>
+          <mat-card-title>
+            {{card.title}}
+          </mat-card-title>
+        </mat-card-header>
+          <div *ngIf="'Pose'==card.title">
+            <mat-card-content class="dashboard-card-content">
+              <app-pose></app-pose>
+            </mat-card-content>
+          </div>
+          <div *ngIf="'Cameras'==card.title">
+            <mat-card-content class="dashboard-card-content">
+              {{card.title}}
+            </mat-card-content>
+          </div>
+          <div *ngIf="'Navigation'==card.title">
+            <mat-card-content class="dashboard-card-content">
+              {{card.title}}
+            </mat-card-content>
+          </div>
+          <div *ngIf="'Controls'==card.title">
+            <mat-card-content class="dashboard-card-content">
+              {{card.title}}
+            </mat-card-content>
+          </div>
+      </mat-card>
+    </mat-grid-tile>
+  </mat-grid-list>
+</div>

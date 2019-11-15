@@ -14,7 +14,7 @@ from std_msgs.msg import Time
 from nav_msgs.msg import Odometry
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
-class MURVelocityControlNode:
+class MURSupervisorNode:
     def __init__(self):
         # Init constants
         self.dt_vel = 2
@@ -119,12 +119,11 @@ class MURVelocityControlNode:
 
 
 if __name__ == '__main__':
-    rospy.init_node('mur_velocity_control')
+    rospy.init_node('mur_supervisor')
     try:
-        node = MURVelocityControlNode()
-        rospy.Rate(10)
+        node = MURSupervisorNode()
+        rospy.Rate(5)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')
     print('exiting')
-

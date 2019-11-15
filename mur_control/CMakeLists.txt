@@ -28,14 +28,11 @@ generate_messages(
 
 generate_dynamic_reconfigure_options(
   cfg/MurControlMixer.cfg
-  cfg/MurAltitudeControl.cfg
-  cfg/MurPositionControl.cfg
   cfg/MurAttitudeControl.cfg
 )
 
-catkin_install_python(PROGRAMS  scripts/mur_altitude_control.py
-                                scripts/mur_attitude_control.py
-                                scripts/mur_position_control.py
+catkin_install_python(PROGRAMS  scripts/mur_attitude_control.py
+                                scripts/mur_supervisor.py
                                 scripts/mur_control_mixer.py
                                 scripts/mur_ekf.py
                                 scripts/mur_aruco_detector.py
