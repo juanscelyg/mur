@@ -12,6 +12,7 @@ from rospy.numpy_msg import numpy_msg
 from geometry_msgs.msg import WrenchStamped, PoseStamped, TwistStamped,Vector3, Quaternion, Pose
 from std_msgs.msg import Time
 from nav_msgs.msg import Odometry
+from mavros_msgs.msg import State
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
 class MURAttitudeControlNode:
@@ -21,6 +22,7 @@ class MURAttitudeControlNode:
         self.station_keeping = 2.0
         self.mur_mass = 9.6;
         self.mur_weight = self.mur_mass * 9.79
+        self.set_mode_status('LAND')
 
         # State vectors
         self.h_last = 0.0;
@@ -73,9 +75,37 @@ class MURAttitudeControlNode:
         # ROS infrastructure
         self.srv_reconfigure = Server(MurAttitudeControlConfig, self.config_callback)
         self.sub_cmd_pose = rospy.Subscriber('/mur/pose_gt', Odometry, self.cmd_pose_callback)
-        self.sub_cmd_desired = rospy.Subscriber('/mur/pose/desired', Pose, self.cmd_desired_callback)
+        self.sub_state = rospy.Subscriber('/mur/state', State, self.state_callback)
+        self.sub_cmd_desired = rospy.Subscriber('/mur/cmd_pose', Pose, self.cmd_desired_callback)
         self.pub_cmd_force = rospy.Publisher('/mur/force_input', WrenchStamped, queue_size=2)
         #self.pub_pose_verification = rospy.Publisher('/mur/pose_verification', Odometry, queue_size=2)
+
+    def set_mode_status(self,mode):
+        if mode == 'STABILIZED':
+            self.state = 'STABILIZED'
+            self.status = 'stabilizing'
+        elif mode == 'ALTCTL':
+            self.state = 'ALTCTL'
+            self.status = 'reaching'
+        elif mode == 'POSCTL':
+            self.state = 'POSCTL'
+            self.status = 'reaching'
+        elif mode == 'AUTO.TAKEOFF':
+            self.state = 'ALTCTL'
+            self.status = 'taking off'
+        elif mode == 'AUTO.LAND':
+            self.state = 'ALTCTL'
+            self.status = 'landing'
+        elif mode == 'LAND':
+            self.state = 'LAND'
+            self.status = 'landed'
+        else:
+            rospy.loginfo("Unknown mdoe := %s. Assigned mode := 'STABILIZED'." %mode)
+            self.state = 'STABILIZED'
+            self.status = 'stabilizing'
+
+    def state_callback(self, msg):
+        self.set_mode_status(msg.mode)
 
     def cmd_pose_callback(self, msg):
         if not bool(self.config):
@@ -101,17 +131,26 @@ class MURAttitudeControlNode:
         self.force_callback()
 
     def cmd_desired_callback(self,msg):
-        X_error = self.pose_pos[0,]-msg.position.x
-        Y_error = self.pose_pos[1,]-msg.position.y
-        self.R = mur_common.rot2(self.nita2[2,])
-        [X_r, Y_r] = np.matmul(np.transpose(self.R),np.array([[X_error],[Y_error]]))
-        self.roll_d = self.pid_x.controlate(self.error_pos[0,],-self.error_vel[0,],self.t)
-        self.pitch_d = self.pid_y.controlate(self.error_pos[1,],-self.error_vel[1,],self.t)
-        self.pos_z = msg.position.z
-        # To build the desire points vector
-        self.nitad = np.array([msg.position.x, msg.position.y, msg.position.z, self.pitch_d, self.roll_d, self.yaw_d])
-        rospy.loginfo("nita desired :=\n %s" %self.nitad)
-
+        if self.state == 'POSCTL':
+            self.roll_d = self.pid_x.controlate(self.error_pos[0,],-self.error_vel[0,],self.t)
+            self.pitch_d = self.pid_y.controlate(self.error_pos[1,],-self.error_vel[1,],self.t)
+            self.pos_z = msg.position.z
+            # To build the desire points vector
+            self.nitad = np.array([msg.position.x, msg.position.y, msg.position.z, self.pitch_d, self.roll_d, self.yaw_d])
+        elif self.state == 'STABILIZED':
+            q_d = np.array([msg.orientation.x,msg.orientation.y,msg.orientation.z,msg.orientation.w])
+            self.roll_d = q_d[0]
+            self.pitch_d = q_d[1]
+            self.pos_z = msg.position.z
+            # To build the desire points vector
+            self.nitad = np.array([self.pose_pos[0,], self.pose_pos[1,], msg.position.z, 0.0,0.0,0.0])
+        elif self.state == 'ALTCTL' or self.state == 'LAND':
+            self.roll_d = 0.0
+            self.pitch_d = 0.0
+            self.pos_z = msg.position.z
+            # To build the desire points vector
+            self.nitad = np.array([msg.position.x, msg.position.y, msg.position.z, self.pitch_d, self.roll_d, self.yaw_d])
+        #rospy.loginfo("nita desired :=\n %s" %self.nitad)
 
     def get_errors(self):
         # Create the errors
@@ -124,10 +163,21 @@ class MURAttitudeControlNode:
     def force_callback(self):
         # Control Law
         # PID control
-        Tz = self.pid_z.controlate(self.error_pos[2,],-self.error_vel[2,],self.t) + self.g_z
-        T_p = self.pid_pitch.controlate(self.error_pos[3,],-self.error_vel[3,],self.t)
-        T_r = self.pid_roll.controlate(self.error_pos[4,],-self.error_vel[4,],self.t)
-        T_y = 0.0 #self.pid_yaw.controlate(self.error_pos[5,],-self.vita[5,],self.t)
+        if self.state == 'STABILIZED':
+            Tz = self.pid_z.controlate(self.error_pos[2,],-self.error_vel[2,],self.t) + self.g_z
+            T_p = 23.0*self.pitch_d
+            T_r = 23.0*self.roll_d
+            T_y = 0.0 #self.pid_yaw.controlate(self.error_pos[5,],-self.vita[5,],self.t)
+        elif self.state == 'LAND':
+            Tz = 0.0
+            T_p = 0.0
+            T_r = 0.0
+            T_y = 0.0 #self.pid_yaw.controlate(self.error_pos[5,],-self.vita[5,],self.t)
+        else:
+            Tz = self.pid_z.controlate(self.error_pos[2,],-self.error_vel[2,],self.t) + self.g_z
+            T_p = self.pid_pitch.controlate(self.error_pos[3,],-self.error_vel[3,],self.t)
+            T_r = self.pid_roll.controlate(self.error_pos[4,],-self.error_vel[4,],self.t)
+            T_y = 0.0 #self.pid_yaw.controlate(self.error_pos[5,],-self.vita[5,],self.t)
         # To create the message
         force_msg = WrenchStamped()
         force_msg.header.stamp = rospy.Time.now()
@@ -140,16 +190,6 @@ class MURAttitudeControlNode:
         #rospy.loginfo("Rot :=\n %s" %self.error_pos)
         #rospy.loginfo("For :=\n %s" %np.array([Tz,T_p,T_r,T_y]))
         self.pub_cmd_force.publish(force_msg)
-        '''
-        # Odometry auxiliar
-        pose_msg = Odometry()
-        pose_msg.header.stamp = rospy.Time.now()
-        pose_msg.header.frame_id = 'mur_base_link'
-        pose_msg.pose.pose.position.x = self.error_pos[3,]
-        pose_msg.pose.pose.position.y = self.error_pos[4,]
-        pose_msg.pose.pose.position.z = self.error_pos[5,]
-        self.pub_pose_verification.publish(pose_msg)
-        '''
 
 
     def config_callback(self, config, level):

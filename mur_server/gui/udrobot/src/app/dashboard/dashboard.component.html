@@ -6,7 +6,7 @@
     [value]="100">
 </mat-progress-bar>
 <div class="grid-container">
-  <mat-grid-list cols="2" rowHeight="350px">
+  <mat-grid-list cols="2" rowHeight="400px">
     <mat-grid-tile *ngFor="let card of cards | async" [colspan]="card.cols" [rowspan]="card.rows">
       <mat-card class="dashboard-card">
         <mat-card-header>
@@ -21,7 +21,7 @@
           </div>
           <div *ngIf="'Cameras'==card.title">
             <mat-card-content class="dashboard-card-content">
-              {{card.title}}
+              <app-cameras></app-cameras>
             </mat-card-content>
           </div>
           <div *ngIf="'Navigation'==card.title">
