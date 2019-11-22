@@ -10,7 +10,7 @@ import { ros, DashboardComponent } from '../dashboard/dashboard.component';
 })
 export class PoseComponent implements OnInit {
   constructor() { }
-  private pose_msg: any;
+  public pose_msg: any;
   public x: any;
   public y: any;
   public z: any;

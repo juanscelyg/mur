@@ -20,7 +20,11 @@ import { NavigationComponent } from './navigation/navigation.component';
 import { ControlsComponent } from './controls/controls.component';
 import { SettingsComponent } from './settings/settings.component';
 import {MatTableModule} from '@angular/material/table';
-
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatListModule} from '@angular/material/list';
+import {MatRadioModule} from '@angular/material/radio';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material';
 
 @NgModule({
   declarations: [
@@ -45,7 +49,12 @@ import {MatTableModule} from '@angular/material/table';
     MatButtonModule,
     LayoutModule,
     MatProgressBarModule,
-    MatTableModule
+    MatTableModule,
+    MatSlideToggleModule,
+    MatListModule,
+    MatRadioModule,
+    MatFormFieldModule,
+    MatInputModule
   ],
   providers: [],
   bootstrap: [AppComponent]

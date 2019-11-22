@@ -100,9 +100,11 @@ class MURAttitudeControlNode:
             self.state = 'LAND'
             self.status = 'landed'
         else:
-            rospy.loginfo("Unknown mdoe := %s. Assigned mode := 'STABILIZED'." %mode)
+            rospy.logwarn("Unknown mode := %s. Assigned mode := 'STABILIZED'." %mode)
             self.state = 'STABILIZED'
             self.status = 'stabilizing'
+        rospy.loginfo("Assigned Mode := %s. Status := %s." %(self.state,self.status))
+
 
     def state_callback(self, msg):
         self.set_mode_status(msg.mode)
