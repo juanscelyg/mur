@@ -15,6 +15,7 @@ from mavros_msgs.msg import OverrideRCIn
 from std_msgs.msg import Time
 from nav_msgs.msg import Odometry
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
+from mavros_msgs.srv import CommandBool, CommandBoolResponse
 
 class MURSimToIntoNode:
     def __init__(self):
@@ -25,11 +26,15 @@ class MURSimToIntoNode:
         self.config = {}
 
         # ROS infrastructure
+        self.arming_srv = rospy.Service('/mavros/cmd/arming', CommandBool, self.arming_req)
         self.sub_cmd_pose = rospy.Subscriber('/mavros/rc/override', OverrideRCIn, self.cmd_actuators)
         self.pub_thruster_0 = rospy.Publisher('/mur/thrusters/0/input', FloatStamped, queue_size=1)
         self.pub_thruster_1 = rospy.Publisher('/mur/thrusters/1/input', FloatStamped, queue_size=1)
         self.pub_thruster_2 = rospy.Publisher('/mur/thrusters/2/input', FloatStamped, queue_size=1)
         self.pub_thruster_3 = rospy.Publisher('/mur/thrusters/3/input', FloatStamped, queue_size=1)
+
+    def arming_req(self,req):
+        return CommandBoolResponse(req.value,0)
 
     def vel_normalize(self, msg):
         force_actuators = np.array([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
@@ -76,4 +81,3 @@ if __name__ == '__main__':
     except rospy.ROSInterruptException:
         print('caught exception')
     print('exiting')
-

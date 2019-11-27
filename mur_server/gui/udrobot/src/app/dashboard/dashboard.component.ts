@@ -4,6 +4,9 @@ import { Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
 
 declare var ROSLIB: any;
 
+import { Setting } from '../settings/settings';
+
+
 export let ros;
 let isConnected = false;
 
@@ -52,6 +55,7 @@ export class DashboardComponent {
   hasNodes = true;
   onConnectedText: string;
   onConnectedLabel: string;
+  setting: Setting;
 
   ngOnInit(){
     this.isConnected = isConnected;
@@ -60,7 +64,7 @@ export class DashboardComponent {
     //this.setting = Setting.getCurrent();
     // Load a new Ros connection with a new try every time if it fails
     this.newRosConnection();
-    setInterval(()=>{this.newRosConnection();},5000);
+    setInterval(()=>{this.newRosConnection();},1000);
     this.data={
       rosout: [],
       //nodes: [],
@@ -70,6 +74,7 @@ export class DashboardComponent {
       this.onConnected();
     }
   }
+
   newRosConnection(): void {
     if (isConnected) {
       return;
@@ -80,9 +85,9 @@ export class DashboardComponent {
       ros = false;
       return;
     }
-
-    //ros = new ROSLIB.Ros({ url: `ws://${this.setting.address}:${this.setting.port}` });
-    ros = new ROSLIB.Ros({ url: `ws://127.0.0.1:9090` });
+    this.setting = Setting.getCurrent();
+    ros = new ROSLIB.Ros({ url: `ws://${this.setting[0].address}:${this.setting[0].port}` });
+    //ros = new ROSLIB.Ros({ url: `ws://127.0.0.1:9090` });
 
     ros.on('connection', () => {
       this.onConnected();

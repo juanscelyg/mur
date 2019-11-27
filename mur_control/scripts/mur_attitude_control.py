@@ -146,7 +146,7 @@ class MURAttitudeControlNode:
             self.pos_z = msg.position.z
             # To build the desire points vector
             self.nitad = np.array([self.pose_pos[0,], self.pose_pos[1,], msg.position.z, 0.0,0.0,0.0])
-        elif self.state == 'ALTCTL' or self.state == 'LAND':
+        elif self.state == 'ALTCTL':
             self.roll_d = 0.0
             self.pitch_d = 0.0
             self.pos_z = msg.position.z
@@ -170,11 +170,12 @@ class MURAttitudeControlNode:
             T_p = 23.0*self.pitch_d
             T_r = 23.0*self.roll_d
             T_y = 0.0 #self.pid_yaw.controlate(self.error_pos[5,],-self.vita[5,],self.t)
-        elif self.state == 'LAND':
+        elif (self.state == 'LAND' or self.status  == 'landing') and abs(self.error_pos[2,])<0.15:
             Tz = 0.0
             T_p = 0.0
             T_r = 0.0
-            T_y = 0.0 #self.pid_yaw.controlate(self.error_pos[5,],-self.vita[5,],self.t)
+            T_y = 0.0
+            self.set_mode_status('LAND')#self.pid_yaw.controlate(self.error_pos[5,],-self.vita[5,],self.t)
         else:
             Tz = self.pid_z.controlate(self.error_pos[2,],-self.error_vel[2,],self.t) + self.g_z
             T_p = self.pid_pitch.controlate(self.error_pos[3,],-self.error_vel[3,],self.t)
