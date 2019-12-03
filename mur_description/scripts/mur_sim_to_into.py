@@ -34,7 +34,7 @@ class MURSimToIntoNode:
         self.pub_thruster_3 = rospy.Publisher('/mur/thrusters/3/input', FloatStamped, queue_size=1)
 
     def arming_req(self,req):
-        return CommandBoolResponse(req.value,0)
+        return CommandBoolResponse(True,0)
 
     def vel_normalize(self, msg):
         force_actuators = np.array([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])

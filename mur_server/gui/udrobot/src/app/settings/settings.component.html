@@ -14,13 +14,14 @@
                 <mat-form-field>
                   <input matInput type="string" placeholder="Robot Address" formControlName="robot_address" value="127.0.0.1" #robot_address>
                 </mat-form-field>
-                <button mat-raised-button name="set-default" color="primary" (click)="set_default_handle($event)">Set Default</button>
+                <button mat-raised-button name="set-default" color="primary" (click)="set_default_handle($event)" (touchend)="set_default_handle($event)">Set Default</button>
               </mat-list-item>
               <mat-list-item>
                 <mat-form-field>
                   <input matInput type="number" placeholder="Robot Port" formControlName="robot_port" value="9090" #robot_port>
                 </mat-form-field>
-                <button mat-raised-button name="set-server" color="primary" (click)="set_server_handle($event,robot_address,robot_port)">Set Server</button>
+                <button mat-raised-button name="set-server" color="primary" (click)="set_server_handle($event,robot_address,robot_port)"
+                (touchend)="set_server_handle($event,robot_address,robot_port)">Set Server</button>
               </mat-list-item>
               <mat-divider></mat-divider>
               <mat-list-item>
@@ -46,7 +47,8 @@
                   <input matInput type="number" placeholder="Yaw ekf" formControlName="yaw_ekf" value="0.0" #yaw_ekf>
                 </mat-form-field>
               </mat-list-item><mat-list-item>
-                <button mat-raised-button name="set-ekf" color="primary" (click)="set_ekf_handle($event,x_ekf,y_ekf,z_ekf,pitch_ekf,roll_ekf,yaw_ekf)">Set EKF</button>
+                <button mat-raised-button name="set-ekf" color="primary" (click)="set_ekf_handle($event,x_ekf,y_ekf,z_ekf,pitch_ekf,roll_ekf,yaw_ekf)"
+                (touchend)="set_ekf_handle($event,x_ekf,y_ekf,z_ekf,pitch_ekf,roll_ekf,yaw_ekf)">Set EKF</button>
               </mat-list-item>
             </mat-list>
           </mat-card-content>
@@ -60,30 +62,30 @@
               <mat-list-item>
                 <label class="status-margin" >Motor 1: {{motor_1.value}}</label>
                 <mat-slider color="primary" [max]='motor_max' [min]='motor_min'
-                [disabled]="!armed_enabled" (input)="get_value_motor($event)"
-                [value]='motor_init' (click)="motor_1.value=motor_init"
-                (touchend)="motor_1.value=motor_init" #motor_1></mat-slider>
+                [disabled]="!armed_enabled" (input)="get_value_motor($event, motor_1, motor_2, motor_3, motor_4)"
+                [value]='motor_init' (click)="motor_1.value=motor_init; get_value_motor($event, motor_1, motor_2, motor_3, motor_4)"
+                (touchend)="motor_1.value=motor_init; get_value_motor($event, motor_1, motor_2, motor_3, motor_4)" #motor_1></mat-slider>
               </mat-list-item>
               <mat-list-item>
                 <label class="status-margin" >Motor 2: {{motor_2.value}}</label>
                 <mat-slider color="primary" [max]="motor_max" [min]="motor_min"
-                [disabled]="!armed_enabled" (input)="get_value_motor($event)"
-                [value]='motor_init' (click)="motor_2.value=motor_init"
-                (touchend)="motor_2.value=motor_init" #motor_2></mat-slider>
+                [disabled]="!armed_enabled" (input)="get_value_motor($event, motor_1, motor_2, motor_3, motor_4)"
+                [value]='motor_init' (click)="motor_2.value=motor_init; get_value_motor($event, motor_1, motor_2, motor_3, motor_4)"
+                (touchend)="motor_2.value=motor_init; get_value_motor($event, motor_1, motor_2, motor_3, motor_4)" #motor_2></mat-slider>
               </mat-list-item>
               <mat-list-item>
                 <label class="status-margin" >Motor 3: {{motor_3.value}}</label>
                 <mat-slider color="primary" [max]="motor_max" [min]="motor_min"
-                [disabled]="!armed_enabled" (input)="get_value_motor($event)"
-                [value]='motor_init' (click)="motor_3.value=motor_init"
-                (touchend)="motor_3.value=motor_init" #motor_3></mat-slider>
+                [disabled]="!armed_enabled" (input)="get_value_motor($event, motor_1, motor_2, motor_3, motor_4)"
+                [value]='motor_init' (click)="motor_3.value=motor_init; get_value_motor($event, motor_1, motor_2, motor_3, motor_4)"
+                (touchend)="motor_3.value=motor_init; get_value_motor($event, motor_1, motor_2, motor_3, motor_4)" #motor_3></mat-slider>
               </mat-list-item>
               <mat-list-item>
                 <label class="status-margin" >Motor 4: {{motor_4.value}}</label>
                 <mat-slider color="primary" [max]="motor_max" [min]="motor_min"
-                [disabled]="!armed_enabled" (input)="get_value_motor($event)"
-                [value]='motor_init' (click)="motor_4.value=motor_init"
-                (touchend)="motor_4.value=motor_init" #motor_4></mat-slider>
+                [disabled]="!armed_enabled" (input)="get_value_motor($event, motor_1, motor_2, motor_3, motor_4)"
+                [value]='motor_init' (click)="motor_4.value=motor_init; get_value_motor($event, motor_1, motor_2, motor_3, motor_4)"
+                (touchend)="motor_4.value=motor_init; get_value_motor($event, motor_1, motor_2, motor_3, motor_4)" #motor_4></mat-slider>
               </mat-list-item>
           </mat-list>
           </mat-card-content>

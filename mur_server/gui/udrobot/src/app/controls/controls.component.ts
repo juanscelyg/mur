@@ -182,7 +182,7 @@ export class ControlsComponent implements OnInit {
     var request2 = new ROSLIB.ServiceRequest({
       stream_id: 0,
       message_rate: 10,
-      bool: true
+      on_off: true
     });
     this.setstream_srv.callService(request2, responde =>{});
     this.armingClient = new ROSLIB.Service({
@@ -194,9 +194,16 @@ export class ControlsComponent implements OnInit {
       value: event.checked,
     });
     this.armingClient.callService(request, response =>{
-      this.armed_enabled = response.success;
+      var  string_armed = "DISARMED";
+      if(event.checked){
+        string_armed = "ARMED";
+      }
+      else if(!event.checked){
+        string_armed = "DISARMED";
+      }
+      this.armed_enabled = response.success && event.checked;
       this.input_method_disabled = !(this.armed_enabled && this.stabilized_flag);
-      console.log("CONTROL ARMED:="+this.armed_enabled);
+      console.log("CONTROL "+string_armed+":="+response.success);
     });
 
     /*Falta set stream rate y roslaunch roscontrol*/

@@ -46,12 +46,23 @@ export class SettingsComponent implements OnInit {
   private storageIndexName = 'roscc2-index';
   public armingClient: any;
   public setstream_srv: any;
+  public motor_msg:any;
+  public motor_1_value: any;
+  public motor_2_value: any;
+  public motor_3_value: any;
+  public motor_4_value: any;
 
   constructor(private breakpointObserver: BreakpointObserver) { }
 
   ngOnInit() {
     this.setting = JSON.parse(localStorage.getItem(this.storageSettingsName)) || [ Setting.getDefault() ];
     this.getDefault();
+    this.motor_msg = new ROSLIB.Topic({
+      ros: ros,
+      name: '/mavros/rc/override',
+      messageType: 'mavros_msgs/OverrideRCIn',
+      throttle_rate: '2'
+    });
   }
 
   getDefault(){
@@ -84,8 +95,15 @@ export class SettingsComponent implements OnInit {
     console.log(x_ekf.value,y_ekf.value,z_ekf.value,pitch_ekf.value,roll_ekf.value,yaw_ekf.value);
   }
 
-  get_value_motor(event: any){
-    console.log(event.value);
+  get_value_motor(event: any, motor_1: any, motor_2: any, motor_3: any, motor_4: any){
+    this.motor_1_value = parseFloat(motor_1.value);
+    this.motor_2_value = parseFloat(motor_2.value);
+    this.motor_3_value = parseFloat(motor_3.value);
+    this.motor_4_value = parseFloat(motor_4.value);
+    let motor_values = new ROSLIB.Message({
+      channels: [this.motor_1_value,this.motor_2_value,this.motor_3_value,this.motor_4_value,0,0,0,0]
+    });
+    this.motor_msg.publish(motor_values);
   }
 
   arm_handle(event: any){
@@ -97,7 +115,7 @@ export class SettingsComponent implements OnInit {
     var request2 = new ROSLIB.ServiceRequest({
       stream_id: 0,
       message_rate: 10,
-      bool: true
+      on_off: true
     });
     this.setstream_srv.callService(request2, responde =>{});
     this.armingClient = new ROSLIB.Service({
@@ -109,8 +127,15 @@ export class SettingsComponent implements OnInit {
       value: event.checked,
     });
     this.armingClient.callService(request, response =>{
-      this.armed_enabled = response.success;
-      console.log("TESTING ARMED:="+this.armed_enabled);
+      var  string_armed = "DISARMED";
+      if(event.checked){
+        string_armed = "ARMED";
+      }
+      else if(!event.checked){
+        string_armed = "DISARMED";
+      }
+      this.armed_enabled = response.success && event.checked;
+      console.log("TESTING "+string_armed+":="+response.success);
     });
     /*Falta el stream rate*/
   }
