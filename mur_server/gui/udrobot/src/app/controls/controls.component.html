@@ -23,7 +23,7 @@
 <mat-card class="status-card mat-elevation-z8">
   <mat-card-content ><mat-list>
     <mat-list-item>
-    <label class="status-margin" ><b>STATUS:</b> {{status}} </label>
+    <label class="status-margin" ><b>STATUS:</b>&nbsp;</label><span id="status_label"></span>
     <mat-form-field style="margin-left:4em; margin-right:4em">
       <input matInput type="number" placeholder="Z landing" formControlName="z_landing" value="-1.4" #z_landing>
     </mat-form-field>
@@ -59,19 +59,12 @@
 <mat-card class="input-control-card mat-elevation-z8">
 <mat-card-content>
     <section class="input-control-section">
-
-      <ng-template [ngIf]="leak_enabled" [ngIfElse]="leak_disabled">
-          <label class="leak-margin" style="margin-right:2em; color:green" ><b>NO LEAK</b></label>
-      </ng-template>
-      <ng-template #leak_disabled>
-          <label class="leak-margin" style="margin-right:2em; color:red" ><b>LEAK DETECTED</b></label>
-      </ng-template>
-
+      <label class="armed-margin" style="margin-right:2em" ><b><span id="leak_label"></span></b></label>
       <ng-template [ngIf]="armed_enabled" [ngIfElse]="armed_disabled">
-          <label class="armed-margin" style="margin-right:2em; color:green" ><b>ARMED</b></label>
+          <label class="armed-margin" style="margin-right:2em; color:red" ><b>ARMED</b></label>
       </ng-template>
       <ng-template #armed_disabled>
-          <label class="armed-margin" style="margin-right:2em; color:red" ><b>DISARMED</b></label>
+          <label class="armed-margin" style="margin-right:2em; color:green" ><b>DISARMED</b></label>
       </ng-template>
 
       <mat-radio-group formControlName="input-control-form" color="primary" (change)="input_control_radioChange($event)" disabled={{input_method_disabled}}>

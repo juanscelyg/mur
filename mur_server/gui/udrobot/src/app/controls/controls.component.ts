@@ -31,6 +31,7 @@ export class ControlsComponent implements OnInit {
   public state_label:string;
   public input_method_disabled: boolean = true;
   public leak_enabled: boolean = false;
+  public leak_label: string;
   public armed_enabled: boolean = false;
   public stabilized_flag: boolean = false;
   public altitude_flag: boolean = false;
@@ -40,13 +41,51 @@ export class ControlsComponent implements OnInit {
   public state_msg: any;
   public desired_pose_msg: any;
   public pose_msg: any;
+  public leak_msg: any;
+  public mur_status_msg: any;
 
   ngOnInit() {
+    this.status = 'unknown';
+    this.leak_enabled = false;
+    document.getElementById("leak_label").innerHTML = "NO LEAK";
+    document.getElementById("leak_label").style.color="green";
+    document.getElementById("status_label").innerHTML = this.status;
     this.state_msg = new ROSLIB.Topic({
       ros: ros,
       name: '/mur/state',
       messageType: 'mavros_msgs/State',
       throttle_rate: '20'
+    });
+    this.leak_msg = new ROSLIB.Topic({
+      ros: ros,
+      name: 'mavros/statustext/recv',
+      messageType: 'mavros_msgs/StatusText'
+    });
+    this.leak_msg.subscribe(function(message){
+      if (message.text == "Leak Detected"){
+        this.leak_label = message.text;
+        this.leak_enabled = true;
+        this.status = message.text;
+        document.getElementById("leak_label").innerHTML = "LEAK DETECTED";
+        document.getElementById("leak_label").style.color="red";
+        console.log("leak msg:= "+this.status+"=>"+this.leak_enabled);
+      }
+      else{
+        document.getElementById("leak_label").innerHTML = "NO LEAK";
+        document.getElementById("leak_label").style.color="green";
+      }
+    });
+    this.mur_status_msg = new ROSLIB.Topic({
+      ros: ros,
+      name: '/mur/status',
+      messageType: 'mavros_msgs/StatusText'
+    });
+    this.mur_status_msg.subscribe(function(message){
+      if(!this.leak_enabled){
+        this.status = message.text;
+        document.getElementById("status_label").innerHTML = this.status;
+      }
+
     });
     this.desired_pose_msg = new ROSLIB.Topic({
       ros : ros,

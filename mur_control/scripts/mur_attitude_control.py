@@ -12,7 +12,7 @@ from rospy.numpy_msg import numpy_msg
 from geometry_msgs.msg import WrenchStamped, PoseStamped, TwistStamped,Vector3, Quaternion, Pose
 from std_msgs.msg import Time
 from nav_msgs.msg import Odometry
-from mavros_msgs.msg import State
+from mavros_msgs.msg import State, StatusText
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
 class MURAttitudeControlNode:
@@ -78,6 +78,7 @@ class MURAttitudeControlNode:
         self.sub_state = rospy.Subscriber('/mur/state', State, self.state_callback)
         self.sub_cmd_desired = rospy.Subscriber('/mur/cmd_pose', Pose, self.cmd_desired_callback)
         self.pub_cmd_force = rospy.Publisher('/mur/force_input', WrenchStamped, queue_size=2)
+        self.pub_status = rospy.Publisher('/mur/status', StatusText, queue_size=2 )
         #self.pub_pose_verification = rospy.Publisher('/mur/pose_verification', Odometry, queue_size=2)
 
     def set_mode_status(self,mode):
@@ -99,6 +100,9 @@ class MURAttitudeControlNode:
         elif mode == 'LAND':
             self.state = 'LAND'
             self.status = 'landed'
+        elif mode == 'LEAK':
+            self.state = 'LAND'
+            self.status = 'Leak Detected'
         else:
             rospy.logwarn("Unknown mode := %s. Assigned mode := 'STABILIZED'." %mode)
             self.state = 'STABILIZED'
@@ -193,6 +197,10 @@ class MURAttitudeControlNode:
         #rospy.loginfo("Rot :=\n %s" %self.error_pos)
         #rospy.loginfo("For :=\n %s" %np.array([Tz,T_p,T_r,T_y]))
         self.pub_cmd_force.publish(force_msg)
+        status_msg = StatusText()
+        status_msg.header.stamp = rospy.Time.now()
+        status_msg.text = self.status;
+        self.pub_status.publish(status_msg)
 
 
     def config_callback(self, config, level):
