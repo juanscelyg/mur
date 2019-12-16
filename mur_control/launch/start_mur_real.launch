@@ -30,6 +30,8 @@
   </node>
   <node name="video_server" pkg="web_video_server" type="web_video_server" output="screen">
     <param name="port" value="9091"/>
+    <remap from="/mur/camera1/image_raw" to="/mur/mur/camera1/camera_image">
+    <remap from="/mur/camera2/image_raw" to="/mur/mur/camera2/camera_image">
   </node>
   </group>
 </launch>

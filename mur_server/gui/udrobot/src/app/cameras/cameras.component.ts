@@ -21,8 +21,10 @@ export class CamerasComponent implements OnInit {
 
   newServerConnection(): void{
     this.setting = Setting.getCurrent();
-    this.link_1 = "http://"+this.setting[0].address+":9091/stream?topic=/mur/camera1/image_raw";
-    this.link_2 = "http://"+this.setting[0].address+":9091/stream?topic=/mur/camera2/image_raw";
+    //this.link_1 = "http://"+this.setting[0].address+":9091/stream?topic=/mur/camera1/image_raw";
+    //this.link_2 = "http://"+this.setting[0].address+":9091/stream?topic=/mur/camera2/image_raw";
+    this.link_1 = "http://"+this.setting[0].address+":9091/stream?topic=/mur/mur/camera1/camera_image";
+    this.link_2 = "http://"+this.setting[0].address+":9091/stream?topic=/mur/mur/camera2/camera_image";
   }
 
 }
