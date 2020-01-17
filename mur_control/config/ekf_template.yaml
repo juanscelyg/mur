@@ -23,8 +23,8 @@ pose0_config: [false, false,  true,
                false, false, false]
 pose0_differential: false
 pose0_relative: false
-pose0_queue_size: 5
-pose0_rejection_threshold: 2  # Note the difference in parameter name
+pose0_queue_size: 2
+pose0_rejection_threshold: 20  # Note the difference in parameter name
 pose0_nodelay: false
 
 ## POSE 1 ARUCO
@@ -37,8 +37,8 @@ pose1_config: [true,  true,  false,
                false, false, false]
 pose1_differential: false
 pose1_relative: false
-pose1_queue_size: 5
-pose1_rejection_threshold: 2  # Note the difference in parameter name
+pose1_queue_size: 1
+pose1_rejection_threshold: 15  # Note the difference in parameter name
 pose1_nodelay: false
 
 ## IMU 0 IMU
@@ -53,9 +53,9 @@ imu0_nodelay: false
 imu0_differential: false
 imu0_relative: false
 imu0_queue_size: 5
-imu0_pose_rejection_threshold: 1                 # Note the difference in parameter names
-imu0_twist_rejection_threshold: 1               #
-imu0_linear_acceleration_rejection_threshold: 1  #
+imu0_pose_rejection_threshold: 15                 # Note the difference in parameter names
+imu0_twist_rejection_threshold: 15               #
+imu0_linear_acceleration_rejection_threshold: 15  #
 
 imu0_remove_gravitational_acceleration: true
 use_control: false
@@ -121,4 +121,3 @@ initial_estimate_covariance: [1e-6, 0,    0,    0,    0,    0,    0,    0,    0,
                               0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     1e-6, 0,    0,
                               0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    1e-6, 0,
                               0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    1e-6]
-

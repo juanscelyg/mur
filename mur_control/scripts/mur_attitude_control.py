@@ -31,7 +31,7 @@ class MURAttitudeControlNode:
         self.error_vel = np.zeros(shape=(6,1))
 
         # Desire values
-        self.pos_z = -1.5
+        self.pos_z = -1.75
         self.roll_d = 0.0
         self.pitch_d = 0.0
         self.yaw_d = 0.0
@@ -48,9 +48,9 @@ class MURAttitudeControlNode:
         self.p_y = -0.06
         self.d_y = 0.06
 
-        self.p_z = 12.0
-        self.i_z = 0.05
-        self.d_z = -40.0
+        self.p_z = 22.0
+        self.i_z = 0.015
+        self.d_z = -45.0
 
         self.p_r = 10.0
         self.i_r = 0.25
@@ -74,7 +74,7 @@ class MURAttitudeControlNode:
 
         # ROS infrastructure
         self.srv_reconfigure = Server(MurAttitudeControlConfig, self.config_callback)
-        self.sub_cmd_pose = rospy.Subscriber('/mur/pose_gt', Odometry, self.cmd_pose_callback)
+        self.sub_cmd_pose = rospy.Subscriber('/mur/odom_filtered', Odometry, self.cmd_pose_callback)
         self.sub_state = rospy.Subscriber('/mur/state', State, self.state_callback)
         self.sub_cmd_desired = rospy.Subscriber('/mur/cmd_pose', Pose, self.cmd_desired_callback)
         self.pub_cmd_force = rospy.Publisher('/mur/force_input', WrenchStamped, queue_size=2)

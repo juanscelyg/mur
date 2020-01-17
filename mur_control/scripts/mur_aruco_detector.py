@@ -21,7 +21,7 @@ class MURArucoDetector():
     def __init__(self):
         # Aruco markers
         self.aruco_dic = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_1000)
-        self.markerLength = 0.2 # in meters
+        self.markerLength = 0.15 # in meters
 
         # Camera
         camera_matrix = rospy.get_param('/mur_aruco_detector/camera_matrix/data')
@@ -36,7 +36,7 @@ class MURArucoDetector():
         self.pose_pub = rospy.Publisher("/mur/aruco_pose", PoseWithCovarianceStamped, queue_size=1)
         self.aruco_pub = rospy.Publisher("/mur/aruco_flag", BoolStamped, queue_size=1)
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("/mur/mur/camera/camera_image",Image,self.callback)
+        self.image_sub = rospy.Subscriber("/mur/mur/camera1/camera_image",Image,self.callback)
         self.listener = tf.TransformListener()
 
 
@@ -52,21 +52,14 @@ class MURArucoDetector():
         return RC_B
 
     def get_aruco_pose(self, id):
-        if id==10:
-            tvec = np.array([0.2, 0.97, -1.2])
-            rvec = np.array([np.pi/2, 0, 0])
-        elif id == 11:
-            tvec = np.array([2.15, -0.2, -1.2])
-            rvec = np.array([np.pi/2, 0, -np.pi/2])
-        elif id == 12:
-            tvec = np.array([-0.2, -0.98, -1.2])
-            rvec = np.array([np.pi/2, 0, np.pi])
-        elif id == 13:
-            tvec = np.array([-2.15, 0.2, -1.2])
-            rvec = np.array([np.pi/2, 0, np.pi/2])
-        else:
-            tvec = np.array([0.0, 0.0, 0.0])
-            rvec = np.array([0, 0, 0])
+        data_url="/mur_aruco_detector/marker_" + str(int(id)) + "/data"
+        try:
+            aruco_pose = rospy.get_param(data_url)
+        except KeyError as e:
+            rospy.loginfo("Parameter := %s. Not Found" %e)
+            aruco_pose = {0.0,0.0,-1.75,0.0,0.0,0.0}
+        tvec = np.array([aruco_pose[0], aruco_pose[1], aruco_pose[2]])
+        rvec = np.array([aruco_pose[3], aruco_pose[4], aruco_pose[5]])
         return  tvec, rvec
 
     def pose_callback(self,tvec,rvec,aruco_flag):
@@ -112,7 +105,7 @@ class MURArucoDetector():
                 t = TransformStamped()
                 t.header.frame_id = "camera_link_optical"
                 t.header.stamp = rospy.Time.now()
-                t.child_frame_id = "Marker_"+str(ids[i])
+                t.child_frame_id = "Marker_"+str(int(ids[i]))
                 t.transform.translation.x = t_vec[0]
                 t.transform.translation.y = t_vec[1]
                 t.transform.translation.z = t_vec[2]
@@ -147,8 +140,8 @@ class MURArucoDetector():
 if __name__ == '__main__':
     rospy.init_node('mur_aruco_detector')
     try:
-        #np.set_printoptions(suppress=True)
         node = MURArucoDetector()
+        rate = rospy.Rate(50)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')

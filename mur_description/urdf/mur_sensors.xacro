@@ -51,10 +51,10 @@
         topic="camera"
         mass="0.075"
         update_rate="30"
-        hfov="0.75"
+        hfov="1.8749"
         width="1280"
         height="720"
-        stddev="0.005"
+        stddev="0.007"
         scale="1.0">
         <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
         <origin xyz="-0.055 0.160 0" rpy="0 0 ${0.5*pi}"/>
@@ -68,10 +68,10 @@
         topic="camera"
         mass="0.05"
         update_rate="30"
-        hfov="0.75"
+        hfov="0.5465"
         width="640"
         height="480"
-        stddev="0.005"
+        stddev="0.009"
         scale="1.0">
         <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
         <origin xyz="-0.055 0 -0.06" rpy="0 ${0.5*pi} ${0.5*pi}"/>
