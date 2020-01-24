@@ -12,7 +12,7 @@ from dynamic_reconfigure.server import Server
 from mur_control.cfg import MurControlMixerConfig
 from mur_control.msg import FloatStamped
 from mavros_msgs.msg import OverrideRCIn
-from geometry_msgs.msg import WrenchStamped, PoseStamped, TransformStamped
+from geometry_msgs.msg import WrenchStamped, PoseStamped, TransformStamped, PoseWithCovarianceStamped
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import FluidPressure, Imu
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     rospy.init_node('mur_control_mixer')
     try:
         node = MURControlMixerNode()
-        rate = rospy.Rate(50)
+        rate = rospy.Rate(100)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')

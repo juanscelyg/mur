@@ -28,7 +28,6 @@ generate_messages(
 
 generate_dynamic_reconfigure_options(
   cfg/MurControlMixer.cfg
-  cfg/MurAttitudeControl.cfg
 )
 
 catkin_install_python(PROGRAMS  scripts/mur_attitude_control.py
@@ -38,6 +37,7 @@ catkin_install_python(PROGRAMS  scripts/mur_attitude_control.py
                                 scripts/mur_aruco_detector.py
                                 scripts/mur_ident_lineales.py
                                 scripts/mur_barometer_parse.py
+                                scripts/mur_pose2d_parse.py
                         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(DIRECTORY launch config cfg

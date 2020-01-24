@@ -3,7 +3,15 @@ Panels:
     Help Height: 0
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
+      Expanded:
+        - /TF1/Tree1/world1
+        - /TF1/Tree1/world1/mur/base_footprint1
+        - /TF1/Tree1/world1/mur/base_footprint1/mur/base_stabilized1
+        - /TF1/Tree1/world1/mur/base_footprint1/mur/base_stabilized1/mur/base_link1
+        - /TF1/Tree1/world1/map1
+        - /TF1/Tree1/world1/map1/odom1
+        - /TF1/Tree1/world1/map1/odom1/base_link1
+        - /Odometry1/Shape1
       Splitter Ratio: 0.838888884
     Tree Height: 235
   - Class: rviz/Selection
@@ -30,14 +38,22 @@ Visualization Manager:
   Displays:
     - Class: rviz/TF
       Enabled: true
-      Frame Timeout: 15
+      Frame Timeout: 150
       Frames:
         All Enabled: false
-        Marker_[117]:
+        Marker_114:
+          Value: true
+        Marker_116:
+          Value: true
+        Marker_117:
+          Value: true
+        Marker_118:
           Value: true
         base_link:
           Value: false
         camera_link_optical:
+          Value: false
+        map:
           Value: false
         mur/base_footprint:
           Value: false
@@ -72,7 +88,7 @@ Visualization Manager:
         mur/thruster_3:
           Value: false
         odom:
-          Value: true
+          Value: false
         world:
           Value: true
         world_ned:
@@ -84,6 +100,18 @@ Visualization Manager:
       Show Names: true
       Tree:
         world:
+          map:
+            odom:
+              base_link:
+                camera_link_optical:
+                  Marker_114:
+                    {}
+                  Marker_116:
+                    {}
+                  Marker_117:
+                    {}
+                  Marker_118:
+                    {}
           mur/base_footprint:
             mur/base_stabilized:
               mur/base_link:
@@ -110,11 +138,6 @@ Visualization Manager:
                 mur/thruster_2:
                   {}
                 mur/thruster_3:
-                  {}
-          odom:
-            base_link:
-              camera_link_optical:
-                Marker_[117]:
                   {}
           world_ned:
             {}
@@ -259,6 +282,73 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Alpha: 0.699999988
+      Class: rviz/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: true
+      Name: Map
+      Topic: /map
+      Unreliable: false
+      Use Timestamp: false
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 25; 255; 0
+      Enabled: true
+      Head Diameter: 0.300000012
+      Head Length: 0.200000003
+      Length: 0.300000012
+      Line Style: Lines
+      Line Width: 0.0299999993
+      Name: Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.0299999993
+      Shaft Diameter: 0.100000001
+      Shaft Length: 0.100000001
+      Topic: ""
+      Unreliable: false
+      Value: true
+    - Angle Tolerance: 0.100000001
+      Class: rviz/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.300000012
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: true
+      Keep: 100
+      Name: Odometry
+      Position Tolerance: 0.100000001
+      Shape:
+        Alpha: 1
+        Axes Length: 0.25
+        Axes Radius: 0.0500000007
+        Color: 255; 25; 0
+        Head Length: 0.300000012
+        Head Radius: 0.100000001
+        Shaft Length: 1
+        Shaft Radius: 0.0500000007
+        Value: Axes
+      Topic: /mur/odom_filtered
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -293,7 +383,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Scale: 109.722343
+      Scale: 117.338005
       Target Frame: mur/base_link
       Value: TopDownOrtho (rviz)
       X: 0
@@ -317,5 +407,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1041
-  X: 2793
+  X: 2789
   Y: 0

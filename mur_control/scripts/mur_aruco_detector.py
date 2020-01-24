@@ -57,7 +57,7 @@ class MURArucoDetector():
             aruco_pose = rospy.get_param(data_url)
         except KeyError as e:
             rospy.loginfo("Parameter := %s. Not Found" %e)
-            aruco_pose = {0.0,0.0,-1.75,0.0,0.0,0.0}
+            aruco_pose = np.array([0.0,0.0,-1.75,0.0,0.0,0.0])
         tvec = np.array([aruco_pose[0], aruco_pose[1], aruco_pose[2]])
         rvec = np.array([aruco_pose[3], aruco_pose[4], aruco_pose[5]])
         return  tvec, rvec
@@ -78,8 +78,26 @@ class MURArucoDetector():
         msg_pose.pose.pose.orientation.y = q[1]
         msg_pose.pose.pose.orientation.z = q[2]
         msg_pose.pose.pose.orientation.w = q[3]
+        cov_matrix = np.zeros((6, 6), float)
+        np.fill_diagonal(cov_matrix, [0.1,0.1,0.1,0.01,0.01,0.01])
+        msg_pose.pose.covariance = cov_matrix.flatten()
         self.pose_pub.publish(msg_pose)
         self.aruco_pub.publish(msg_flag)
+
+    def remove_outliers(self, axis_array):
+        rospy.loginfo("axis_array:=\n %s",axis_array)
+        if len(axis_array) > 1:
+            mean = np.mean(axis_array, axis=0)
+            std = np.std(axis_array, axis=0)
+            rospy.loginfo("mean,std:=\n %s %s",mean,std)
+            final_array = []
+            for i in range(len(axis_array)):
+                if (axis_array[i] > (mean - 2.0*std)) and (axis_array[i] < (mean + 2.0*std)):
+                    final_array.append(axis_array[i])
+            rospy.loginfo("final_array:=\n %s",final_array)
+            return final_array
+        else:
+            return axis_array
 
 
     def callback(self, msg_image):
@@ -93,17 +111,20 @@ class MURArucoDetector():
             aruco_flag = True
             rvecs = np.zeros(shape=(len(ids),3))
             tvecs = np.zeros(shape=(len(ids),3))
+            trans_vector = np.zeros(shape=(len(ids),3))
+            rot_vector = np.zeros(shape=(len(ids),3))
             for i in range(len(ids)):
                 rvec, tvec, _objPoints = cv2.aruco.estimatePoseSingleMarkers(corners[i], self.markerLength, self.camera_matrix, self.dist_coeffs)
                 t_vec = np.array([tvec[0][0][0],tvec[0][0][1],tvec[0][0][2]])
                 #rospy.loginfo("t_vec :=\n %s", t_vec)
                 r_vec = np.array([rvec[0][0][0],rvec[0][0][1],rvec[0][0][2]])
+                #r_vec = np.array([0,0,0])
                 #rospy.loginfo("r_vec :=\n %s", r_vec)
                 cv2.aruco.drawDetectedMarkers(cv_image,corners, ids)
                 cv_image = cv2.aruco.drawAxis(cv_image, self.camera_matrix, self.dist_coeffs, rvec, tvec, 0.2)
                 br = tf2_ros.TransformBroadcaster()
                 t = TransformStamped()
-                t.header.frame_id = "camera_link_optical"
+                t.header.frame_id = "camera1_link_optical"
                 t.header.stamp = rospy.Time.now()
                 t.child_frame_id = "Marker_"+str(int(ids[i]))
                 t.transform.translation.x = t_vec[0]
@@ -131,7 +152,13 @@ class MURArucoDetector():
                 RO_B = np.matmul(RO_A,RA_B)
                 #rospy.loginfo("RO_B :=\n %s", RO_B)
                 (_,_,rot,trans,_) = decompose_matrix(RO_B)
-            self.pose_callback(trans,rot,aruco_flag)
+                trans_vector[i,:] = trans
+                rot_vector[i,:] = rot
+            #trans_pose = np.array([np.mean(trans_vector[:,0]),np.mean(trans_vector[:,1]),np.mean(trans_vector[:,2])])
+            #rot_pose = np.array([np.mean(rot_vector[:,0]),np.mean(rot_vector[:,1]),np.mean(rot_vector[:,2])])
+            trans_pose = np.array([np.mean(self.remove_outliers(trans_vector[:,0])),np.mean(self.remove_outliers(trans_vector[:,1])),np.mean(self.remove_outliers(trans_vector[:,2]))])
+            rot_pose = np.array([np.mean(self.remove_outliers(rot_vector[:,0])),np.mean(self.remove_outliers(rot_vector[:,1])),np.mean(self.remove_outliers(rot_vector[:,2]))])
+            self.pose_callback(trans_pose,rot,aruco_flag)
         try:
             self.image_pub.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8"))
         except CvBridgeError as e:
@@ -141,7 +168,7 @@ if __name__ == '__main__':
     rospy.init_node('mur_aruco_detector')
     try:
         node = MURArucoDetector()
-        rate = rospy.Rate(50)
+        rate = rospy.Rate(5)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')
