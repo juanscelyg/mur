@@ -12,20 +12,23 @@ class mur_PID():
 
         self.integral = 0.0
         self.e_1 = 0.0
+        self.de_1 = 1.0
         self.t_1 = 0.0
 
-    def controlate(self, e, ev, t):
-        de = 0.0
-        dt = t - self.t_1
+    def controlate(self, e, ev, dt):
+        d_e = 1.0
         if self.t_1 > 0.0 and dt > 0.0:
+            self.t_1 = 1.0 # flag
             d_e = (e - self.e_1)/dt
-            de = ev;
-            self.integral += 0.5*(e + self.e_1)*dt # Mid-point Integration Rule
+            #self.integral += 0.5*(e + self.e_1)*dt # Mid-point Integration Rule
+            self.integral +=  (dt*self.i)*e # Forward euler for acumulation
+            #self.integral = self.integral - (self.e_1/self.de_1)
 
-        u = self.p*e + self.d*de + self.i*self.integral
+        u = self.p*e + self.d*ev + self.integral
 
         self.e_1 = e
-        self.t_1 = t
+        #self.t_1 = t
+        self.de_1 = d_e
 
         if (np.linalg.norm(u) > self.sat):
             # controller is in saturation: limit outpt, reset integral
