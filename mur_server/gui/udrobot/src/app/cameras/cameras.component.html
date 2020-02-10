@@ -1,18 +1,16 @@
-<mat-grid-list cols="2" rowHeight="1:1">
-  <mat-grid-tile>
-    <mat-card class="iframe-container">
-      <mat-card-header>
-        <mat-card-title>Front Camera</mat-card-title>
-      </mat-card-header>
-      <img mat-card-image src={{link_1}} width="1280" height="720" alt="Front Camera">
-    </mat-card>
-  </mat-grid-tile>
-  <mat-grid-tile>
-    <mat-card class="iframe-container">
-      <mat-card-header>
-        <mat-card-title>Bottom Camera</mat-card-title>
-      </mat-card-header>
-      <img mat-card-image src={{link_2}} width="640" height="480" alt="Bottom Camera">
-    </mat-card>
+<mat-grid-list cols="3" rowHeight="100px">
+  <mat-grid-tile
+    *ngFor="let tile of tiles"
+    [colspan]="tile.cols"
+    [rowspan]="tile.rows">
+    <div *ngIf="'Imagen'==tile.text">
+      <img mat-card-image src={{link_1}} alt="Camera Image">
+    </div>
+    <div *ngIf="'Controls'==tile.text">
+      <mat-form-field style="margin-left:2em; margin-right:2em">
+        <input matInput type="string" placeholder="Camera Topic" formControlName="camera_topic" value="/camera1/image_raw" #camera_topic>
+      </mat-form-field>
+      <button mat-raised-button name="set-topic" color="primary" (click)="set_topic_handle($event, camera_topic)" (touchend)="set_topic_handle($event, camera_topic)">Set Topic</button>
+    </div>
   </mat-grid-tile>
 </mat-grid-list>

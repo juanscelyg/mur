@@ -26,6 +26,7 @@ import {MatRadioModule} from '@angular/material/radio';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material';
 import {MatSliderModule} from '@angular/material/slider';
+import {MatSelectModule} from '@angular/material/select';
 
 @NgModule({
   declarations: [
@@ -56,7 +57,8 @@ import {MatSliderModule} from '@angular/material/slider';
     MatRadioModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSliderModule
+    MatSliderModule,
+    MatSelectModule
   ],
   providers: [],
   bootstrap: [AppComponent]

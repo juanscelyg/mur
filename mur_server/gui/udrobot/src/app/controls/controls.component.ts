@@ -95,7 +95,7 @@ export class ControlsComponent implements OnInit {
     });
     this.pose_msg = new ROSLIB.Topic({
       ros,
-      name: '/mur/pose_gt',
+      name: '/mur/odom_filtered',
       messageType: 'nav_msgs/Odometry'
     });
     this.pose_msg.subscribe(function(message){

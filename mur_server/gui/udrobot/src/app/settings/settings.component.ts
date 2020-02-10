@@ -66,7 +66,7 @@ export class SettingsComponent implements OnInit {
   }
 
   getDefault(){
-    this.address = '127.0.0.1';
+    this.address = '192.168.8.103';
     this.setting[0].address = this.address;
     this.port = 9090;
     this.setting[0].port = this.port;

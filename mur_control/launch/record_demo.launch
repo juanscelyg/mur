@@ -1,6 +1,7 @@
 <launch>
   <arg name="record" default="false"/>
-  <arg name="bag_filename" default="/tmp/recording.bag"/>
+  <arg name="bag_name" default="default"/>
+  <arg name="bag_filename" default="/tmp/rosbag/$(arg bag_name).bag"/>
   <arg name="use_ned_frame" default="false"/>
 
   <group if="$(arg record)">

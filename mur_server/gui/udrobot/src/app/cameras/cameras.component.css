@@ -16,10 +16,7 @@
    width: 100%;
 }
 */
-.iframe-container{
-  transform: translate(-30%, -50%);
-  transform: scale(0.75, 0.5625);
-  background-repeat: no-repeat;
-  background-size: contain;
-  position: relative;
+.mat-card-image{
+  max-width:100%;
+  height:auto;
 }

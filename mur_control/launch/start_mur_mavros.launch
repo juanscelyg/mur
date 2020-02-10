@@ -1,0 +1,6 @@
+<launch>
+  <!-- MAVROS -->
+  <include file="$(find mavros)/launch/apm.launch">
+    <arg name="fcu_url" value="/dev/ttyACM0:115200"/>
+  </include>
+</launch>

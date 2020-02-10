@@ -48,7 +48,7 @@ class MURSupervisorNode:
 
         # ROS infrastructure
         self.srv_reconfigure = Server(MurVelocityControlConfig, self.config_callback)
-        self.sub_cmd_pose = rospy.Subscriber('/mur/pose_gt', Odometry, self.cmd_pose_callback)
+        self.sub_cmd_pose = rospy.Subscriber('/mur/odom_filtered', Odometry, self.cmd_pose_callback)
         self.pub_cmd_force = rospy.Publisher('/control/Wrench/velocity', WrenchStamped, queue_size=10)
 
     def cmd_pose_callback(self, msg):

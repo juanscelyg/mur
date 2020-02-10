@@ -1,0 +1,14 @@
+<launch>
+    <!-- If you want to generate a ROS bag with the recorded simulated data, set this flag to true -->
+    <arg name="record" default="true"/>
+    <arg name="bag_name" default='default'/>
+    <arg name="bag_filename" default="/tmp/$(arg bag_name).bag"/>
+    <arg name="use_ned_frame" default="false"/>
+    <!-- Start the recording node  -->
+    <node pkg="rosbag" type="record" name="recording"
+      args="record -O $(arg bag_filename)
+        /camera1/image_raw
+        /mur/sonar
+        /tritech_micron/scan
+        /mur/odom_filtered"/>
+</launch>

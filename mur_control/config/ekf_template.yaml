@@ -41,18 +41,6 @@ pose1_queue_size: 1
 pose1_rejection_threshold: 15  # Note the difference in parameter name
 pose1_nodelay: false
 
-# odom0: /mur/pose_gt
-# odom0_config: [true,  true,  false,
-#                false, false, false,
-#                false, false, false,
-#                false, false, false,
-#                false, false, false]
-# odom0_differential: false
-# odom0_relative: false
-# odom0_queue_size: 1
-# odom0_rejection_threshold: 15  # Note the difference in parameter name
-# odom0_nodelay: false
-
 ## IMU 0 IMU
 
 imu0: /mavros/imu/data

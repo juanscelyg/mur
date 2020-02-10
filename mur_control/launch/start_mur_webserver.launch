@@ -1,0 +1,8 @@
+<launch>
+  <!-- WEBSERVER -->
+  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+  <!-- VIDEO WEBSERVER -->
+  <node name="video_server" pkg="web_video_server" type="web_video_server" output="screen">
+    <param name="port" value="9091"/>
+  </node>
+</launch>
