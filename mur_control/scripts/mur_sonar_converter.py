@@ -23,6 +23,7 @@ class MURSonarConverterNode():
         self.angle_increment = 0.0
         self.range_max = 5.0
         self.range_min = 0.0
+        self.heading = 0.0
         self.angle_increment = math.pi/100.0
         self.range = np.zeros(shape=(int(2.0*math.pi/self.angle_increment),1))
 
@@ -33,8 +34,10 @@ class MURSonarConverterNode():
         self.sub_heading = rospy.Subscriber('/tritech_micron/heading', PoseStamped, self.get_heading)
 
     def get_config(self, msg_config):
-        self.angle_increment = msg_config.step
-        self.range_max = msg_config.range
+        if msg_config.step != self.angle_increment:
+            self.angle_increment = msg_config.step
+            self.range_max = msg_config.range
+            self.range = np.zeros(shape=(int(2.0*math.pi/self.angle_increment),1))
 
     def get_heading(self, msg_heading):
         pose_heading = np.array([msg_heading.pose.orientation.x,msg_heading.pose.orientation.y,msg_heading.pose.orientation.z,msg_heading.pose.orientation.w])
@@ -49,19 +52,15 @@ class MURSonarConverterNode():
             index = int(result[1][0])
         else:
             index=int(result[1])
-        #max_val = max(values_array)
-        #rospy.loginfo("El valor maximo es := %s" %max_val)
-        #rospy.loginfo("Index del maximo := %s" %index)
-        #rospy.loginfo("X, Y, Z := %s" %msg_cloud.points[index])
         x_val =  msg_cloud.points[index].x
         y_val =  msg_cloud.points[index].y
         self.range[int(self.heading/self.angle_increment)] = np.linalg.norm(np.array([x_val, y_val]))
+        rospy.loginfo("X val:= %s Y val:= %s Angle:= %s," %(x_val,y_val,self.heading))
         msg_laser = LaserScan()
         msg_laser.header = self.header
         msg_laser.angle_min = 0.0
         msg_laser.angle_max = 2.0*math.pi
         msg_laser.angle_increment = self.angle_increment
-
         msg_laser.range_min = self.range_min
         msg_laser.range_max = self.range_max
         msg_laser.ranges = self.range

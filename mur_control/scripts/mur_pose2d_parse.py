@@ -14,7 +14,7 @@ class MURPose2DParse():
 
         # ROS infrastructure
         self.sub_pose2d = rospy.Subscriber('/pose_stamped', PoseStamped, self.call_pose)
-        self.pub_pose = rospy.Publisher('/mur/pose2D_stamped', PoseWithCovarianceStamped, queue_size=2)
+        self.pub_pose = rospy.Publisher('/pose2D_stamped', PoseWithCovarianceStamped, queue_size=2)
 
     def call_pose(self, msg_pose):
         pose_stamped_msg = PoseWithCovarianceStamped()
