@@ -44,8 +44,9 @@ def push_to_pwm(push_value):
     return pwm_value
 
 def pressure_to_meters(pressure):
-    a=-0.010197442;
-    meters=a*pressure;
+    a=-0.10197442;
+    b=10.2903;
+    meters=a*pressure+b;
     return meters
 
 def aruco_to_world(id, rvec, tvec):

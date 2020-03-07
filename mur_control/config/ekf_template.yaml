@@ -29,7 +29,7 @@ pose0_nodelay: false
 
 ## POSE 1 LASER SCAN
 
-pose1: /mur/pose2D_stamped
+pose1: /pose2D_stamped
 pose1_config: [true,  true,  false,
                false, false, false,
                false, false, false,
