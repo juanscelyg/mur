@@ -15,6 +15,9 @@ from sensor_msgs.msg import FluidPressure, Imu
 
 class MURSimToOutNode:
     def __init__(self):
+        self.atm_press = 101325.0;
+
+
         # ROS infrastructure
         self.pub_pres = rospy.Publisher('/mavros/imu/diff_pressure', FluidPressure, queue_size=1)
         self.pub_imu = rospy.Publisher('/mavros/imu/data', Imu, queue_size=1)
@@ -27,7 +30,7 @@ class MURSimToOutNode:
         msg_pres = FluidPressure();
         msg_pres.header.stamp = rospy.Time.now()
         msg_pres.header.frame_id = msg_pres_int.header.frame_id
-        msg_pres.fluid_pressure = msg_pres_int.fluid_pressure
+        msg_pres.fluid_pressure = (msg_pres_int.fluid_pressure * 1000) - self.atm_press
         self.pub_pres.publish(msg_pres)
 
         msg_imu = Imu();
@@ -52,4 +55,3 @@ if __name__ == '__main__':
     except rospy.ROSInterruptException:
         print('caught exception')
     print('exiting')
-

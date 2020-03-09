@@ -1,6 +1,7 @@
 <launch>
     <!-- If you want to generate a ROS bag with the recorded simulated data, set this flag to true -->
     <arg name="record" default="true"/>
+    <arg name="bag_name" default="default"/>
 
     <!-- Start the a underwater world simulation scenario -->
     <include file="$(find grmi_worlds)/launch/GRMI_pool_world.launch"/>
@@ -28,6 +29,7 @@
     <!-- Start the recording node  -->
     <include file="$(find mur_control)/launch/record_demo.launch">
       <arg name="record" value="$(arg record)"/>
+      <arg name="bag_name" value="$(arg bag_name)"/>
     </include>
 
     <!-- Open RViz for visualization of sensor data and visualization markers -->
