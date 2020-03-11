@@ -12,7 +12,7 @@
   <!-- LASER FILTER -->
   <node pkg="laser_filters" type="scan_to_scan_filter_chain"  name="laser_filter">
     <rosparam command="load" file="$(find mur_control)/config/laser_filter_config.yaml" />
-    <remap from="scan" to="/mur/sonar" />
+    <remap from="scan" to="/sonar" />
     <remap from="scan_filtered" to="/mur/sonar_filtered" />
   </node>
   <!-- LASER SCAN MATCHER -->
