@@ -1,3 +1,29 @@
 scan_filter_chain:
+- name: shadows
+  type: laser_filters/ScanShadowsFilter
+  params:
+    min_angle: 110
+    max_angle: 243
+    neighbors: 20
+    window: 1
+- name: dark_shadows
+  type: laser_filters/LaserScanIntensityFilter
+  params:
+    lower_threshold: 100
+    upper_threshold: 10000
+    disp_histogram: 0
+scan_filter_chain:
+- name: box
+  type: laser_filters/LaserScanBoxFilter
+  params:
+    box_frame: base_link
+    min_x: -0.5
+    max_x: 0.5
+    min_y: -0.5
+    max_y: 0.5
+    min_z: -1.0
+    max_z: 1.0
+
+scan_filter_chain:
 - name: interpolation
   type: laser_filters/InterpolationFilter
