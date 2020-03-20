@@ -31,6 +31,7 @@ generate_dynamic_reconfigure_options(
 )
 
 catkin_install_python(PROGRAMS  scripts/mur_attitude_control.py
+                                scripts/mur_attitude_tele.py
                                 scripts/mur_supervisor.py
                                 scripts/mur_control_mixer.py
                                 scripts/mur_ekf.py

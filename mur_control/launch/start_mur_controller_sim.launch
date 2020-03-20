@@ -1,6 +1,6 @@
 <launch>
     <!-- If you want to generate a ROS bag with the recorded simulated data, set this flag to true -->
-    <arg name="record" default="true"/>
+    <arg name="record" default="false"/>
     <arg name="bag_name" default="default"/>
 
     <!-- Start the a underwater world simulation scenario -->
