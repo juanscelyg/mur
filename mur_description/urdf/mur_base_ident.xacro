@@ -6,13 +6,13 @@
     <xacro:include filename="$(find uuv_gazebo_ros_plugins)/urdf/snippets.xacro"/>
     <!--xacro:include filename="$(find mur_description)/urdf/mur_snippets.xacro"/-->
     <!-- Properties -->
-    <xacro:property name="mass" value="9.6"/> <!--The real value is 8.6, but it was changed for the simulation. The real life add 1kg to the robot.-->
+    <xacro:property name="mass" value="10.6"/> <!--The real value is 8.6, but it was changed for the simulation. The real life add 1kg to the robot.-->
     <xacro:property name="volume" value="0.008550699"/>
     <xacro:property name="cob" value="0 0 0"/>
     <xacro:property name="rho" value="1027.0"/>
 
-    <xacro:property name="visual_mesh_file" value="file://$(find mur_description)/mesh/mur.dae"/>
-    <xacro:property name="collision_mesh_file" value="file://$(find mur_description)/mesh/mur.dae"/>
+    <xacro:property name="visual_mesh_file" value="file://$(find mur_description)/mesh/mur_5.dae"/>
+    <xacro:property name="collision_mesh_file" value="file://$(find mur_description)/mesh/mur_5.dae"/>
     <xacro:property name="prop_mesh_file" value="file://$(find mur_description)/mesh/mur_prop.dae"/>
 
     <xacro:macro name="mur_base_ident" params="namespace debug">
@@ -41,12 +41,12 @@
             </inertial>
         </link>
 <!-- JOINT BETWEEN ROBOT AND ARM -->
-        <joint name="mur_arm_joint" type="continuous">
+        <joint name="mur_arm_joint" type="revolute">
           <parent link="${namespace}/base_link"/>
           <child link="${namespace}/arm_base_link" />
           <origin xyz="0 0 0" rpy="0 0 0"/>
           <axis xyz="1 1 0"/>
-          <limit effort="9999999999999" velocity="999999999999"/>
+          <limit effort="9999999999999" velocity="999999999999" lower="-0.35" upper="0.35"/>
         </joint>
 
 <!-- ARM -->
@@ -135,12 +135,12 @@
             <hydrodynamic_model>
               <type>fossen</type>
               <added_mass>
-                8.37    0       0       0       0       0
-                0       8.37    0       0       0       0
-                0       0       8.37    0       0       0
-                0       0       0       0.384   0       0
-                0       0       0       0       0.465   0
-                0       0       0       0       0       0.167
+                2.13     0       0       0       0       0
+                0       8.0257    0       0       0       0
+                0       0       7.3667    0       0       0
+                0       0       0       0.2222       0       0
+                0       0       0       0       0.1492       0
+                0       0       0       0       0       0.3209
               </added_mass>
               <!--<linear_damping_forward_speed>
                 -8      0       0       0       0       0
@@ -155,7 +155,7 @@
               </linear_damping-->
 
               <quadratic_damping>
-                -17.4666 -50.8618 -55.7484 -0.00711 -0.0123 -0.45725
+                -17.4666 -50.8618 -55.7484 -0.47 -0.34 -0.99
               </quadratic_damping>
             </hydrodynamic_model>
           </link>
@@ -201,6 +201,6 @@
         </plugin>
       </gazebo>
       <xacro:include filename="$(find mur_description)/urdf/mur_sensors.xacro"/>
-      <xacro:include filename="$(find mur_description)/urdf/mur_actuators.xacro"/>
+      <xacro:include filename="$(find mur_description)/urdf/mur_actuators_5.xacro"/>
     </xacro:macro>
 </robot>

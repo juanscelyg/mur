@@ -4,11 +4,11 @@
 
     <!-- Start the a underwater world simulation scenario -->
     <arg name="paused" default="true"/>
-    <arg name="gui" default="true"/>
+    <arg name="gui" default="false"/>
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
       <arg name="world_name" value="worlds/GRMI_pool.world"/>
-      <arg name="paused" value="true"/>
+      <arg name="paused" value="false"/>
       <arg name="use_sim_time" value="true"/>
       <arg name="gui" value="$(arg gui)"/>
       <arg name="headless" value="false"/>

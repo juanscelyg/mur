@@ -6,7 +6,7 @@
     <xacro:include filename="$(find uuv_gazebo_ros_plugins)/urdf/snippets.xacro"/>
     <!--xacro:include filename="$(find mur_description)/urdf/mur_snippets.xacro"/-->
     <!-- Properties -->
-    <xacro:property name="mass" value="9.6"/> <!--The real value is 8.6, but it was changed for the simulation. The real life add 1kg to the robot.-->
+    <xacro:property name="mass" value="10.6"/> <!--The real value is 8.6, but it was changed for the simulation. The real life add 1kg to the robot.-->
     <xacro:property name="volume" value="0.008550699"/>
     <xacro:property name="cob" value="0 0 0"/>
     <xacro:property name="rho" value="1027.0"/>
@@ -53,12 +53,12 @@
             <hydrodynamic_model>
               <type>fossen</type>
               <added_mass>
-                9.6     0       0       0       0       0
-                0       9.60    0       0       0       0
-                0       0       9.60    0       0       0
-                0       0       0       1       0       0
-                0       0       0       0       1       0
-                0       0       0       0       0       1
+                2.13     0       0       0       0       0
+                0       8.0257    0       0       0       0
+                0       0       7.3667    0       0       0
+                0       0       0       0.2222       0       0
+                0       0       0       0       0.1492       0
+                0       0       0       0       0       0.3209
               </added_mass>
               <!--<linear_damping_forward_speed>
                 -8      0       0       0       0       0
@@ -69,11 +69,11 @@
                 0       -34     0       0       0       -32
               </linear_damping_forward_speed>-->
               <!--linear_damping>
-                -1.1033 -2.2187 -0.03113 -0.1 -0.1 -0.1
+                -0 -0 -0 -15.3427 -44.6770 -48.9694
               </linear_damping-->
 
               <quadratic_damping>
-                -17.4666 -50.8618 -55.7484 -0.47 -0.34 -0.99
+                -17.4666 -50.8618 -55.7484 -84.5403 -50.6692 -77.13
               </quadratic_damping>
             </hydrodynamic_model>
           </link>
