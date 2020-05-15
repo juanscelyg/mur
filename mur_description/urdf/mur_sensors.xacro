@@ -11,7 +11,7 @@
         suffix=""
         parent_link="${parent_link}"
         topic="sonar"
-        mass="0.015"
+        mass="0.180"
         update_rate="10"
         samples="250"
         fov="3.92"

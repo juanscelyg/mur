@@ -1,12 +1,14 @@
 <launch>
     <!-- If you want to generate a ROS bag with the recorded simulated data, set this flag to true -->
     <arg name="record" default="false"/>
-    <arg name="bag_name" default="default"/>
 
     <!-- Start the a underwater world simulation scenario -->
-    <include file="$(find grmi_worlds)/launch/GRMI_pool_world.launch"/>
-    <!--include file="$(find uuv_gazebo_worlds)/launch/munkholmen.launch"/-->
-    <!--include file="$(find grmi_worlds)/launch/GRMI_empty_world_ekf.launch"/-->
+    <arg name="paused" default="true"/>
+    <arg name="gui" default="false"/>
+
+    <include file="$(find uuv_gazebo_worlds)/launch/auv_underwater_world.launch"/>
+
+    <!--include file="$(find uuv_assistants)/launch/publish_world_ned_frame.launch"/-->
 
     <!-- Add the MUR vehicle to the simulation (namespace: mur) -->
     <include file="$(find mur_description)/launch/upload_mur.launch">
@@ -29,19 +31,9 @@
     <!-- Start the recording node  -->
     <include file="$(find mur_control)/launch/record_demo.launch">
       <arg name="record" value="$(arg record)"/>
-      <arg name="bag_name" value="$(arg bag_name)"/>
     </include>
 
     <!-- Open RViz for visualization of sensor data and visualization markers -->
     <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find mur_control)/rviz/controller_demo.rviz"/>
 
-    <!--
-    You can run this demo as
-
-    >> roslaunch uuv_tutorial_dp_controller start_tutorial_dp_controller_demo.launch
-
-    and you can then send some waypoints to the vehicle to see it working
-
-    >> roslaunch uuv_control_utils send_waypoints_file.launch uuv_name:=rexrov
-    -->
 </launch>

@@ -4,6 +4,8 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /TF1
+        - /TF1/Frames1
         - /Odometry1/Shape1
       Splitter Ratio: 0.838888884
     Tree Height: 273
@@ -15,8 +17,7 @@ Panels:
     Name: Tool Properties
     Splitter Ratio: 0.588679016
   - Class: rviz/Views
-    Expanded:
-      - /Current View1
+    Expanded: ~
     Name: Views
     Splitter Ratio: 0.5
   - Class: rviz/Time
@@ -34,14 +35,16 @@ Visualization Manager:
       Frame Timeout: 150
       Frames:
         All Enabled: false
+        mur/arm0_base_link:
+          Value: false
         mur/arm_base_link:
-          Value: true
+          Value: false
         mur/base_base_link:
-          Value: true
+          Value: false
         mur/base_footprint:
           Value: false
         mur/base_link:
-          Value: false
+          Value: true
         mur/base_link_ned:
           Value: false
         mur/base_stabilized:
@@ -84,9 +87,10 @@ Visualization Manager:
           mur/base_footprint:
             mur/base_stabilized:
               mur/base_link:
-                mur/arm_base_link:
-                  mur/base_base_link:
-                    {}
+                mur/arm0_base_link:
+                  mur/arm_base_link:
+                    mur/base_base_link:
+                      {}
                 mur/base_link_ned:
                   {}
                 mur/camera1_link:
@@ -155,6 +159,11 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        mur/arm0_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         mur/arm_base_link:
           Alpha: 1
           Show Axes: false
@@ -356,25 +365,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 2.38073349
+      Distance: 2.69806051
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.782250404
-        Y: 0.355065107
-        Z: -5.96046448e-08
+        X: 0
+        Y: 0
+        Z: 0
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.0853983015
-      Target Frame: mur/base_link
+      Pitch: -0.174600527
+      Target Frame: mur/arm_base_link
       Value: XYOrbit (rviz)
-      Yaw: 0.645398498
+      Yaw: 2.13222528
     Saved: ~
 Window Geometry:
   Displays:
@@ -394,5 +403,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 677
-  X: 671
+  X: 675
   Y: 25
