@@ -5,7 +5,7 @@
 
     <!-- Start the a underwater world simulation scenario -->
     <include file="$(find grmi_worlds)/launch/GRMI_pool_world.launch"/>
-    <!--include file="$(find uuv_gazebo_worlds)/launch/munkholmen.launch"/-->
+    <!--include file="$(find uuv_gazebo_worlds)/launch/ocean_waves.launch"/-->
     <!--include file="$(find grmi_worlds)/launch/GRMI_empty_world_ekf.launch"/-->
 
     <!-- Add the MUR vehicle to the simulation (namespace: mur) -->
@@ -22,8 +22,8 @@
     <arg name="uuv_name" value="mur"/>
     <arg name="model_name" value="mur"/>
     <group ns="$(arg uuv_name)">
-        <node pkg="mur_control" type="mur_barometer_parse.py" name="mur_barometer_parse" output="screen"></node>
-        <node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node>
+      <node pkg="mur_control" type="mur_barometer_parse.py" name="mur_barometer_parse" output="screen"></node>
+      <node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node>
     </group>
 
     <!-- Start the recording node  -->

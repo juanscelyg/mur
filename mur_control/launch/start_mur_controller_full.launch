@@ -33,21 +33,7 @@
     <arg name="uuv_name" value="mur"/>
     <arg name="model_name" value="mur"/>
     <group ns="$(arg uuv_name)">
-          <!--node pkg="mur_control" type="mur_altitude_control.py" name="mur_altitude_control" output="screen"></node-->
-          <!--node pkg="mur_control" type="mur_attitude_control.py" name="mur_attitude_control" output="screen"></node-->
-          <!--node pkg="mur_control" type="mur_position_control.py" name="mur_position_control" output="screen"></node-->
-        <!--node pkg="mur_control" type="mur_aruco_detector.py" name="mur_aruco_detector" output="screen">
-            <rosparam command="load" file="$(find mur_control)/config/head_camera.yaml" />
-        </node-->
         <node pkg="mur_control" type="mur_barometer_parse.py" name="mur_barometer_parse" output="screen"></node>
-        <!--node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
-            <rosparam command="load" file="$(find mur_control)/config/ekf_template.yaml" />
-        </node-->
-        <!--node pkg="mur_control" type="mur_ekf.py" name="mur_ekf" output="screen"></node-->
-        <!--node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
-          <rosparam command="load" file="$(find mur_control)/config/ekf_template.yaml" />
-          <remap from="odometry/filtered" to="/mur/Odometry"/>
-        </node-->
         <node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node>
     </group>
 
