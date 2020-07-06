@@ -1,41 +1,18 @@
 <launch>
-  <!-- MAVROS -->
-  <include file="$(find mavros)/launch/apm.launch">
-    <arg name="fcu_url" value="/dev/ttyACM0:115200"/>
-  </include>
-  <!-- SONAR -->
-  <node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_sonar" args="0.0 0.21 0.057 0 0 0.707 0.707 base_link sonar" />
-  <include file="$(find tritech_micron)/launch/tritech_micron.launch">
-    <arg name="port" value="/dev/ttyUSB0"/>
-    <arg name="frame" value="sonar"/>
-  </include>
-  <!-- NAMESPACE -->
-  <arg name="uuv_name" value="mur"/>
-  <arg name="model_name" value="mur"/>
-  <group ns="$(arg uuv_name)">
-  <!-- WEBSERVER -->
-  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
-  <!-- CAMERAS -->
-  <node name="camera1" pkg="usb_cam" type="usb_cam_node" output="screen">
-    <param name="video_device" value="/dev/video0"/>
-    <param name="image_width" value="1280"/>
-    <param name="image_height" value="720"/>
-    <param name="camera_frame_id" value="camera1"/>
-    <param name="io_method" value="mmap"/>
-    <remap from="image_raw" to="camera1/camera_image"/>
-  </node>
-  <!--node name="camera2" pkg="usb_cam" type="usb_cam_node" output="screen">
-    <param name="video_device" value="/dev/video1"/>
-    <param name="image_width" value="640"/>
-    <param name="image_height" value="480"/>
-    <param name="camera_frame_id" value="camera2"/>
-    <param name="io_method" value="mmap"/>
-    <remap from="image_raw" to="camera2/camera_image"/>
-  </node-->
-  <node name="video_server" pkg="web_video_server" type="web_video_server" output="screen">
-    <param name="port" value="9091"/>
-    <remap from="/mur/camera1/image_raw" to="/mur/mur/camera1/camera_image"/>
-    <remap from="/mur/camera2/image_raw" to="/mur/mur/camera2/camera_image"/>
-  </node>
-  </group>
+  <!--MAVROS-->
+    <include file="$(find mur_control)/launch/start_mur_mavros.launch"/>
+
+  <!--MAVROS PARSE-->
+    <node pkg="mur_control" type="mur_barometer_parse.py" name="mur_barometer_parse" output="screen"></node>
+    <node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node>
+
+  <!--SONAR-->
+    <include file="$(find mur_control)/launch/start_mur_sonar.launch"/>
+
+  <!--CAMERAS-->
+    <include file="$(find mur_control)/launch/start_mur_front_camera.launch"/>
+
+  <!--SERVER-->
+    <include file="$(find mur_control)/launch/start_mur_webserver.launch"/>
+
 </launch>

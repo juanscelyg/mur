@@ -4,7 +4,7 @@
 
     <!-- Start the a underwater world simulation scenario -->
     <arg name="paused" default="true"/>
-    <arg name="gui" default="false"/>
+    <arg name="gui" default="true"/>
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
       <arg name="world_name" value="worlds/GRMI_pool.world"/>

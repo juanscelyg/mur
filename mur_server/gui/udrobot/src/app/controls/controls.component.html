@@ -46,8 +46,8 @@
     </mat-form-field>
     <button mat-raised-button name="set-pose-button" color="primary"  (click)="set_pose_handle($event,x_desired,y_desired,z_desired,yaw_desired)"
     (touchend)="set_pose_handle($event,x_desired,y_desired,z_desired,yaw_desired)" [disabled]="!armed_enabled">Set Pose</button>
-    <button mat-raised-button name="land-button" color="primary" style="margin-left:2em" (click)="land_handle($event,x_desired,y_desired,z_desired,yaw_desired)"
-    (touchend)="land_handle($event,x_desired,y_desired,z_desired,yaw_desired)" [disabled]="!armed_enabled">LAND</button>
+    <button mat-raised-button name="land-button" color="primary" style="margin-left:2em" (click)="land_handle($event,z_desired)"
+    (touchend)="land_handle($event,z_desired)" [disabled]="!armed_enabled">LAND</button>
     <button mat-raised-button name="takeoff-button" color="primary" style="margin-left:2em" (click)="takeoff_handle($event)"
     (touchend)="takeoff_handle($event)" [disabled]="!armed_enabled">TAKE OFF</button>
     </mat-list-item>

@@ -1,10 +1,10 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormControl, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {MatFormFieldControl} from '@angular/material/form-field';
-import { MatRadioChange, MatRadioButton } from '@angular/material';
+import { MatRadioChange, MatRadioButton } from '@angular/material/radio';
 import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
-import {MatSlideToggleModule} from '@angular/material'
+import {MatSlideToggleModule} from '@angular/material/slide-toggle'
 
 declare var ROSLIB: any;
 import { ros, DashboardComponent } from '../dashboard/dashboard.component';
@@ -33,6 +33,7 @@ export class ControlsComponent implements OnInit {
   public leak_enabled: boolean = false;
   public leak_label: string;
   public armed_enabled: boolean = false;
+  public armed_label: string;
   public stabilized_flag: boolean = false;
   public altitude_flag: boolean = false;
   public position_flag: boolean = false;

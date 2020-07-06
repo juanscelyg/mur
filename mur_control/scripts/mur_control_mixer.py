@@ -21,7 +21,7 @@ class MURControlMixerNode():
     def __init__(self):
         # Init constants
         self.num_thrusters = 4
-        self.angle = 5.0
+        self.angle = 10.0
         self.x_bar = 0.197
         self.y_bar = 0.18022
         self.b = 0.038
@@ -63,9 +63,9 @@ class MURControlMixerNode():
         t_matrix = np.matrix([[0, 0, 0, 0],
             [-np.sin(np.deg2rad(self.angle)), np.sin(np.deg2rad(self.angle)), np.sin(np.deg2rad(self.angle)), -np.sin(np.deg2rad(self.angle))],
             [np.cos(np.deg2rad(self.angle)), np.cos(np.deg2rad(self.angle)), np.cos(np.deg2rad(self.angle)), np.cos(np.deg2rad(self.angle))],
-            [np.cos(np.deg2rad(self.angle))*self.y_bar, -np.cos(np.deg2rad(-self.angle))*self.y_bar, -np.cos(np.deg2rad(-self.angle))*self.y_bar, np.cos(np.deg2rad(self.angle))*self.y_bar],
+            [np.cos(np.deg2rad(self.angle))*self.y_bar, -np.cos(np.deg2rad(self.angle))*self.y_bar, -np.cos(np.deg2rad(self.angle))*self.y_bar, np.cos(np.deg2rad(self.angle))*self.y_bar],
             [-np.cos(np.deg2rad(self.angle))*self.x_bar, -np.cos(np.deg2rad(self.angle))*self.x_bar, np.cos(np.deg2rad(self.angle))*self.x_bar, np.cos(np.deg2rad(self.angle))*self.x_bar],
-            [-np.sin(np.deg2rad(self.angle))*self.x_bar+self.b, np.sin(np.deg2rad(-self.angle))*self.x_bar+self.b, -np.sin(np.deg2rad(-self.angle))*self.x_bar+self.b, np.sin(np.deg2rad(self.angle))*self.x_bar+self.b]])
+            [-np.sin(np.deg2rad(self.angle))*self.x_bar, np.sin(np.deg2rad(self.angle))*self.x_bar, -np.sin(np.deg2rad(self.angle))*self.x_bar, np.sin(np.deg2rad(self.angle))*self.x_bar]])
         return t_matrix
 
     def set_force_thrusters(self):

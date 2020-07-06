@@ -13,7 +13,7 @@
         topic="sonar"
         mass="0.180"
         update_rate="10"
-        samples="250"
+        samples="50"
         fov="3.92"
         range_min="0.3"
         range_max="75.0"

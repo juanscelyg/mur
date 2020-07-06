@@ -1,6 +1,6 @@
 <launch>
   <arg name="record" default="false"/>
-  <arg name="bag_name" default="default"/>
+  <arg name="bag_name" default="default"/> <!--bag_name:=$(date +'%d-%m-%Y_%Hh%Mm%S')-->
   <arg name="bag_filename" default="/tmp/$(arg bag_name).bag"/>
   <arg name="use_ned_frame" default="false"/>
 

@@ -1,7 +1,7 @@
 <launch>
     <!-- If you want to generate a ROS bag with the recorded simulated data, set this flag to true -->
     <arg name="record" default="false"/>
-    <arg name="bag_name" default="default"/>
+    <arg name="bag_name" default="default"/> <!--bag_name:=$(date +'%d-%m-%Y_%Hh%Mm%S')-->
 
     <!-- Start the a underwater world simulation scenario -->
     <include file="$(find grmi_worlds)/launch/GRMI_pool_world.launch"/>
