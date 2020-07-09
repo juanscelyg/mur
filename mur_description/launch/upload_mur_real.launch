@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_world" args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 /world /mur/base_link" />
+  <include file="$(find uuv_assistants)/launch/publish_world_ned_frame.launch"/>
+
+  <!-- Add the MUR vehicle to the simulation (namespace: mur) -->
+  <arg name="mode" default="5"/>
+  <arg name="namespace" default="mur"/>
+  <include file="$(find mur_description)/launch/upload_mur_$(arg mode).launch">
+    <arg name="namespace" value="$(arg namespace)"/>
+  </include>
+
+  <!-- Start the sensors-->
+  <arg name="uuv_name" value="mur"/>
+  <arg name="model_name" value="mur"/>
+  <group ns="$(arg uuv_name)">
+    <node pkg="mur_control" type="mur_barometer_parse.py" name="mur_barometer_parse" output="screen"></node>
+    <node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node>
+  </group>
+
+</launch>

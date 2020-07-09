@@ -2,12 +2,8 @@
   <!--MAVROS-->
     <include file="$(find mur_control)/launch/start_mur_mavros.launch"/>
 
-  <!--MAVROS PARSE-->
-    <node pkg="mur_control" type="mur_barometer_parse.py" name="mur_barometer_parse" output="screen"></node>
-    <node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node>
-
-  <!--SONAR-->
-    <include file="$(find mur_control)/launch/start_mur_sonar.launch"/>
+  <!--UPLOAD MUR-->
+    <include file="$(find mur_description)/launch/upload_mur_real.launch"/>
 
   <!--CAMERAS-->
     <include file="$(find mur_control)/launch/start_mur_front_camera.launch"/>
