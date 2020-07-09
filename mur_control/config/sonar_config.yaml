@@ -1,5 +1,5 @@
 !!python/object/new:dynamic_reconfigure.encoding.Config
 dictitems: {ad_high: 80.0, ad_low: 0.0, adc8on: true, continuous: false, gain: 1.0,
-  inverted: false, left_limit: 2.0106192982974678, mo_time: 82, nbins: 400, range: 2.94,
-  right_limit: 4.335397861953915, scanright: false, speed: 1500.0, step: 0.06283185307179587}
+  inverted: false, left_limit: 2.0106192982974678, mo_time: 82, nbins: 190, range: 2.94,
+  right_limit: 4.335397861953915, scanright: false, speed: 1500.0, step: 0.12566370614359174}
 state: []
