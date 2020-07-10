@@ -1,6 +1,8 @@
 <launch>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_imu" args="0.05391 0.02946 0.01951 0.0 0.0 0.0 1.0 base_link imu_link" />
   <!-- MAVROS -->
   <include file="$(find mavros)/launch/apm.launch">
     <arg name="fcu_url" value="/dev/ttyACM0:115200"/>
+    <arg name="config_yaml" value="$(find mur_control)/config/apm_config.yaml" />
   </include>
 </launch>
