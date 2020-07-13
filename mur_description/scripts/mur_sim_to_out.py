@@ -20,7 +20,7 @@ class MURSimToOutNode:
 
         # ROS infrastructure
         self.pub_pres = rospy.Publisher('/mavros/imu/diff_pressure', FluidPressure, queue_size=1)
-        self.pub_imu = rospy.Publisher('/mavros/imu/data', Imu, queue_size=1)
+        self.pub_imu = rospy.Publisher('/mur/imu/data', Imu, queue_size=1)
         self.sub_pres = message_filters.Subscriber('/mur/pressure', FluidPressure)
         self.sub_imu = message_filters.Subscriber('/mur/imu', Imu)
         self.ts = message_filters.TimeSynchronizer([self.sub_pres, self.sub_imu], 10)

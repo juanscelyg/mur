@@ -1,0 +1,11 @@
+<launch>
+  <!--MAVROS-->
+    <include file="$(find mur_control)/launch/real/start_mur_mavros.launch"/>
+
+  <!--CAMERAS-->
+    <include file="$(find mur_control)/launch/real/start_mur_front_camera.launch"/>
+
+  <!--SERVER-->
+    <include file="$(find mur_control)/launch/real/start_mur_webserver.launch"/>
+
+</launch>
