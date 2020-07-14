@@ -1,0 +1,12 @@
+<launch>
+  <!--
+    If you will dont use laser_scan_matcher, you must publish one pose to the EKF:
+       rostopic pub -r 10 /pose2Dstamped geometry_msgs/PoseStamped
+
+  -->
+  <param name="joy_node/dev" value="/dev/input/js0" />
+  <!--JOY NODE-->
+  <node pkg="joy" type="joy_node" name="joy_node" output="screen"></node>
+  <!--JOY PARSE -->
+  <node pkg="mur_control" type="mur_gamepad_parse.py" name="mur_gamepad_parse" output="screen"></node>
+</launch>

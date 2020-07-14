@@ -91,7 +91,7 @@ export class ControlsComponent implements OnInit {
     this.desired_pose_msg = new ROSLIB.Topic({
       ros : ros,
       name : '/mur/cmd_pose',
-      messageType: 'geometry_msgs/Pose',
+      messageType: 'geometry_msgs/PoseStamped',
       throttle_rate: '20'
     });
     this.pose_msg = new ROSLIB.Topic({

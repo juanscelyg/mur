@@ -43,7 +43,7 @@ pose1_nodelay: false
 
 ## IMU 0 IMU
 
-imu0: /mavros/imu/data
+imu0: /mur/imu/data
 imu0_config: [false, false, false,
               true,  true,  true,
               false, false, false,

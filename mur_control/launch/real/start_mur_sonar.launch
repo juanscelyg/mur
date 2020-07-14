@@ -3,8 +3,8 @@
   <include file="$(find tritech_micron)/launch/tritech_micron.launch">
     <arg name="port" value="/dev/ttyUSB0"/>
     <arg name="frame" value="/sonar"/>
+    <rosparam command="load" file="$(find mur_control)/config/sonar_config.yaml" />
   </include>
-  <rosparam command="load" file="$(find mur_control)/config/sonar_config.yaml" />
   <!--PARSE-->
   <node pkg="mur_control" type="mur_sonar_converter.py" name="mur_sonar_converter" output="screen"></node>
 </launch>
