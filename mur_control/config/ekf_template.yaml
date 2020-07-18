@@ -10,7 +10,7 @@ publish_tf: true
 publish_acceleration: false
 
 odom_frame: odom           # Defaults to "odom" if unspecified
-base_link_frame: base_link  # Defaults to "base_link" if unspecified
+base_link_frame: /mur/base_link  # Defaults to "base_link" if unspecified
 world_frame: odom    # Defaults to the value of odom_frame if unspecified
 
 ## POSE 0 BAROMETER

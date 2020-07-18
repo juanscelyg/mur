@@ -43,6 +43,7 @@ catkin_install_python(PROGRAMS  scripts/mur_attitude_control.py
                                 scripts/mur_sonar_converter.py
                                 scripts/mur_imu_parse.py
                                 scripts/mur_gamepad_parse.py
+                                scripts/mur_gamepad_force.py
                         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(DIRECTORY launch config cfg

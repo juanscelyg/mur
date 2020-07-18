@@ -24,7 +24,8 @@ class MURImuParse():
         q_org = quaternion_from_euler(r,p,y)
         q_rot = quaternion_from_euler(np.pi, 0, np.pi/2.0)
         q_new = quaternion_multiply(q_rot, q_org)
-        rospy.loginfo(q_new)
+        #rospy.loginfo(q_new)
+        rospy.loginfo(euler_from_quaternion(q_new))
         msg_imu.orientation.x = q_new[0]
         msg_imu.orientation.y = q_new[1]
         msg_imu.orientation.z = q_new[2]

@@ -20,7 +20,7 @@ class MURGamepadParseNode():
         self.roll_gain = -0.15
         self.yaw_gain = 0.15
         self.z_gain = 1.0
-        self.z_offset = -1.4 # Max Depth
+        self.z_offset = -1.15 # Max Depth
 
         # ROS infraestucture
         self.pub_pose = rospy.Publisher('/mur/cmd_pose', PoseStamped, queue_size=1)

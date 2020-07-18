@@ -4,8 +4,8 @@
   <node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_odom" args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 /odom /mur/base_link" />
   <!--node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_base" args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 /mur/base_link base_link" /-->
   <node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_imu" args="0.0 0.0 0.0 0.707 0.707 0.0 0.0 /mur/imu_link imu_link" />
-  <!--node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_sonar" args="0.0 0.21 0.057 0.707 -0.707 0.0 0.0 base_link sonar" /-->
-  <node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_sonar" args="0.0 0.0 0.0 0.707 -0.707 0.0 0.0 /mur/sonar_link sonar" />
+  <node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_sonar" args="0.0 0.21 0.057 0.707 -0.707 0.0 0.0 /mur/base_link sonar" />
+  <!--node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_sonar" args="0.0 0.0 0.0 0.707 -0.707 0.0 0.0 /mur/sonar_link sonar" /-->
 
   <!-- Add the MUR vehicle to the simulation -->
   <arg name="mode" default="5"/>
@@ -24,9 +24,7 @@
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" ></node>
 
   <!-- Start the sensors-->
-  <group ns="$(arg uuv_name)">
     <node pkg="mur_control" type="mur_barometer_parse.py" name="mur_barometer_parse" output="screen"></node>
-    <node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node>
-  </group>
+    <!--node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node-->
 
 </launch>

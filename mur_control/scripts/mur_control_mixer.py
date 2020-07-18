@@ -45,7 +45,7 @@ class MURControlMixerNode():
         # ROS infraestucture
         self.srv_reconfigure = Server(MurControlMixerConfig, self.config_callback)
         self.pub_actuators = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=1)
-        self.sub_odometry = rospy.Subscriber('/mur/odom_filtered', Odometry, self.get_odometry)
+        self.sub_odometry = rospy.Subscriber('/mur/imu/data', Imu, self.get_odometry)
         self.sub_force = rospy.Subscriber('/mur/force_input', WrenchStamped, self.cmd_force_callback)
 
     def config_callback(self, config, level):
@@ -88,7 +88,7 @@ class MURControlMixerNode():
 
     def get_odometry(self, msg_pose):
         # Get the position and velocities
-        self.pose_rot = np.array([msg_pose.pose.pose.orientation.x, msg_pose.pose.pose.orientation.y, msg_pose.pose.pose.orientation.z, msg_pose.pose.pose.orientation.w])
+        self.pose_rot = np.array([msg_pose.orientation.x, msg_pose.orientation.y, msg_pose.orientation.z, msg_pose.orientation.w])
         #rospy.loginfo("Pos := \n %s" %self.pose_pos)
         self.J = mur_common.convert_body_world(self.pose_rot)
 
