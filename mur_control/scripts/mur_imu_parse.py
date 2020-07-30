@@ -21,9 +21,10 @@ class MURImuParse():
         msg_imu.header.stamp = rospy.Time.now()
         msg_imu.header.frame_id = "imu_link"
         r,p,y = euler_from_quaternion([msg_imu_int.orientation.x,msg_imu_int.orientation.y,msg_imu_int.orientation.z,msg_imu_int.orientation.w])
-        q_org = quaternion_from_euler(r,p,y)
-        q_rot = quaternion_from_euler(np.pi, 0, np.pi/2.0)
-        q_new = quaternion_multiply(q_rot, q_org)
+        self.roll = -p
+        self.pitch = r
+        self.yaw = y
+        q_new = quaternion_from_euler(self.roll, self.pitch, self.yaw)
         #rospy.loginfo(q_new)
         rospy.loginfo(euler_from_quaternion(q_new))
         msg_imu.orientation.x = q_new[0]

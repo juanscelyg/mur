@@ -27,17 +27,21 @@ class MURControlMixerNode():
         self.b = 0.038
 
         # Desire parameters
-        self.saturation = 30.0
+        self.saturation = 20.0
 
         # Variables
         self.force_vel = np.zeros(shape=(6,1))
         self.force_yaw = np.zeros(shape=(6,1))
         self.force_height = np.zeros(shape=(6,1))
         self.pose_rot = np.array([0,0,0,1])
+        self.thrusters = np.array([0,0,0,0])
         self.J = mur_common.convert_body_world(self.pose_rot)
 
         # Convert parameters
         self.T = self.get_t_matrix()
+
+        # Timer
+        self.mytime = 0.15
 
         # ROS parameter server
         self.config = {}
@@ -45,7 +49,7 @@ class MURControlMixerNode():
         # ROS infraestucture
         self.srv_reconfigure = Server(MurControlMixerConfig, self.config_callback)
         self.pub_actuators = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=1)
-        self.sub_odometry = rospy.Subscriber('/mur/imu/data', Imu, self.get_odometry)
+        self.sub_odometry = rospy.Subscriber('/mavros/imu/data', Imu, self.get_odometry)
         self.sub_force = rospy.Subscriber('/mur/force_input', WrenchStamped, self.cmd_force_callback)
 
     def config_callback(self, config, level):
@@ -68,9 +72,10 @@ class MURControlMixerNode():
             [-np.sin(np.deg2rad(self.angle))*self.x_bar, np.sin(np.deg2rad(self.angle))*self.x_bar, -np.sin(np.deg2rad(self.angle))*self.x_bar, np.sin(np.deg2rad(self.angle))*self.x_bar]])
         return t_matrix
 
-    def set_force_thrusters(self):
+    def set_force_thrusters(self, event):
         msg_actuators = OverrideRCIn()
         msg_actuators.channels = np.array([mur_common.push_to_pwm(self.thrusters[0]),mur_common.push_to_pwm(self.thrusters[1]),mur_common.push_to_pwm(self.thrusters[2]),mur_common.push_to_pwm(self.thrusters[3]),0,0,0,0])
+        rospy.loginfo("Motors Values:= %s", msg_actuators.channels)
         self.pub_actuators.publish(msg_actuators)
 
     def saturator_thruster(self,force):
@@ -90,7 +95,11 @@ class MURControlMixerNode():
         # Get the position and velocities
         self.pose_rot = np.array([msg_pose.orientation.x, msg_pose.orientation.y, msg_pose.orientation.z, msg_pose.orientation.w])
         #rospy.loginfo("Pos := \n %s" %self.pose_pos)
-        self.J = mur_common.convert_body_world(self.pose_rot)
+        self.J, orientation = mur_common.convert_body_world(self.pose_rot)
+        self.pitch=orientation[0]
+        self.roll=orientation[1]
+        self.yaw=orientation[2]
+        #rospy.loginfo("Orientation:= %s", orientation)
 
 
     def cmd_force_callback(self, msg_force):
@@ -102,13 +111,14 @@ class MURControlMixerNode():
         self.thrusters = self.saturator_thruster(thrusters_forces)
         ### self.thrusters = thrusters_forces
         ### rospy.loginfo("Thrusters :=\n %s" %self.thrusters)
-        self.set_force_thrusters()
+        #self.set_force_thrusters()
 
 if __name__ == '__main__':
     rospy.init_node('mur_control_mixer')
     try:
         node = MURControlMixerNode()
-        rate = rospy.Rate(100)
+        rospy.Timer(rospy.Duration(node.mytime), node.set_force_thrusters)
+        rate = rospy.Rate(10)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')
