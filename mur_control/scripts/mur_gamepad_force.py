@@ -35,7 +35,7 @@ class MURGamepadForceNode():
         # Timer
         self.mytime = 0.3
         #limite
-        self.limite=50;
+        self.limite=100;
 
         # ROS infraestucture
         self.pub_actuators = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=1)

@@ -41,7 +41,7 @@ class MURControlMixerNode():
         self.T = self.get_t_matrix()
 
         # Timer
-        self.mytime = 0.15
+        self.mytime = 0.3
 
         # ROS parameter server
         self.config = {}
