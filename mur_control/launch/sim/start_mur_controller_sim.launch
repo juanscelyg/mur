@@ -23,7 +23,7 @@
     <arg name="model_name" value="mur"/>
     <group ns="$(arg uuv_name)">
       <node pkg="mur_control" type="mur_barometer_parse.py" name="mur_barometer_parse" output="screen"></node>
-      <node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node>
+      <!--node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node-->
     </group>
 
 

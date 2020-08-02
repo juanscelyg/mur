@@ -69,11 +69,11 @@
                 0       -34     0       0       0       -32
               </linear_damping_forward_speed>-->
               <linear_damping>
-                -0 -0 -0 -0.6508 -1.0745 -0.3834
+                -0 -0 -0 -0.4721 -0.3472 -0.9926
               </linear_damping>
 
               <quadratic_damping>
-                -17.4666 -50.8618 -55.7484 -15.2562 -11.2216 -32.0758
+                -17.4666 -50.8618 -55.7484 -1.6901 -1.0130 -3.5534
               </quadratic_damping>
             </hydrodynamic_model>
           </link>

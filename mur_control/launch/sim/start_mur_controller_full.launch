@@ -34,13 +34,9 @@
     <arg name="model_name" value="mur"/>
     <group ns="$(arg uuv_name)">
         <node pkg="mur_control" type="mur_barometer_parse.py" name="mur_barometer_parse" output="screen"></node>
-        <node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node>
+        <!--node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node-->
     </group>
 
-    <!-- Start the recording node  -->
-    <include file="$(find mur_control)/launch/record_demo.launch">
-      <arg name="record" value="$(arg record)"/>
-    </include>
 
     <!-- Open RViz for visualization of sensor data and visualization markers -->
     <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find mur_control)/rviz/controller_demo.rviz"/>

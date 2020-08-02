@@ -32,7 +32,7 @@ def rot2(ang):
     return R
 
 def push_to_pwm(push_value):
-    push_value = int(push_value);
+    #print push_value
     if push_value > 0:
         params=np.array([-0.11398604,14.048945,1538.7531]);
     elif push_value < 0:
@@ -40,7 +40,7 @@ def push_to_pwm(push_value):
     else:
         push_value = 0;
         params=np.array([0,0,1500]);
-    pwm_value = (params[0]*push_value**2)+(params[1]*push_value)+params[2]
+    pwm_value = int((params[0]*push_value**2)+(params[1]*push_value)+params[2])
     return pwm_value
 
 def pressure_to_meters(pressure):

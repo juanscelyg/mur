@@ -4,7 +4,7 @@ import numpy as np
 import rospy
 import logging
 import sys
-import tf
+from tf.transformations import quaternion_from_euler, euler_from_quaternion
 import message_filters
 from simtools import mur_simtools
 from rospy.numpy_msg import numpy_msg
@@ -20,7 +20,7 @@ class MURSimToOutNode:
 
         # ROS infrastructure
         self.pub_pres = rospy.Publisher('/mavros/imu/diff_pressure', FluidPressure, queue_size=1)
-        self.pub_imu = rospy.Publisher('/mur/imu/data', Imu, queue_size=1)
+        self.pub_imu = rospy.Publisher('/mavros/imu/data', Imu, queue_size=1)
         self.sub_pres = message_filters.Subscriber('/mur/pressure', FluidPressure)
         self.sub_imu = message_filters.Subscriber('/mur/imu', Imu)
         self.ts = message_filters.TimeSynchronizer([self.sub_pres, self.sub_imu], 10)
@@ -35,10 +35,24 @@ class MURSimToOutNode:
 
         msg_imu = Imu();
         msg_imu.header.stamp = rospy.Time.now()
-        msg_imu.header.frame_id = "base_link"
-        msg_imu.orientation = msg_imu_int.orientation
+        msg_imu.header.frame_id = "/mur/imu_link"
+        qx = msg_imu_int.orientation.x
+        qy = msg_imu_int.orientation.y
+        qz = msg_imu_int.orientation.z
+        qw = msg_imu_int.orientation.w
+        euler_angles = euler_from_quaternion(np.array([qx,qy,qz,qw]))
+        r = euler_angles[1]
+        p = -euler_angles[0]
+        y = euler_angles[2]
+        q = quaternion_from_euler(r,p,y)
+        msg_imu.orientation.x = q[0]
+        msg_imu.orientation.y = q[1]
+        msg_imu.orientation.z = q[2]
+        msg_imu.orientation.w = q[3]
         msg_imu.orientation_covariance = np.array([0,0,0,0,0,0,0,0,0])
-        msg_imu.angular_velocity = msg_imu_int.angular_velocity
+        msg_imu.angular_velocity.x = -msg_imu_int.angular_velocity.x
+        msg_imu.angular_velocity.y = msg_imu_int.angular_velocity.y
+        msg_imu.angular_velocity.z = msg_imu_int.angular_velocity.z
         msg_imu.angular_velocity_covariance = np.array([1.2184E-7,0.0,0.0,0.0,1.2184E-7,0.0,0.0,0.0,1.2184E-7])
         msg_imu.linear_acceleration.x = msg_imu_int.linear_acceleration.x # The same configuration in the PIXHAWK
         msg_imu.linear_acceleration.y = msg_imu_int.linear_acceleration.y
@@ -50,7 +64,7 @@ if __name__ == '__main__':
     rospy.init_node('mur_sim_to_out_node')
     try:
         node = MURSimToOutNode()
-        rate = rospy.Rate(50)
+        rate = rospy.Rate(10)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')
