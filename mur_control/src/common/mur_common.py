@@ -45,7 +45,7 @@ def push_to_pwm(push_value):
 
 def pressure_to_meters(pressure):
     a=-0.000102;
-    b=0.001991;
+    b=-0.2;
     meters=a*pressure+b;
     return meters
 

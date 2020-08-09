@@ -43,8 +43,9 @@ class MURControlMixerNode():
         self.T = self.get_t_matrix()
 
         # Smooth Signal
-        self.ts = 0.07
+        self.mytime = 0.07
         self.n_points = 5
+        self.ts = self.mytime/(self.n_points+1.0)
         self.limit = 0.1
 
         # ROS parameter server
@@ -76,31 +77,13 @@ class MURControlMixerNode():
             [-np.sin(np.deg2rad(self.angle))*self.x_bar, np.sin(np.deg2rad(self.angle))*self.x_bar, -np.sin(np.deg2rad(self.angle))*self.x_bar, np.sin(np.deg2rad(self.angle))*self.x_bar]])
         return t_matrix
 
-    def set_force_thrusters(self):
-        # Enviar la cantidad de mensajes de acuerdo a los puntos que acordamos y aplicar el limite
+    def set_force_thrusters(self, event):
         self.pub_force()
-        '''
-        rospy.loginfo("Inicio")
-        self.increment = np.empty_like(self.thrusters)
-        for i in range(self.num_thrusters):
-            if abs(self.thrusters[i]-self.thrusters_1[i])>self.limit:
-                self.increment[i] = (self.thrusters[i]-self.thrusters_1[i])/(self.n_points) # Lineal increment
-            else:
-                self.increment[i] = 0.0
-
-        for i in range(self.n_points):
-            self.thrusters = self.thrusters_1+self.increment*i # Lineal increment
-            #rospy.loginfo("Thrusters:= %s", self.thrusters)
-            self.pub_force()
-            time.sleep(self.ts)
-        rospy.loginfo("Final")
-        self.thrusters_1 = self.thrusters
-        '''
 
     def pub_force(self):
         msg_actuators = OverrideRCIn()
         msg_actuators.channels = np.array([mur_common.push_to_pwm(self.thrusters[0]),mur_common.push_to_pwm(self.thrusters[1]),mur_common.push_to_pwm(self.thrusters[2]),mur_common.push_to_pwm(self.thrusters[3]),0,0,0,0])
-        rospy.loginfo("Motors Values:= %s", msg_actuators.channels)
+        #rospy.loginfo("Motors Values:= %s", msg_actuators.channels)
         self.pub_actuators.publish(msg_actuators)
 
 
@@ -137,12 +120,13 @@ class MURControlMixerNode():
         self.thrusters = self.saturator_thruster(thrusters_forces)
         ### self.thrusters = thrusters_forces
         ### rospy.loginfo("Thrusters :=\n %s" %self.thrusters)
-        self.set_force_thrusters()
+        #self.set_force_thrusters()
 
 if __name__ == '__main__':
     rospy.init_node('mur_control_mixer')
     try:
         node = MURControlMixerNode()
+        rospy.Timer(rospy.Duration(node.mytime), node.set_force_thrusters)
         rate = rospy.Rate(10)
         rospy.spin()
     except rospy.ROSInterruptException:

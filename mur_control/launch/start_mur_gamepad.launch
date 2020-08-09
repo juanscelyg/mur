@@ -8,5 +8,6 @@
   <!--JOY NODE-->
   <node pkg="joy" type="joy_node" name="joy_node" output="screen"></node>
   <!--JOY PARSE -->
-  <node pkg="mur_control" type="mur_gamepad_force.py" name="mur_gamepad_force" output="screen"></node>
+  <!--node pkg="mur_control" type="mur_gamepad_force.py" name="mur_gamepad_force" output="screen"></node-->
+  <node pkg="mur_control" type="mur_gamepad_parse.py" name="mur_gamepad_parse" output="screen"></node>
 </launch>

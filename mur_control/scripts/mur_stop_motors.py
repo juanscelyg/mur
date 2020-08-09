@@ -5,38 +5,25 @@ import rospy
 import logging
 import sys
 import tf
-import message_filters
-from common import mur_common
-from geometry_msgs.msg import WrenchStamped, PoseStamped, AccelStamped, PoseWithCovarianceStamped
-from tf.transformations import quaternion_from_euler, euler_from_quaternion
-from nav_msgs.msg import Odometry
-from sensor_msgs.msg import FluidPressure, Imu
+from mavros_msgs.msg import OverrideRCIn
 
 class MURStopMotors():
     def __init__(self):
 
         # ROS infrastructure
-        self.pub_force = rospy.Publisher('/mur/force_input', WrenchStamped, queue_size=5)
+        self.pub_actuators = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=5)
 
         # Callback
-        self.epochs = 2
+        self.epochs = 5
         for i in range(self.epochs):
             self.shutdown_motors()
         rospy.logwarn("The motors have been stopped by themselves.")
 
     def shutdown_motors(self):
-        force_msg = WrenchStamped()
-        force_msg.header.stamp = rospy.Time.now()
-        force_msg.header.frame_id = '/mur/base_link'
-        force_msg.wrench.force.x = 0.0
-        force_msg.wrench.force.y = 0.0
-        force_msg.wrench.force.z = 0.0
-        force_msg.wrench.torque.x = 0.0
-        force_msg.wrench.torque.y = 0.0
-        force_msg.wrench.torque.z = 0.0
-        # rospy.loginfo("Depth :=\n %s" %depth_msg.pose.pose.position)
-        # To publish the message
-        self.pub_force.publish(force_msg)
+        msg_actuators = OverrideRCIn()
+        msg_actuators.channels = np.array([1500,1500,1500,1500,0,0,0,0])
+        rospy.loginfo("Motors Values:= %s", msg_actuators.channels)
+        self.pub_actuators.publish(msg_actuators)
 
 
 if __name__ == '__main__':

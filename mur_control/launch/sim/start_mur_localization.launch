@@ -14,7 +14,7 @@
     <param name="publish_pose" value="false"/>
     <param name="publish_pose_stamped" value="true"/>
     <remap from="scan" to="/mur/sonar"/>
-    <remap from="/imu/data" to="/mavros/imu/data"/>
+    <remap from="/imu/data" to="/mur/imu/data"/>
   </node>
   <node pkg="mur_control" type="mur_pose2d_parse.py" name="mur_pose2d_parse" output="screen">
   </node>

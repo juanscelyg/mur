@@ -16,11 +16,13 @@ from nav_msgs.msg import Odometry
 class MURGamepadParseNode():
     def __init__(self):
         # Init constants
-        self.pitch_gain = -0.15
-        self.roll_gain = -0.15
+        self.pitch_gain = -0.95
+        self.roll_gain = -0.95
         self.yaw_gain = 0.15
-        self.z_gain = 1.0
-        self.z_offset = -1.15 # Max Depth
+        self.z_gain = 0.005
+        self.yaw_1 = 0.0
+        self.z_1 = 0.0
+        self.z_offset = -1.65 # Max Depth
 
         # ROS infraestucture
         self.pub_pose = rospy.Publisher('/mur/cmd_pose', PoseStamped, queue_size=1)
@@ -30,12 +32,24 @@ class MURGamepadParseNode():
     def get_values(self, msg_joy):
         pitch_d = msg_joy.axes[0]*self.pitch_gain
         roll_d  = msg_joy.axes[1]*self.roll_gain
-        yaw_d   = msg_joy.axes[3]*self.yaw_gain
-        z_d     = msg_joy.axes[4]*self.z_gain*abs(self.z_offset) + self.z_offset
+        # Yaw Part
+        yaw_d   = msg_joy.axes[3]*self.yaw_gain+self.yaw_1
+        if yaw_d>np.pi:
+            yaw_d=np.pi
+        elif yaw_d<-np.pi:
+            yaw_d=-np.pi
+        # Z Part
+        z_d     = msg_joy.axes[4]*self.z_gain+self.z_1
         if z_d>0:
             z_d=0.0
         elif z_d<self.z_offset:
             z_d=self.z_offset
+        # Up to zero level
+        if msg_joy.buttons[4] == 1:
+            z_d = 0.0
+        # To go down until -1.0 meter
+        if msg_joy.buttons[5] == 1:
+            z_d = -1.0
         msg_pose = PoseStamped()
         msg_pose.header.stamp = rospy.Time.now()
         msg_pose.header.frame_id = 'odom'
@@ -46,6 +60,8 @@ class MURGamepadParseNode():
         msg_pose.pose.orientation.z = q[2]
         msg_pose.pose.orientation.w = q[3]
         self.pub_pose.publish(msg_pose)
+        self.yaw_1=yaw_d
+        self.z_1 = z_d
 
 
 if __name__ == '__main__':
