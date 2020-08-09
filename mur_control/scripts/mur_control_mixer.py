@@ -83,7 +83,7 @@ class MURControlMixerNode():
     def pub_force(self):
         msg_actuators = OverrideRCIn()
         msg_actuators.channels = np.array([mur_common.push_to_pwm(self.thrusters[0]),mur_common.push_to_pwm(self.thrusters[1]),mur_common.push_to_pwm(self.thrusters[2]),mur_common.push_to_pwm(self.thrusters[3]),0,0,0,0])
-        #rospy.loginfo("Motors Values:= %s", msg_actuators.channels)
+        rospy.loginfo("Motors Values:= %s", msg_actuators.channels[0:self.num_thrusters])
         self.pub_actuators.publish(msg_actuators)
 
 
