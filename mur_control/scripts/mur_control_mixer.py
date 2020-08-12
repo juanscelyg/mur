@@ -40,13 +40,13 @@ class MURControlMixerNode():
         self.J,_ = mur_common.convert_body_world(self.pose_rot)
 
         # Convert parameters
-        self.T = self.get_t_matrix()
+        self.T = self.get_t_matrix(self.force_vel)
 
         # Smooth Signal
         self.mytime = 0.07
         self.n_points = 5
         self.ts = self.mytime/(self.n_points+1.0)
-        self.limit = 0.1
+        self.limit = 0.5
 
         # ROS parameter server
         self.config = {}
@@ -68,7 +68,7 @@ class MURControlMixerNode():
         force = np.array([[msg.wrench.force.x], [msg.wrench.force.y], [msg.wrench.force.z], [msg.wrench.torque.x], [msg.wrench.torque.y], [msg.wrench.torque.z]])
         return force
 
-    def get_t_matrix(self):
+    def get_t_matrix(self, force_vector):
         t_matrix = np.matrix([[0, 0, 0, 0],
             [-np.sin(np.deg2rad(self.angle)), np.sin(np.deg2rad(self.angle)), np.sin(np.deg2rad(self.angle)), -np.sin(np.deg2rad(self.angle))],
             [np.cos(np.deg2rad(self.angle)), np.cos(np.deg2rad(self.angle)), np.cos(np.deg2rad(self.angle)), np.cos(np.deg2rad(self.angle))],
@@ -79,6 +79,7 @@ class MURControlMixerNode():
 
     def set_force_thrusters(self, event):
         self.pub_force()
+        self.thrusters_1=self.thrusters
 
     def pub_force(self):
         msg_actuators = OverrideRCIn()
@@ -116,13 +117,14 @@ class MURControlMixerNode():
         # Thruster forces
         Tt = np.matmul(self.J,self.force_attitude)
         B = np.linalg.pinv(self.T)
+        #rospy.loginfo("B := %s" %B)
+        #rospy.loginfo("Tt :=\n %s" %Tt)
         thrusters_forces = np.matmul(B,Tt)
         self.thrusters = self.saturator_thruster(thrusters_forces)
-        ### self.thrusters = thrusters_forces
-        ### rospy.loginfo("Thrusters :=\n %s" %self.thrusters)
-        #self.set_force_thrusters()
+        rospy.loginfo("Thrusters :=\n %s" %thrusters_forces)
 
 if __name__ == '__main__':
+    np.set_printoptions(suppress=True)
     rospy.init_node('mur_control_mixer')
     try:
         node = MURControlMixerNode()

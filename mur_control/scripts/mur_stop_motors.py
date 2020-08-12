@@ -15,7 +15,7 @@ def MURStopMotors():
     for i in range(epochs):
         msg_actuators = OverrideRCIn()
         msg_actuators.channels = np.array([1500,1500,1500,1500,0,0,0,0])
-        rospy.loginfo("Motors Values:= %s", msg_actuators.channels)
+        rospy.loginfo("Motors Values:= %s", msg_actuators.channels[0:4])
         pub_actuators.publish(msg_actuators)
         rate.sleep()
     rospy.logwarn("The motors have been stopped by themselves.")

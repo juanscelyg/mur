@@ -35,7 +35,7 @@ class MURGamepadForceNode():
         # Timer
         self.mytime = 0.3
         #limite
-        self.limite=100;
+        self.limite=150;
 
         # ROS infraestucture
         self.pub_actuators = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=1)
@@ -78,8 +78,8 @@ class MURGamepadForceNode():
             msg_actu.channels = np.array([self.pitch,self.roll,self.yaw,self.z,0,0,0,0])
         elif self.mode==1:
             msg_actu.channels = np.array([self.z,self.z,self.z,self.z,0,0,0,0])
-        rospy.loginfo(msg_actu.channels)
-        self.pub_actuators.publish(msg_actu)
+        rospy.loginfo(msg_actu.channels[0:4])
+        self.pub_actuators.publish(msg_actu.channels)
         self.pitch_1 = self.pitch
         self.roll_1 =  self.roll
         self.yaw_1 = self.yaw
@@ -91,7 +91,7 @@ if __name__ == '__main__':
     try:
         node = MURGamepadForceNode()
         rospy.Timer(rospy.Duration(node.mytime), node.set_force)
-        rate = rospy.Rate(10)
+        rate = rospy.Rate(100)
         rospy.spin()
     except rospy.ROSInterruptException:
         print('caught exception')
