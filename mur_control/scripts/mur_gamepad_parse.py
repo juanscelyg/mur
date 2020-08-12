@@ -16,8 +16,8 @@ from nav_msgs.msg import Odometry
 class MURGamepadParseNode():
     def __init__(self):
         # Init constants
-        self.pitch_gain = -0.95
-        self.roll_gain = -0.95
+        self.pitch_gain = -0.25
+        self.roll_gain = -0.25
         self.yaw_gain = 0.15
         self.z_gain = 0.005
         self.yaw_1 = 0.0

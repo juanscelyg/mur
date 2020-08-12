@@ -119,9 +119,18 @@ class MURControlMixerNode():
         B = np.linalg.pinv(self.T)
         #rospy.loginfo("B := %s" %B)
         #rospy.loginfo("Tt :=\n %s" %Tt)
+        min_limit = 0.0
         thrusters_forces = np.matmul(B,Tt)
-        self.thrusters = self.saturator_thruster(thrusters_forces)
+        '''
+        for i in range(len(thrusters_forces)):
+            if thrusters_forces[i]<min_limit:
+                min_limit=thrusters_forces[i]
+        for i in range(len(thrusters_forces)):
+            thrusters_forces[i]=thrusters_forces[i]+min_limit
+        '''
         rospy.loginfo("Thrusters :=\n %s" %thrusters_forces)
+        self.thrusters = self.saturator_thruster(thrusters_forces)
+
 
 if __name__ == '__main__':
     np.set_printoptions(suppress=True)
