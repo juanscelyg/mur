@@ -34,7 +34,7 @@ def rot2(ang):
 def push_to_pwm(push_value):
     #print push_value
     if push_value > 0:
-        params=np.array([-0.11398604,14.048945,1538.7531]);
+        params=np.array([0,14.048945,1538.7531]);
     elif push_value < 0:
         params=np.array([0.18721626,17.284769,1460.6878]);
     else:

@@ -16,12 +16,12 @@ from nav_msgs.msg import Odometry
 class MURGamepadParseNode():
     def __init__(self):
         # Init constants
-        self.pitch_gain = -0.25
-        self.roll_gain = -0.25
+        self.pitch_gain = -0.95
+        self.roll_gain = -0.95
         self.yaw_gain = 0.15
         self.z_gain = 0.005
         self.yaw_1 = 0.0
-        self.z_1 = 0.0
+        self.z_1 = -0.1
         self.z_offset = -1.65 # Max Depth
 
         # ROS infraestucture
@@ -33,20 +33,20 @@ class MURGamepadParseNode():
         pitch_d = msg_joy.axes[0]*self.pitch_gain
         roll_d  = msg_joy.axes[1]*self.roll_gain
         # Yaw Part
-        yaw_d   = msg_joy.axes[3]*self.yaw_gain+self.yaw_1
+        yaw_d   = msg_joy.buttons[3]*self.yaw_gain-msg_joy.buttons[1]*self.yaw_gain+self.yaw_1
         if yaw_d>np.pi:
             yaw_d=np.pi
         elif yaw_d<-np.pi:
             yaw_d=-np.pi
         # Z Part
         z_d     = msg_joy.axes[4]*self.z_gain+self.z_1
-        if z_d>0:
-            z_d=0.0
+        if z_d>0.1:
+            z_d=-0.1
         elif z_d<self.z_offset:
             z_d=self.z_offset
         # Up to zero level
         if msg_joy.buttons[4] == 1:
-            z_d = 0.0
+            z_d = -0.10
         # To go down until -1.0 meter
         if msg_joy.buttons[5] == 1:
             z_d = -1.0
