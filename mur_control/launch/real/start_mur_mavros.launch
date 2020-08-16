@@ -23,5 +23,7 @@
 
   <!-- IMU PARSE -->
   <node pkg="mur_control" type="mur_imu_parse.py" name="mur_imu_parse" output="screen"/>
+  <!-- BAROMETER PARSE -->
+  <node pkg="mur_control" type="mur_barometer_parse.py" name="mur_barometer_parse" output="screen"></node>
 
 </launch>

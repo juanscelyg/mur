@@ -23,8 +23,4 @@
   </node>
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" ></node>
 
-  <!-- Start the sensors-->
-    <node pkg="mur_control" type="mur_barometer_parse.py" name="mur_barometer_parse" output="screen"></node>
-    <!--node pkg="mur_control" type="mur_control_mixer.py" name="mur_control_mixer" output="screen"></node-->
-
 </launch>
