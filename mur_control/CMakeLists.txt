@@ -39,7 +39,7 @@ catkin_install_python(PROGRAMS  scripts/mur_attitude_control.py
                                 scripts/mur_ident_lineales.py
                                 scripts/mur_barometer_parse.py
                                 scripts/mur_pose2d_parse.py
-                                scripts/mur_attitude_pid.py
+                                scripts/mur_pid_acc.py
                                 scripts/mur_sonar_converter.py
                                 scripts/mur_imu_parse.py
                                 scripts/mur_gamepad_parse.py

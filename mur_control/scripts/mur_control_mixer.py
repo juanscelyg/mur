@@ -77,16 +77,19 @@ class MURControlMixerNode():
                 [0,0,0,0],
                 [0,0,0,0],
                 [0,0,0,0]])
+            ### TX ###
             if wrench_vector[3]>0:
-                t_matrix[3]=np.array([0, np.cos(np.deg2rad(self.angle))*self.y_bar, np.cos(np.deg2rad(self.angle))*self.y_bar, 0])
+                t_matrix[3]=np.array([0, -np.cos(np.deg2rad(self.angle))*self.y_bar, -np.cos(np.deg2rad(self.angle))*self.y_bar, 0])
             else:
                 t_matrix[3]=np.array([np.cos(np.deg2rad(self.angle))*self.y_bar, 0, 0, np.cos(np.deg2rad(self.angle))*self.y_bar])
+            ### TY ###
             if wrench_vector[4]>0:
-                t_matrix[4]=np.array([np.cos(np.deg2rad(self.angle))*self.x_bar, np.cos(np.deg2rad(self.angle))*self.x_bar, 0, 0])
+                t_matrix[4]=np.array([-np.cos(np.deg2rad(self.angle))*self.x_bar, -np.cos(np.deg2rad(self.angle))*self.x_bar, 0, 0])
             else:
                 t_matrix[4]=np.array([0, 0, np.cos(np.deg2rad(self.angle))*self.x_bar, np.cos(np.deg2rad(self.angle))*self.x_bar])
+            ### TZ ###
             if wrench_vector[5]>0:
-                t_matrix[5]=np.array([np.sin(np.deg2rad(self.angle))*self.x_bar, 0, np.sin(np.deg2rad(self.angle))*self.x_bar, 0])
+                t_matrix[5]=np.array([-np.sin(np.deg2rad(self.angle))*self.x_bar, 0, -np.sin(np.deg2rad(self.angle))*self.x_bar, 0])
             else:
                 t_matrix[5]=np.array([0, np.sin(np.deg2rad(self.angle))*self.x_bar, 0, np.sin(np.deg2rad(self.angle))*self.x_bar])
             return t_matrix
@@ -110,23 +113,13 @@ class MURControlMixerNode():
         #rospy.loginfo("Tt :=\n %s" %Tt)
         thrusters_forces = np.matmul(B,Ft)
         thrusters_wrenchs = np.matmul(B,Wt)
-        max_limit = np.amax(thrusters_wrenchs)
+        #max_limit = np.amax(thrusters_wrenchs)
+        #min_array = np.dot(np.ones(shape=(4,1)),max_limit)
+        #thrusters_wrenchs = thrusters_wrenchs - min_array
         #rospy.loginfo("Thrusters :=\n %s" %self.thrusters)
-        flag=False
-
-        for i in range(len(thrusters_forces)):
-            if thrusters_forces[i]>max_limit:
-                flag=True
-        if flag:
-            for i in range(len(thrusters_wrenchs)):
-                if thrusters_wrenchs[i]!=0:
-                    if (thrusters_wrenchs[i]/self.thrusters_1[i])<0:
-                        thrusters_wrenchs[i]=0.0
-            min_array = np.dot(np.ones(shape=(4,1)),max_limit)
-            thrusters_wrenchs = thrusters_wrenchs - min_array
         #rospy.loginfo("max_limit :=\n %s" %min_array)
-        rospy.loginfo("F:=\n %s", thrusters_forces)
-        rospy.loginfo("W:=\n %s", thrusters_wrenchs)
+        #rospy.loginfo("F:=\n %s", thrusters_forces)
+        #rospy.loginfo("W:=\n %s", thrusters_wrenchs)
         self.thrusters = self.saturator_thruster(thrusters_forces+thrusters_wrenchs)
         self.pub_force()
         self.thrusters_1=self.thrusters

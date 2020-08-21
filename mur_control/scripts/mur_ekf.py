@@ -48,7 +48,7 @@ class MURExtendedKalmanFilter():
         self.last_time = 0.0 #init
 
         # ROS infraestucture
-        self.pub_pose = rospy.Publisher('/mur/Odometry', Odometry, queue_size=1)
+        self.pub_pose = rospy.Publisher('/mur/odom_filtered', Odometry, queue_size=1)
         self.sub_imu = rospy.Subscriber('/mavros/imu/data', Imu, self.call_imu)
         self.sub_pres = rospy.Subscriber('/mur/depth', PoseWithCovarianceStamped, self.call_pres)
         self.sub_pose = rospy.Subscriber('/mur/aruco_pose', PoseWithCovarianceStamped, self.call_pose)
