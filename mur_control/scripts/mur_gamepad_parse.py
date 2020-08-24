@@ -50,6 +50,8 @@ class MURGamepadParseNode():
         # To go down until -1.0 meter
         if msg_joy.buttons[5] == 1:
             z_d = -1.0
+        if msg_joy.buttons[2] == 1:
+            z_d = -0.50
         msg_pose = PoseStamped()
         msg_pose.header.stamp = rospy.Time.now()
         msg_pose.header.frame_id = 'odom'
