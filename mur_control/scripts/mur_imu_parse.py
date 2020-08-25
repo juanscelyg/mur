@@ -36,9 +36,9 @@ class MURImuParse():
         msg_imu.orientation.z = q_new[2]
         msg_imu.orientation.w = q_new[3]
         msg_imu.orientation_covariance = msg_imu_int.orientation_covariance
-        msg_imu.angular_velocity.x = msg_imu_int.angular_velocity.y
-        msg_imu.angular_velocity.y = msg_imu_int.angular_velocity.x
-        msg_imu.angular_velocity.z = -msg_imu_int.angular_velocity.z
+        msg_imu.angular_velocity.x = -msg_imu_int.angular_velocity.x
+        msg_imu.angular_velocity.y = -msg_imu_int.angular_velocity.y
+        msg_imu.angular_velocity.z = msg_imu_int.angular_velocity.z
         msg_imu.angular_velocity_covariance = msg_imu_int.angular_velocity_covariance
         msg_imu.linear_acceleration.x = msg_imu_int.linear_acceleration.y # The same configuration in the PIXHAWK
         msg_imu.linear_acceleration.y = -msg_imu_int.linear_acceleration.x
