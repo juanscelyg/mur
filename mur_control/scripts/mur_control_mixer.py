@@ -22,7 +22,7 @@ class MURControlMixerNode():
     def __init__(self):
         # Init constants
         self.num_thrusters = 4
-        self.angle = 10.0
+        self.angle = -5.0
         self.x_bar = 0.197
         self.y_bar = 0.18022
         self.b = 0.038
