@@ -4,10 +4,17 @@
        rostopic pub -r 10 /pose2Dstamped geometry_msgs/PoseStamped
 
   -->
+  <arg name="test_motors" default="false"/>
   <param name="joy_node/dev" value="/dev/input/js1" />
   <!--JOY NODE-->
   <node pkg="joy" type="joy_node" name="joy_node" output="screen"></node>
   <!--JOY PARSE -->
-  <!-- <node pkg="mur_control" type="mur_gamepad_force.py" name="mur_gamepad_force" output="screen"></node> -->
-  <node pkg="mur_control" type="mur_gamepad_parse.py" name="mur_gamepad_parse" output="screen"></node>
+  <group if="$(arg test_motors)">
+    <!-- Force parsing -->
+    <node pkg="mur_control" type="mur_gamepad_force.py" name="mur_gamepad_force" output="screen"></node>
+  </group>
+  <group unless="$(arg test_motors)">
+    <!-- Pose parsing -->
+    <node pkg="mur_control" type="mur_gamepad_parse.py" name="mur_gamepad_parse" output="screen"></node>
+  </group>
 </launch>

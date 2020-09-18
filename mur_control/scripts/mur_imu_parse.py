@@ -42,15 +42,15 @@ class MURImuParse():
         msg_imu.angular_velocity_covariance = msg_imu_int.angular_velocity_covariance
         msg_imu.linear_acceleration.x = msg_imu_int.linear_acceleration.y # The same configuration in the PIXHAWK
         msg_imu.linear_acceleration.y = -msg_imu_int.linear_acceleration.x
-        msg_imu.linear_acceleration.z = -msg_imu_int.linear_acceleration.z
+        msg_imu.linear_acceleration.z = msg_imu_int.linear_acceleration.z
         msg_imu.linear_acceleration_covariance = msg_imu_int.linear_acceleration_covariance
         self.pub_imu.publish(msg_imu)
         # ORIENTATION
         msg_ori = PointStamped()
         msg_ori.header.stamp = rospy.Time.now()
         msg_ori.header.frame_id = "imu_link"
-        msg_ori.point.x = self.roll
-        msg_ori.point.y = self.pitch
+        msg_ori.point.x = self.pitch
+        msg_ori.point.y = self.roll
         msg_ori.point.z = self.yaw
         self.pub_ori.publish(msg_ori)
         # ANGULAR VELOCITY
