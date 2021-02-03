@@ -21,27 +21,27 @@
           <timeConstant>0.52</timeConstant>
         </dynamics>
         <xacro:thruster_cf_dead_zone_macro
-          rotor_constant_l="0.096047"
-          rotor_constant_r="0.111192"
-          delta_l="-3.5604"
-          delta_r="2.5132"/>
+          rotor_constant_l="0.000275"
+          rotor_constant_r="0.000275"
+          delta_l="0"
+          delta_r="0"/>
       </xacro:generic_thruster_macro>
     </xacro:macro>
 
     <xacro:thruster_macro namespace="${namespace}" thruster_id="0">
-        <origin xyz="0.2 0.1742 0.0745" rpy="0 ${-80*pi/180} ${-pi/2}" />
+        <origin xyz="0.2 0.1742 0.0745" rpy="0 ${-95*pi/180} ${-pi/2}" />
     </xacro:thruster_macro>
 
     <xacro:thruster_macro namespace="${namespace}" thruster_id="1">
-        <origin xyz="0.2 -0.1742 0.0745" rpy="0 ${-100*pi/180} ${-pi/2}" />
+        <origin xyz="0.2 -0.1742 0.0745" rpy="0 ${-85*pi/180} ${-pi/2}" />
     </xacro:thruster_macro>
 
     <xacro:thruster_macro namespace="${namespace}" thruster_id="2">
-        <origin xyz="-0.2 -0.1742 0.0745" rpy="0 ${-100*pi/180} ${-pi/2}" />
+        <origin xyz="-0.2 -0.1742 0.0745" rpy="0 ${-85*pi/180} ${-pi/2}" />
     </xacro:thruster_macro>
 
     <xacro:thruster_macro namespace="${namespace}" thruster_id="3">
-        <origin xyz="-0.2 0.1742 0.0745" rpy="0 ${-80*pi/180} ${-pi/2}" />
+        <origin xyz="-0.2 0.1742 0.0745" rpy="0 ${-95*pi/180} ${-pi/2}" />
     </xacro:thruster_macro>
 
 </robot>

@@ -7,7 +7,7 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion, eul
 def convert_body_world(pose_rot):
     nita2_t = euler_from_quaternion(pose_rot)
     nita2 = np.array([nita2_t[0],nita2_t[1],nita2_t[2]])
-    r = -nita2[1]
+    r = nita2[1]
     p = nita2[0]
     y = nita2[2]
     sr = np.sin(r)
@@ -23,6 +23,13 @@ def convert_body_world(pose_rot):
                     [0, 0, 0, 1, sr*tp, cr*tp],
                     [0, 0, 0, 0, cr, -sr],
                     [0, 0, 0, 0, sr/cp, cr/cp]])
+    m_convert = np.array([  [0, 1,  0,  0,  0,  0],
+                            [1, 0,  0,  0,  0,  0],
+                            [0, 0, -1,  0,  0,  0],
+                            [0, 0,  0,  0,  1,  0],
+                            [0, 0,  0,  1,  0,  0],
+                            [0, 0,  0,  0,  0, -1]])
+    J_rotada = np.matmul(m_convert, J)
     return J, np.array([r,p,y])
 
 def rot2(ang):

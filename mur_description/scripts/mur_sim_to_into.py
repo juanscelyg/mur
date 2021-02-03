@@ -40,7 +40,7 @@ class MURSimToIntoNode:
         force_actuators = np.array([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
         force_size = len(force_actuators)
         for i in range (force_size):
-            force_actuators[i] = mur_simtools.pwm_to_push(msg.channels[i])
+            force_actuators[i] = mur_simtools.pwm_to_vel(msg.channels[i])
         #rospy.loginfo("Force Actuators:=\n %s" %force_actuators)
         return force_actuators
 
