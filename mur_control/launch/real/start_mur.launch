@@ -4,6 +4,7 @@
 
   <!--CAMERAS-->
     <include file="$(find mur_control)/launch/real/start_mur_front_camera.launch"/>
+    <include file="$(find mur_control)/launch/real/start_mur_bottom_camera.launch"/>
 
   <!--SERVER-->
     <include file="$(find mur_control)/launch/real/start_mur_webserver.launch"/>
