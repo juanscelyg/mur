@@ -24,7 +24,7 @@ class MURGamepadParseNode():
         self.yaw_gain = 0.2
         self.z_gain = 0.005
         self.yaw_1 = 1.0
-        self.z_1 = -0.1
+        self.z_1 = -0.05
         self.z_offset = -1.65 # Max Depth
         self.flag = False
 
@@ -86,11 +86,11 @@ class MURGamepadParseNode():
             if self.special_option == 1:
                 z_d = self.z_1 - 0.5
             if self.special_option == 2:
-                z_d = -0.1
+                z_d = -0.05
             if self.special_option == 3:
                 z_d =  self.z_1 + 0.5
-            if z_d>-0.1:
-                z_d=-0.1
+            if z_d>-0.01:
+                z_d=-0.01
             elif z_d<self.z_offset:
                 z_d=self.z_offset
 
