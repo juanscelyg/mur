@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <node pkg="mur_control" type="mur_test_paths.py" name="mur_test_paths" output="screen"/>
+</launch>
