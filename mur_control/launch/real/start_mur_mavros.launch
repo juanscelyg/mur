@@ -1,6 +1,6 @@
 <launch>
   <!-- MAVROS -->
-  <arg name="fcu_url" default="/dev/ttyACM0:115200" />
+  <arg name="fcu_url" default="/dev/ttyACM1:115200" />
   <arg name="gcs_url" default="" />
   <arg name="tgt_system" default="1" />
   <arg name="tgt_component" default="1" />

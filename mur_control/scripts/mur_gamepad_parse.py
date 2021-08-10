@@ -97,7 +97,7 @@ class MURGamepadParseNode():
             # To publish
             msg_pose = PoseStamped()
             msg_pose.header.stamp = rospy.Time.now()
-            msg_pose.header.frame_id = 'odom'
+            msg_pose.header.frame_id = 'world'
             msg_pose.pose.position.z = z_d
             q = quaternion_from_euler(pitch_d, roll_d, yaw_d)
             msg_pose.pose.orientation.x = q[0]

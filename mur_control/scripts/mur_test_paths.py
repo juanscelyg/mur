@@ -24,7 +24,7 @@ class MURTestPaths():
 
     def stabilized_req(self, req):
         segments = 3
-        n_points = 10
+        n_points = 20
         z_path=-1.0
         z_d=0
         for i in range(segments):
@@ -48,7 +48,7 @@ class MURTestPaths():
 
     def simple_req(self, req):
         segments = 8
-        n_points = 10
+        n_points = 20
         z_path=-1.0
         pitch_path=1.0
         roll_path=1.0
@@ -108,7 +108,7 @@ class MURTestPaths():
     def pub_pose(self,z_d, pitch_d, roll_d, yaw_d):
         msg_pose = PoseStamped()
         msg_pose.header.stamp = rospy.Time.now()
-        msg_pose.header.frame_id = 'odom'
+        msg_pose.header.frame_id = 'world'
         msg_pose.pose.position.z = z_d
         q = quaternion_from_euler(pitch_d, roll_d, yaw_d)
         msg_pose.pose.orientation.x = q[0]

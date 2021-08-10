@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
-  <node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_world" args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 /world /odom" />
+  <node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_world" args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 /world /map" />
   <node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_odom" args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 /odom /mur/base_link" />
-  <!--node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_base" args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 /mur/base_link base_link" /-->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_base" args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 /mur/base_link base_link" />
   <node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_imu" args="0.0 0.0 0.0 0.707 0.707 0.0 0.0 /mur/imu_link imu_link" />
   <node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_sonar" args="0.0 0.21 0.057 0.707 -0.707 0.0 0.0 /mur/base_link sonar" />
   <!--node pkg="tf2_ros" type="static_transform_publisher" name="robot_broadcaster_sonar" args="0.0 0.0 0.0 0.707 -0.707 0.0 0.0 /mur/sonar_link sonar" /-->
