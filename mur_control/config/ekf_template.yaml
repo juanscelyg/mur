@@ -11,7 +11,7 @@ publish_acceleration: false
 
 odom_frame: odom           # Defaults to "odom" if unspecified
 base_link_frame: /mur/base_link  # Defaults to "base_link" if unspecified
-world_frame: odom    # Defaults to the value of odom_frame if unspecified
+world_frame: map    # Defaults to the value of odom_frame if unspecified
 
 ## POSE 0 BAROMETER
 
@@ -57,7 +57,7 @@ imu0_pose_rejection_threshold: 0.5                 # Note the difference in para
 imu0_twist_rejection_threshold: 0.5               #
 imu0_linear_acceleration_rejection_threshold: 0.5  #
 
-imu0_remove_gravitational_acceleration: true
+imu0_remove_gravitational_acceleration: false
 use_control: false
 # Whether the input (assumed to be cmd_vel) is a geometry_msgs/Twist or geometry_msgs/TwistStamped message. Defaults to
 # false.
