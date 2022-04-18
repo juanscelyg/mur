@@ -21,7 +21,7 @@ export class CamerasComponent implements OnInit {
 
   setting: Setting;
   public link_1: any;
-  public topic_name: any = "/camera1/image_raw";
+  public topic_name: any = "/mur/mur/camera1/camera_image";
   tiles: Tile[] = [
     {text: 'Imagen', cols: 2, rows: 3},
     {text: 'Controls', cols: 1, rows: 3},
@@ -33,14 +33,19 @@ export class CamerasComponent implements OnInit {
   }
 
   newServerConnection(): void{
+    this.set_current_connection();
+
+  }
+
+  set_current_connection(): void{
     this.setting = Setting.getCurrent();
     this.link_1 = "http://"+this.setting[0].address+":9091/stream?topic="+this.topic_name;
   }
 
-
-set_topic_handle(event: any, camera_topic: any){
-  this.topic_name = camera_topic.value;
-  console.log(this.topic_name);
-  console.log("Camera Topic has been changed");
-}
+  set_topic_handle(event: any, camera_topic: any){
+    this.topic_name = camera_topic.value;
+    this.set_current_connection();
+    console.log(this.topic_name);
+    console.log("Camera Topic has been changed");
+  }
 }

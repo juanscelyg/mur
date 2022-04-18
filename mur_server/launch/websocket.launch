@@ -1,3 +1,4 @@
 <launch>
   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+  <include file="$(find rvizweb)/launch/rvizweb.launch"/>
 </launch>

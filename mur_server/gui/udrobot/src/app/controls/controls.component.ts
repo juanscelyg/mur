@@ -96,8 +96,8 @@ export class ControlsComponent implements OnInit {
     });
     this.pose_msg = new ROSLIB.Topic({
       ros,
-      name: '/mur/odom_filtered',
-      messageType: 'nav_msgs/Odometry'
+      name: '/mur/depth/pose',
+      messageType: 'geometry_msgs/PoseWithCovarianceStamped'
     });
     this.pose_msg.subscribe(function(message){
       this.z_n = message.pose.pose.position.z;

@@ -117,19 +117,6 @@ class MURTestPaths():
         msg_pose.pose.orientation.w = q[3]
         self.pub_cmd.publish(msg_pose)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
     np.set_printoptions(suppress=True)
     rospy.init_node('mur_test_paths')

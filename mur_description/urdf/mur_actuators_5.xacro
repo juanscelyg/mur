@@ -7,7 +7,7 @@
         - The thruster pose in the <origin> block is relative to the body's center of mass. Be
           aware that Gazebo does not use the SNAME convention per default.
     -->
-    <xacro:property name="prop_mesh_file" value="file://$(find mur_description)/mesh/mur_prop.dae"/>
+    <xacro:property name="prop_mesh_file" value="file://$(find mur_description)/meshes/mur_prop.dae"/>
 
     <xacro:macro name="thruster_macro"
       params="namespace thruster_id *origin">

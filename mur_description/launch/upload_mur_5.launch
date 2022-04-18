@@ -21,6 +21,8 @@
     <arg name="namespace" default="mur"/>
     <arg name="world_frame" default="world"/>
 
+    <rosparam file="$(find mur_description)/config/config.yaml" command="load" />
+
     <group ns="$(arg namespace)">
         <param name="robot_description"
         command="$(find xacro)/xacro --inorder '$(find mur_description)/robots/mur_$(arg mode).urdf.xacro' debug:=$(arg debug) namespace:=$(arg namespace)" />
@@ -37,13 +39,18 @@
         </group>
 
         <!-- A joint state publisher plugin already is started with the model, no need to use the default joint state publisher -->
-
+        
         <!-- Publish robot model for ROS -->
         <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen">
             <param name="robot_description" value="/$(arg namespace)/robot_description" />
             <param name="publish_frequency" value="5" />
         </node>
     </group>
+
+    <!-- Publish controller for arm-->
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="$(arg namespace)" 
+        args="arm_base_to_link_joint_position_controller joint_state_controller"/> 
+
 
     <!-- publish state and tf for in relation to the world frame -->
     <include file="$(find uuv_descriptions)/launch/message_to_tf.launch">

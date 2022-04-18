@@ -4,7 +4,7 @@ export class Setting {
 
   static getDefault(): Setting {
     return {
-      address: '192.168.8.103',
+      address: '0.0.0.0',
       port:9090,
     };
   }

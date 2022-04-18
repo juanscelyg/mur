@@ -1,6 +1,10 @@
 <launch>
   <!-- WEBSERVER -->
   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+  <node name="tf2_web_republisher" pkg="tf2_web_republisher" type="tf2_web_republisher" output="screen"></node>
+  <!--include file="$(find rvizweb)/launch/rvizweb.launch">
+    <arg name="config_file" value="$(find mur_control)/config/configuration.json"/>
+  </include-->
   <!-- VIDEO WEBSERVER -->
   <node name="video_server" pkg="web_video_server" type="web_video_server" output="screen">
     <param name="port" value="9091"/>

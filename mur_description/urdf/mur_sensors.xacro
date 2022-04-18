@@ -23,7 +23,7 @@
         <xacro:insert_block name="origin" />
         <visual>
           <geometry>
-            <mesh filename="file://$(find mur_description)/mesh/Micron DST Sonar.dae" scale="1 1 1"/>
+            <mesh filename="file://$(find mur_description)/meshes/Micron DST Sonar.dae" scale="1 1 1"/>
           </geometry>
         </visual>
       </xacro:multibeam_sonar>

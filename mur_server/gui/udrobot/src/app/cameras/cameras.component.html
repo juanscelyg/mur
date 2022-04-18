@@ -8,9 +8,13 @@
     </div>
     <div *ngIf="'Controls'==tile.text">
       <mat-form-field style="margin-left:2em; margin-right:2em">
-        <input matInput type="string" placeholder="Camera Topic" formControlName="camera_topic" value="/camera1/image_raw" #camera_topic>
+        <input matInput type="string" placeholder="Camera Topic" formControlName="camera_topic" value="/mur/camera_image" #camera_topic>
       </mat-form-field>
       <button mat-raised-button name="set-topic" color="primary" (click)="set_topic_handle($event, camera_topic)" (touchend)="set_topic_handle($event, camera_topic)">Set Topic</button>
+      <p>
+        <label><b>Current img source:</b></label><br>
+        <label>{{link_1}}</label>
+      </p>
     </div>
   </mat-grid-tile>
 </mat-grid-list>
